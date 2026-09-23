@@ -48,7 +48,7 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           flags=()
-          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease --notes-file docs/PREVIEW_RELEASE.md); fi
           gh release create "$RELEASE_TAG" dist/*.zip dist/*.sha256 dist/spray-can.rb --title "Spray Can $RELEASE_TAG" --generate-notes "${flags[@]}"
       - name: Remove temporary signing material
         if: always()
