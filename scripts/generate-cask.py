@@ -20,7 +20,7 @@ checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
 
   url "https://github.com/Kymer0615/spray_can/releases/download/v#{{version}}/SprayCan-#{{version}}-universal.zip"
   name "Spray Can"
-  desc "Keyboard-driven pointer and element navigation for macOS"
+  desc "Keyboard-driven pointer and element navigation"
   homepage "https://github.com/Kymer0615/spray_can"
 
   depends_on macos: :sonoma
