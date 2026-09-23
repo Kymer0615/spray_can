@@ -1,0 +1,57 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode 26
+        run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
+      - run: scripts/test.sh
+      - name: Configure signing for stable releases
+        if: ${{ !contains(github.ref_name, '-') }}
+        env:
+          CERTIFICATE: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.SIGNING_KEYCHAIN_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${CERTIFICATE:?Missing signing certificate}" "${KEYCHAIN_PASSWORD:?Missing keychain password}"
+          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/developer.p12"
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/signing.keychain-db"
+          security set-keychain-settings -lut 21600 "$RUNNER_TEMP/signing.keychain-db"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/signing.keychain-db"
+          security import "$RUNNER_TEMP/developer.p12" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$RUNNER_TEMP/signing.keychain-db"
+          security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/signing.keychain-db"
+          security list-keychains -d user -s "$RUNNER_TEMP/signing.keychain-db" login.keychain-db
+          xcrun notarytool store-credentials SprayCan --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --keychain "$RUNNER_TEMP/signing.keychain-db"
+      - name: Package release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+          SPRAYCAN_SIGN_IDENTITY: ${{ secrets.DEVELOPER_ID_IDENTITY }}
+          SPRAYCAN_NOTARY_PROFILE: SprayCan
+          SPRAYCAN_NOTARY_KEYCHAIN: ${{ runner.temp }}/signing.keychain-db
+        run: |
+          channel=signed
+          if [[ "$RELEASE_TAG" == *-* ]]; then channel=preview; fi
+          scripts/release.sh "${RELEASE_TAG#v}" "$channel"
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$RELEASE_TAG" dist/*.zip dist/*.sha256 dist/spray-can.rb --title "Spray Can $RELEASE_TAG" --generate-notes "${flags[@]}"
+      - name: Remove temporary signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/developer.p12"

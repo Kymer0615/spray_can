@@ -1,0 +1,42 @@
+// !$*UTF8*$!
+{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {
+BD1B96E99B059348953957A4 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/AppController.swift"; sourceTree = "<group>"; };
+1215B9A60B9BF4357D528AA5 = { isa = PBXBuildFile; fileRef = BD1B96E99B059348953957A4; };
+4F82C03FF1B6519E7187C1C1 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/Discovery.swift"; sourceTree = "<group>"; };
+AA7B07F5BDCBAE534033FA53 = { isa = PBXBuildFile; fileRef = 4F82C03FF1B6519E7187C1C1; };
+078E4DF76AA06BC5A57164C3 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/DocumentationRenderer.swift"; sourceTree = "<group>"; };
+D3E0E0CC39F400EEBC9097AE = { isa = PBXBuildFile; fileRef = 078E4DF76AA06BC5A57164C3; };
+2F126782945F3960F9CA9C00 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/Entry.swift"; sourceTree = "<group>"; };
+071B8615A1F321127E8ECBFF = { isa = PBXBuildFile; fileRef = 2F126782945F3960F9CA9C00; };
+F02C44834547AC3B4B5310A8 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/IntegrationHarness.swift"; sourceTree = "<group>"; };
+F0782B7CD55AFF0F94E69496 = { isa = PBXBuildFile; fileRef = F02C44834547AC3B4B5310A8; };
+A1BB91EDBFEA7BED66CB2BB5 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/KeyboardCapture.swift"; sourceTree = "<group>"; };
+E3555873E1471559C773BDAC = { isa = PBXBuildFile; fileRef = A1BB91EDBFEA7BED66CB2BB5; };
+A0C949DFEDA352FA6486173E = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/MouseDriver.swift"; sourceTree = "<group>"; };
+A6685B66CDBD9F80425FF6C1 = { isa = PBXBuildFile; fileRef = A0C949DFEDA352FA6486173E; };
+DD0199E8B61FFD0BB0091082 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/Overlay.swift"; sourceTree = "<group>"; };
+BF082C30C6A7A795A560CC47 = { isa = PBXBuildFile; fileRef = DD0199E8B61FFD0BB0091082; };
+36FC6B79C5A490687637E471 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/Settings.swift"; sourceTree = "<group>"; };
+0B51FAC90AA2BEF5D5234869 = { isa = PBXBuildFile; fileRef = 36FC6B79C5A490687637E471; };
+6F476F7A149D26C8A87D2B5D = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/SprayCanApp/SettingsView.swift"; sourceTree = "<group>"; };
+3506737F9D8D7EE70CB33127 = { isa = PBXBuildFile; fileRef = 6F476F7A149D26C8A87D2B5D; };
+3685E330EC5277A9DD5661C6 = { isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>"; };
+CF8A4D27E1C506A7C75A76BE = { isa = PBXBuildFile; fileRef = 3685E330EC5277A9DD5661C6; };
+7D1043473D55BFA90E8530D3 = { isa = PBXFileReference; explicitFileType = wrapper.application; path = "Spray Can.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+582681C2EAE02B3F3D399C0C = { isa = XCLocalSwiftPackageReference; relativePath = .; };
+94A0426E8D3203DA5468CCF0 = { isa = XCSwiftPackageProductDependency; package = 582681C2EAE02B3F3D399C0C; productName = SprayCanCore; };
+1C25D3719CB905525B1D275B = { isa = PBXBuildFile; productRef = 94A0426E8D3203DA5468CCF0; };
+BCE16DD0260827ECF338C787 = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (1215B9A60B9BF4357D528AA5,AA7B07F5BDCBAE534033FA53,D3E0E0CC39F400EEBC9097AE,071B8615A1F321127E8ECBFF,F0782B7CD55AFF0F94E69496,E3555873E1471559C773BDAC,A6685B66CDBD9F80425FF6C1,BF082C30C6A7A795A560CC47,0B51FAC90AA2BEF5D5234869,3506737F9D8D7EE70CB33127,); runOnlyForDeploymentPostprocessing = 0; };
+0189424A5A60FED329FA868E = { isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (CF8A4D27E1C506A7C75A76BE,); runOnlyForDeploymentPostprocessing = 0; };
+7561BFB015D8F536760CB671 = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (1C25D3719CB905525B1D275B,); runOnlyForDeploymentPostprocessing = 0; };
+FBDC4F23F93125BBEEAE800C = { isa = PBXGroup; children = (7D1043473D55BFA90E8530D3,); name = Products; sourceTree = "<group>"; };
+64292B1C2B2E13EAD8788FC8 = { isa = PBXGroup; children = (BD1B96E99B059348953957A4,4F82C03FF1B6519E7187C1C1,078E4DF76AA06BC5A57164C3,2F126782945F3960F9CA9C00,F02C44834547AC3B4B5310A8,A1BB91EDBFEA7BED66CB2BB5,A0C949DFEDA352FA6486173E,DD0199E8B61FFD0BB0091082,36FC6B79C5A490687637E471,6F476F7A149D26C8A87D2B5D,3685E330EC5277A9DD5661C6,FBDC4F23F93125BBEEAE800C,); sourceTree = "<group>"; };
+89E1FD6268CC0F221A2BE178 = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES;  SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; }; name = Debug; };
+E6DE6C99132752C914FEF632 = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES;  SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; }; name = Release; };
+862894B703A6DEDF96A9DD6C = { isa = XCConfigurationList; buildConfigurations = (89E1FD6268CC0F221A2BE178,E6DE6C99132752C914FEF632,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+7082CC0B6FC1282FCEABD07A = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; PRODUCT_NAME = "Spray Can"; EXECUTABLE_NAME = SprayCan; PRODUCT_BUNDLE_IDENTIFIER = io.github.Kymer0615.SprayCan; INFOPLIST_FILE = Resources/Info.plist; GENERATE_INFOPLIST_FILE = NO; CODE_SIGN_ENTITLEMENTS = Resources/SprayCan.entitlements; CODE_SIGN_STYLE = Manual; CODE_SIGN_IDENTITY = "-"; ENABLE_HARDENED_RUNTIME = YES; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; COMBINE_HIDPI_IMAGES = YES; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; DEBUG_INFORMATION_FORMAT = dwarf; }; name = Debug; };
+639A7CA24D39909E713B47F7 = { isa = XCBuildConfiguration; buildSettings = { SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES; PRODUCT_NAME = "Spray Can"; EXECUTABLE_NAME = SprayCan; PRODUCT_BUNDLE_IDENTIFIER = io.github.Kymer0615.SprayCan; INFOPLIST_FILE = Resources/Info.plist; GENERATE_INFOPLIST_FILE = NO; CODE_SIGN_ENTITLEMENTS = Resources/SprayCan.entitlements; CODE_SIGN_STYLE = Manual; CODE_SIGN_IDENTITY = "-"; ENABLE_HARDENED_RUNTIME = YES; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; COMBINE_HIDPI_IMAGES = YES; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks"; SWIFT_OPTIMIZATION_LEVEL = "-O"; DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym"; }; name = Release; };
+C57128001CE614BF8549D6BB = { isa = XCConfigurationList; buildConfigurations = (7082CC0B6FC1282FCEABD07A,639A7CA24D39909E713B47F7,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+0E8A3AD980EC179856012B7E = { isa = PBXNativeTarget; buildConfigurationList = C57128001CE614BF8549D6BB; buildPhases = (BCE16DD0260827ECF338C787,7561BFB015D8F536760CB671,0189424A5A60FED329FA868E,); buildRules = (); dependencies = (); name = SprayCan; packageProductDependencies = (94A0426E8D3203DA5468CCF0,); productName = "Spray Can"; productReference = 7D1043473D55BFA90E8530D3; productType = "com.apple.product-type.application"; };
+98F54143AB4E86B28C3AFEE0 = { isa = PBXProject; attributes = { LastUpgradeCheck = 2600; }; buildConfigurationList = 862894B703A6DEDF96A9DD6C; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en,Base); mainGroup = 64292B1C2B2E13EAD8788FC8; productRefGroup = FBDC4F23F93125BBEEAE800C; projectDirPath = ""; projectRoot = ""; packageReferences = (582681C2EAE02B3F3D399C0C,); targets = (0E8A3AD980EC179856012B7E,); };
+}; rootObject = 98F54143AB4E86B28C3AFEE0; }
