@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import Combine
 import SprayCanCore
 
 final class OverlayPanel: NSPanel {
@@ -98,54 +99,159 @@ struct SprayCanMark: Shape {
     }
 }
 
+struct HintBadge: View {
+    let label: String
+    let prefix: String
+    let ocr: Bool
+    @ObservedObject private var settings = Settings.shared
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 5) }
+    private var text: some View {
+        (Text(String(label.prefix(prefix.count)).uppercased()).foregroundColor(settings.color(.highlight)) +
+         Text(String(label.dropFirst(prefix.count)).uppercased()).foregroundColor(settings.color(.text)))
+            .font(.system(size: settings.fontSize, weight: .semibold, design: .monospaced))
+            .padding(.horizontal, 6).padding(.vertical, 3).fixedSize()
+    }
+    var body: some View {
+        let tint = settings.color(ocr ? .ocr : .label)
+        if reduceTransparency {
+            text.background(tint, in: shape)
+        } else if #available(macOS 26, *) {
+            text.glassEffect(.regular.tint(tint.opacity(settings.contrast)), in: shape)
+                // Nonactivating panels can neutralize system glass tint; retain the
+                // chosen source color in the outline without replacing the material.
+                .overlay(shape.stroke(tint.opacity(settings.contrast), lineWidth: 1))
+        } else {
+            text.background(tint.opacity(settings.contrast * 0.6), in: shape)
+                .background(.regularMaterial, in: shape)
+                .overlay(shape.stroke(.white.opacity(0.3), lineWidth: 0.75))
+        }
+    }
+}
+
+private struct PlacedHint: Identifiable {
+    let id: String
+    let target: Target
+    let frame: CGRect
+}
+private struct HintLayer: View {
+    let hints: [PlacedHint]
+    let prefix: String
+    let height: CGFloat
+    private var badges: some View {
+        ZStack(alignment: .topLeading) {
+            ForEach(hints) { hint in
+                HintBadge(label: hint.target.label, prefix: prefix, ocr: hint.target.source == .text)
+                    .position(x: hint.frame.midX, y: height - hint.frame.midY)
+            }
+        }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+    var body: some View {
+        Group {
+            if #available(macOS 26, *) {
+                GlassEffectContainer(spacing: 0) { badges }
+            } else { badges }
+        }.environment(\.controlActiveState, .active).allowsHitTesting(false)
+    }
+}
+
+struct AppearancePreview: NSViewRepresentable {
+    func makeNSView(context: Context) -> HintCanvas {
+        let canvas = HintCanvas()
+        canvas.preview = true
+        return canvas
+    }
+    func updateNSView(_ view: HintCanvas, context: Context) { view.needsLayout = true }
+}
+
 final class HintCanvas: NSView {
-    var targets: [Target] = []
-    var prefix = ""
-    var selected: CGRect?
+    var targets: [Target] = [] { didSet { if !preparingPreview { needsLayout = true; needsDisplay = true } } }
+    var prefix = "" { didSet { if !preparingPreview { needsLayout = true } } }
+    var selected: CGRect? { didSet { needsDisplay = true } }
     var screenOrigin = CGPoint.zero
     var primaryHeight: CGFloat = 0
+    var preview = false
+    private var preparingPreview = false
+    private var placed: [PlacedHint] = []
+    private var layoutItems: [HintLayoutItem] = []
+    private var layoutBounds = CGRect.zero
+    private var placements: [HintPlacement] = []
+    private var appearanceChanges: AnyCancellable?
+    private var accessibilityChanges: NSObjectProtocol?
+    private let badges = NSHostingView(rootView: HintLayer(hints: [], prefix: "", height: 0))
+    override init(frame: NSRect) {
+        super.init(frame: frame)
+        addSubview(badges)
+        appearanceChanges = Settings.shared.objectWillChange.sink { [weak self] _ in
+            DispatchQueue.main.async { self?.needsLayout = true; self?.needsDisplay = true }
+        }
+        accessibilityChanges = NSWorkspace.shared.notificationCenter.addObserver(forName: NSWorkspace.accessibilityDisplayOptionsDidChangeNotification, object: nil, queue: .main) { [weak self] _ in
+            self?.needsLayout = true; self?.needsDisplay = true
+        }
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+    deinit { if let accessibilityChanges { NSWorkspace.shared.notificationCenter.removeObserver(accessibilityChanges) } }
     override var isFlipped: Bool { false }
+    private func local(_ rect: CGRect) -> CGRect {
+        Geometry.cocoa(rect, primaryHeight: primaryHeight).offsetBy(dx: -screenOrigin.x, dy: -screenOrigin.y)
+    }
+    override func layout() {
+        super.layout()
+        if preview {
+            preparingPreview = true
+            defer { preparingPreview = false }
+            primaryHeight = bounds.height
+            targets = (0..<6).map { index in
+                let vertical = index < 3
+                let x = vertical ? bounds.width * 0.2 : bounds.width * 0.67 + CGFloat(index - 3) * 18
+                let y = vertical ? bounds.height / 2 - 14 + CGFloat(index) * 14 : bounds.height / 2
+                return Target(id: "preview-\(index)", frame: CGRect(x: x - 5, y: y - 5, width: 10, height: 10), source: index == 1 ? .text : .accessibility, label: ["ab", "ac", "ad", "ae", "af", "ag"][index])
+            }
+            prefix = "a"
+        }
+        let settings = Settings.shared
+        let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
+        let visible = targets.filter { bounds.contains(CGPoint(x: local($0.frame).midX, y: local($0.frame).midY)) }
+        let items = visible.map { target in
+            let size = (target.label.uppercased() as NSString).size(withAttributes: [.font: font])
+            return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6), fixed: target.source == .grid)
+        }
+        if items != layoutItems || bounds != layoutBounds {
+            layoutItems = items; layoutBounds = bounds
+            placements = HintLayout.place(items, in: bounds)
+        }
+        let frames = Dictionary(uniqueKeysWithValues: placements.map { ($0.id, $0.frame) })
+        placed = visible.compactMap { target in
+            guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
+            return PlacedHint(id: target.id, target: target, frame: frame)
+        }
+        badges.frame = bounds
+        badges.rootView = HintLayer(hints: placed, prefix: prefix, height: bounds.height)
+        needsDisplay = true
+    }
     override func draw(_ dirtyRect: NSRect) {
         let settings = Settings.shared
-        var placed: [CGRect] = []
-        let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
-        let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: NSColor.white]
-        func local(_ rect: CGRect) -> CGRect {
-            Geometry.cocoa(rect, primaryHeight: primaryHeight).offsetBy(dx: -screenOrigin.x, dy: -screenOrigin.y)
+        if preview {
+            for target in targets {
+                NSColor.secondaryLabelColor.withAlphaComponent(0.5).setStroke()
+                let control = NSBezierPath(roundedRect: local(target.frame), xRadius: 2, yRadius: 2)
+                control.lineWidth = 1; control.stroke()
+            }
         }
-        for target in targets {
-            let rect = local(target.frame)
-            guard bounds.intersects(rect) else { continue }
-            if target.source == .grid && settings.showLines {
-                NSColor.systemTeal.withAlphaComponent(0.20).setStroke()
-                let border = NSBezierPath(rect: rect); border.lineWidth = 0.5; border.stroke()
-            }
-            guard settings.showLabels else { continue }
-            let text = target.label.uppercased() as NSString
-            let size = text.size(withAttributes: attrs)
-            var badge = CGRect(x: rect.midX - size.width / 2 - 6, y: rect.midY - size.height / 2 - 3, width: size.width + 12, height: size.height + 6)
-            if target.source != .grid {
-                for _ in 0..<7 where placed.contains(where: { $0.intersects(badge.insetBy(dx: -2, dy: -2)) }) { badge.origin.y += badge.height + 2 }
-            }
-            badge.origin.x = min(max(2, badge.minX), bounds.width - badge.width - 2)
-            badge.origin.y = min(max(2, badge.minY), bounds.height - badge.height - 2)
-            placed.append(badge)
-            if abs(badge.midY - rect.midY) > 15 {
-                NSColor.systemTeal.withAlphaComponent(0.55).setStroke()
-                let line = NSBezierPath(); line.move(to: CGPoint(x: rect.midX, y: rect.midY)); line.line(to: CGPoint(x: badge.midX, y: badge.midY)); line.lineWidth = 1; line.stroke()
-            }
-            let shape = NSBezierPath(roundedRect: badge, xRadius: 5, yRadius: 5)
-            let alpha = NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency ? 1 : settings.contrast
-            (target.source == .text ? NSColor.systemIndigo : NSColor(calibratedRed: 0.03, green: 0.26, blue: 0.29, alpha: 1)).withAlphaComponent(alpha).setFill(); shape.fill()
-            NSColor.white.withAlphaComponent(0.6).setStroke(); shape.lineWidth = 0.75; shape.stroke()
-            text.draw(at: CGPoint(x: badge.minX + 6, y: badge.minY + 3), withAttributes: attrs)
-            if !prefix.isEmpty {
-                let matched = String(target.label.prefix(prefix.count)).uppercased() as NSString
-                matched.draw(at: CGPoint(x: badge.minX + 6, y: badge.minY + 3), withAttributes: [.font: font, .foregroundColor: NSColor.systemMint])
-            }
+        for target in targets where target.source == .grid && settings.showLines {
+            settings.nsColor(.grid).withAlphaComponent(0.45).setStroke()
+            let border = NSBezierPath(rect: local(target.frame)); border.lineWidth = 0.5; border.stroke()
+        }
+        let shown = Set(placed.map(\.id))
+        for hint in placements where shown.contains(hint.id) && hint.displaced {
+            settings.nsColor(.grid).withAlphaComponent(0.8).setStroke()
+            let line = NSBezierPath(); line.move(to: hint.connectorStart); line.line(to: hint.anchor)
+            line.lineWidth = 1; line.stroke()
+            settings.nsColor(.grid).setFill()
+            NSBezierPath(ovalIn: CGRect(x: hint.anchor.x - 2, y: hint.anchor.y - 2, width: 4, height: 4)).fill()
         }
         if let selected {
-            NSColor.systemMint.setStroke()
+            settings.nsColor(.highlight).setStroke()
             let ring = NSBezierPath(roundedRect: local(selected).insetBy(dx: -4, dy: -4), xRadius: 7, yRadius: 7)
             ring.lineWidth = 2; ring.stroke()
         }

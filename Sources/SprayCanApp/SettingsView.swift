@@ -55,7 +55,7 @@ struct SettingsView: View {
                     Text("By default, labels move the pointer. Return clicks.").font(.caption).foregroundStyle(.secondary)
                     Toggle("Include all visible windows", isOn: $settings.allWindows)
                     Toggle("Use on-device text recognition", isOn: $settings.vision)
-                    Text("Find text that apps don’t expose to accessibility. Purple labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)
+                    Text("Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)
                     Toggle("Launch at login", isOn: $loginEnabled).onChange(of: loginEnabled) { _, value in
                         do { if value { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }; loginError = "" }
                         catch { loginError = error.localizedDescription }
@@ -82,10 +82,14 @@ struct SettingsView: View {
             Text("Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings").font(.system(.caption, design: .monospaced)).lineSpacing(7)
         case "Appearance":
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
-            NavigationHUD(mode: .elements, status: "42 targets · Type a label · Return clicks", prefix: "a")
+            AppearancePreview().frame(height: 100)
+            ForEach(AppearanceColor.allCases, id: \.self) { role in
+                ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)
+            }
+            Button("Restore default colors") { settings.restoreColors() }
             VStack(alignment: .leading) { Text("Label size · \(Int(settings.fontSize)) pt"); Slider(value: $settings.fontSize, in: 10...22, step: 1) }
             VStack(alignment: .leading) { Text("Grid cell size · \(Int(settings.cellSize)) pt"); Slider(value: $settings.cellSize, in: 32...240, step: 4) }
-            VStack(alignment: .leading) { Text("Label opacity"); Slider(value: $settings.contrast, in: 0.4...1) }
+            VStack(alignment: .leading) { Text("Label tint strength"); Slider(value: $settings.contrast, in: 0.4...1) }
             Text("Liquid Glass on macOS 26 and later. System materials on macOS 14–15. Labels respect Reduce Transparency; navigation never depends on animation.").font(.caption).foregroundStyle(.secondary)
         case "Permissions":
             Text("Only the access needed to navigate.").foregroundStyle(.secondary)
@@ -98,10 +102,26 @@ struct SettingsView: View {
         default:
             SprayCanMark().stroke(.teal, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)).frame(width: 66, height: 88)
             Text("Spray Can 0.1.0").font(.title2.bold())
-            Text("Keyboard-driven navigation, built for your Mac. Inspired by Scoot and Vimac, with an independent native implementation.").foregroundStyle(.secondary)
+            Text("Keyboard-driven navigation, built for your Mac. Free and open source under the MIT License.").foregroundStyle(.secondary)
             Link("Source, releases & documentation ↗", destination: URL(string: "https://github.com/Kymer0615/spray_can")!)
+            Link(destination: URL(string: "https://buymeacoffee.com/ziyang")!) {
+                HStack(spacing: 8) {
+                    Image("BuyMeACoffee").resizable().scaledToFit().frame(width: 24, height: 24)
+                    Text("Buy me a coffee")
+                }.padding(.vertical, 8).padding(.horizontal, 12)
+                    .foregroundStyle(.black).background(Color(red: 1, green: 0.87, blue: 0), in: RoundedRectangle(cornerRadius: 9))
+            }.accessibilityLabel("Buy me a coffee — support Ziyang")
             Text("No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content.").font(.caption).foregroundStyle(.secondary)
             Text("MIT License · © 2026 Spray Can contributors").font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+    private func colorTitle(_ role: AppearanceColor) -> String {
+        switch role {
+        case .label: return "Label tint"
+        case .ocr: return "OCR label tint"
+        case .grid: return "Grid lines"
+        case .text: return "Label text"
+        case .highlight: return "Matched letters & selection"
         }
     }
     private func permission(_ title: String, detail: String, granted: Bool, action: @escaping () -> Void) -> some View {

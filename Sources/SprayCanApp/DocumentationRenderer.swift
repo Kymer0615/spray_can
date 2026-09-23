@@ -2,10 +2,11 @@ import AppKit
 import SwiftUI
 import SprayCanCore
 import ImageIO
+import ScreenCaptureKit
 import UniformTypeIdentifiers
 
 /// Reproducible documentation images of real application views, using synthetic example data.
-/// Does not capture the user's desktop or require Screen Recording.
+/// Captures only synthetic documentation windows; requires Screen Recording for native glass compositing.
 enum DocumentationRenderer {
     static func render() {
         let directory = ProcessInfo.processInfo.environment["SPRAYCAN_DOCS_DIR"] ?? "docs/images"
@@ -17,13 +18,37 @@ enum DocumentationRenderer {
             RunLoop.main.run(until: Date().addingTimeInterval(0.25))
             view.layoutSubtreeIfNeeded()
             view.displayIfNeeded()
-            guard let bitmap = view.bitmapImageRepForCachingDisplay(in: view.bounds) else { return nil }
-            view.cacheDisplay(in: view.bounds, to: bitmap)
+            // Glass is composited by WindowServer and is absent from cacheDisplay bitmaps.
+            // Capture only this synthetic window, never the desktop or another app.
+            var captured: CGImage?
+            var finished = false
+            SCShareableContent.getExcludingDesktopWindows(true, onScreenWindowsOnly: true) { content, error in
+                guard let target = content?.windows.first(where: { $0.windowID == CGWindowID(window.windowNumber) }) else {
+                    DispatchQueue.main.async { finished = true }; return
+                }
+                let filter = SCContentFilter(desktopIndependentWindow: target)
+                let configuration = SCStreamConfiguration()
+                configuration.width = Int(size.width); configuration.height = Int(size.height)
+                configuration.showsCursor = false
+                configuration.ignoreShadowsSingleWindow = true
+                SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration) { image, error in
+                    DispatchQueue.main.async { captured = image; finished = true }
+                }
+            }
+            let deadline = Date().addingTimeInterval(15)
+            while !finished && Date() < deadline { RunLoop.main.run(until: Date().addingTimeInterval(0.05)) }
             window.orderOut(nil)
-            if !name.isEmpty, let data = bitmap.representation(using: .png, properties: [:]) { try? data.write(to: URL(fileURLWithPath: directory).appendingPathComponent(name)) }
-            return bitmap.cgImage
+            guard let captured else { print("Could not render \(name): Screen Recording permission is required for composited documentation visuals."); return nil }
+            if !name.isEmpty {
+                let bitmap = NSBitmapImageRep(cgImage: captured)
+                if let data = bitmap.representation(using: .png, properties: [:]) { try? data.write(to: URL(fileURLWithPath: directory).appendingPathComponent(name)) }
+            }
+            return captured
         }
         save(NSHostingView(rootView: SettingsView(controller: AppController())), name: "settings.png", size: CGSize(width: 696, height: 540))
+        save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance")), name: "appearance.png", size: CGSize(width: 696, height: 540))
+        save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "About")), name: "about.png", size: CGSize(width: 696, height: 540))
+        save(NSHostingView(rootView: AppearancePreview().frame(width: 600, height: 160).background(Color(nsColor: .windowBackgroundColor))), name: "clustered-labels.png", size: CGSize(width: 600, height: 160))
         for grid in [false, true] {
             let container = NSView(frame: CGRect(x: 0, y: 0, width: 1100, height: 700))
             let background = NSHostingView(rootView: DemoDesktop()); background.frame = container.bounds; container.addSubview(background)

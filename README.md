@@ -1,94 +1,171 @@
-<p align="center"><img src="docs/images/icon.png" width="112" alt="Spray Can app icon"></p>
+<p align="center">
+  <img src="docs/images/icon.png" width="112" alt="Spray Can app icon">
+</p>
+
 <h1 align="center">Spray Can</h1>
-<p align="center"><strong>Point. Type. Click.</strong><br>Keyboard-driven navigation, built for your Mac.</p>
-<p align="center">macOS 14+ · Apple Silicon & Intel · Swift + AppKit · Local processing</p>
+
+<p align="center">
+  <strong>Keyboard navigation that sees what Accessibility misses.</strong><br>
+  Navigate your Mac with labels, grids, and private on-device OCR.
+</p>
+
+<p align="center">
+  macOS 14+ · Apple Silicon & Intel · Swift + AppKit · 100% local processing
+</p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/ziyang">
+    <img src="docs/images/buymeacoffee.png" width="36" alt="Buy me a coffee"><br>
+    Support Spray Can
+  </a>
+</p>
+
+**Free and open source under the [MIT License](LICENSE).**
+No subscriptions, paid tiers, analytics, or cloud OCR.
 
 ![Element navigation](docs/images/elements.png)
 
-Spray Can lets you move, click, drag, and scroll without reaching for the mouse. Press **⇧⌘J**, type a label, then press **Return** to click. Familiar [Scoot](https://github.com/mjrusso/scoot) shortcuts meet a native interface, with Liquid Glass on macOS 26 and later.
+Spray Can lets you **click, drag, scroll, and navigate without reaching for the mouse**.
 
-**Preview software:** the navigation core is tested, including 1,000 rapid activation cycles. A live native fixture also passed 60 element/grid click cycles without missed clicks or leaked input. End-to-end compatibility across third-party apps is still being validated. See [validation status](docs/VALIDATION.md); this is not a claim that every macOS control is discoverable.
+Press **⇧⌘J**, type a label, and press **Return**.
 
-## Four ways to move
+Unlike tools that rely only on macOS Accessibility, Spray Can can also use **Apple Vision OCR entirely on-device** to label visible text that an app does not expose through its accessibility tree.
 
-- **Elements · ⇧⌘J:** labels on accessible controls in the active window, menus, and system UI. Optionally include other visible windows.
-- **Grid · ⇧⌘K:** target any location across connected displays, even in apps with no accessibility support.
-- **Freestyle · ⇧⌘L:** nudge the pointer with keyboard commands without a grid.
-- **Scroll · ⌃J:** HJKL scrolling, Tab to switch scroll areas, half-page and top/bottom movement, inspired by [Vimac](https://github.com/nchudleigh/vimac).
+Screenshots never leave your Mac.
+
+## See more. Reach everything.
+
+Spray Can combines three targeting layers:
+
+- **Accessibility** — precise controls, buttons, fields, rows, menus, and system UI.
+- **On-device OCR** — recognizes visible text when Accessibility does not expose it.
+- **Grid** — reaches everything else, including custom canvases and unlabeled areas.
+
+OCR uses **ScreenCaptureKit + Apple Vision** and runs locally. Captured frames are processed in memory and discarded — no cloud inference, screenshot logs, or analytics.
 
 ![Element workflow](docs/images/element-demo.gif)
 
-*Documentation visuals render the application's actual hint and settings views over synthetic example content. Animations illustrate the key sequence; they are not recordings of third-party application tests.*
+## Four ways to navigate
 
-## Reliable activation by design
+| Mode | Shortcut | Use it for |
+| --- | --- | --- |
+| **Elements** | ⇧⌘J | Accessible controls + OCR text |
+| **Grid** | ⇧⌘K | Any position on any connected display |
+| **Freestyle** | ⇧⌘L | Precise keyboard pointer movement |
+| **Scroll** | ⌃J | Vim-style HJKL scrolling |
 
-Keyboard capture does not depend on an overlay becoming the key window. A dedicated event tap starts the session immediately, queues early input while discovery runs, and tracks modifier releases. Old discovery results cannot overwrite a new session, and late OCR results cannot reassign labels after typing starts.
+Global shortcuts are fully configurable.
 
-The target application keeps focus. Accessibility scans are bounded and run off the UI thread. Selected accessible controls are checked again before clicking. Input restrictions such as Secure Input and revoked permissions are reported rather than treated as working navigation.
+## Designed to stay out of your way
 
-## Accessibility + text recognition + grid
+Spray Can keeps the target app focused while you navigate.
 
-Accessibility is the primary source of targets. Traversal considers supported actions, visible rows, clipping, menus, fields, and other actionable roles. It does not globally enable VoiceOver emulation in every application.
+Keyboard input is captured independently of the overlay, so typing can begin immediately while element discovery and OCR continue in the background. Late OCR results cannot change labels after you start typing.
 
-Optional **on-device text recognition** uses ScreenCaptureKit and Apple Vision OCR. It adds purple text-location labels where accessibility has no matching target. OCR recognizes text; it does **not** determine whether text is clickable or detect every unlabeled icon. A dedicated learned UI detector is not included in this release. The grid is always available for unsupported content.
+Before clicking, accessible targets are revalidated to reduce stale-target errors.
 
-Screenshots are processed in memory and discarded. No analytics, cloud inference, or screenshot logs. Session diagnostics record timing and counts only.
+## Clear labels, even in dense interfaces
 
-## Install
+Crowded labels automatically shift around nearby controls instead of simply overlapping them. Connector lines show exactly which target each displaced label belongs to.
 
-Download the universal ZIP from [Releases](https://github.com/Kymer0615/spray_can/releases), extract it, and move **Spray Can.app** into Applications. Preview releases are ad-hoc signed, **not Developer ID signed or notarized**. If Gatekeeper blocks a preview you choose to trust, use System Settings → Privacy & Security → Open Anyway. Do not disable Gatekeeper globally.
+![Adaptive placement for vertical and horizontal clusters](docs/images/clustered-labels.png)
 
-Open Spray Can and enable:
+## Drag, click, scroll
 
-1. **Accessibility:** discover controls and synthesize pointer actions.
-2. **Input Monitoring:** capture navigation keys independently of window focus.
-3. **Screen Recording (optional):** only for text recognition.
+Spray Can supports:
 
-After changing permissions, click **Retry keyboard capture** in Settings → Permissions. macOS may require a relaunch. Quit Scoot or change its shortcuts before using the same bindings in Spray Can.
+- left, middle, right, and double click
+- modifier-click
+- drag and drop
+- fine and full-cell pointer movement
+- screen-edge jumps
+- Vim-style scrolling
+- multiple displays
 
-Homebrew publication is prepared but no public tap installation command is claimed yet. Every packaged release includes a generated cask with its real SHA-256 checksum. See [release instructions](docs/RELEASING.md).
+Example drag:
 
-## Shortcuts
-
-Global shortcuts are configurable in Settings → Shortcuts. Labels use **physical US letter-key positions**, including while an IME is active; Spray Can does not change your input source. Vi mode reserves HJKL for movement.
-
-| Action | Default |
-| --- | --- |
-| Element / grid / freestyle | ⇧⌘J / ⇧⌘K / ⇧⌘L |
-| Scroll-area mode | ⌃J |
-| Move to a target | Type its label |
-| Left / middle / right click | Return / `[` / `]` |
-| Double left click | `\` |
-| Hold left button / drop | `=` / Return |
-| Modified click | Modifier + Return, `[` or `]` |
-| Clear prefix; otherwise exit | Esc, ⌘., or ⌃G |
-| Remove last label character | Delete |
-| Hide / settings | ⌘H / ⌘, |
-| Small movement / full grid-cell movement | Arrows / ⌥ arrows |
-| Move to screen edge | ⌘ arrows |
-| Center, then cycle corners | ⌃L |
-| Scroll at pointer | ⇧ arrows |
-| Toggle grid lines / labels | ⌃= / ⌃⇧= |
-| Increase / decrease cell size | ⇧⌘= / ⇧⌘− |
-| Increase / decrease label opacity | ⌘= / ⌘− |
-
-**Shift–Return is Shift-click**, matching Scoot's source implementation. Use backslash for a double-click. [Complete Emacs, vi, and scroll-mode bindings](docs/SHORTCUTS.md).
-
-### Drag and drop
-
-Press ⇧⌘K, type a source label, press `=`, type a destination label, and press Return. Esc/hide/interruption releases the held button. Reinvoking a global mode also ends an existing drag.
+`⇧⌘K` → type source label → `=` → type destination label → `Return`
 
 ![Grid drag workflow](docs/images/drag-demo.gif)
 
-## A native home
+## Native macOS experience
 
 ![Settings](docs/images/settings.png)
 
-A spray-can menu bar icon shows whether navigation is active. Settings include launch-at-login, optional instant-click, target scope, OCR, vi bindings, label size, grid spacing, and contrast. The interface respects Reduce Transparency and uses no required animations.
+Spray Can is built with Swift and AppKit.
 
-## Build and test
+It uses **Liquid Glass on macOS 26+**, native materials on macOS 14–15, and respects Reduce Transparency.
 
-Requires full **Xcode 26+**, Swift 5.9-compatible language mode, and a macOS SDK with Liquid Glass APIs. Deployment target is macOS 14; older systems use native translucent materials.
+You can customize:
+
+- navigation shortcuts
+- target scope
+- OCR
+- vi bindings
+- label size
+- grid spacing
+- tint strength
+- label, OCR, grid, text, and selection colors
+
+![Appearance customization](docs/images/appearance.png)
+
+## Install
+
+Install from [my Homebrew tap](https://github.com/Kymer0615/homebrew-tap):
+
+```sh
+brew install --cask kymer0615/tap/spray-can
+open "/Applications/Spray Can.app"
+```
+
+To update or remove:
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+brew uninstall --cask spray-can
+```
+
+Ordinary uninstall preserves preferences. If you installed manually, quit Spray Can and move that copy out of Applications before switching to Homebrew to avoid running two copies.
+
+Alternatively, download the universal ZIP from [Releases](https://github.com/Kymer0615/spray_can/releases), extract it, and move **Spray Can.app** into Applications.
+
+Release 0.1.0 is **ad-hoc signed and not notarized**. If macOS blocks a build you trust:
+
+**System Settings → Privacy & Security → Open Anyway**
+
+Spray Can may request:
+
+1. **Accessibility** — discover controls and perform pointer actions.
+2. **Input Monitoring** — capture navigation keys while other apps remain focused.
+3. **Screen Recording** — optional, used only for on-device OCR.
+
+Release archives and their SHA-256 checksums are versioned. See [release instructions](docs/RELEASING.md).
+
+## Privacy
+
+Spray Can is designed to work locally.
+
+- OCR runs through **Apple Vision on-device**
+- screenshots are processed in memory and discarded
+- no screenshot logs
+- no analytics
+- no cloud inference
+- no account or subscription required
+
+## OCR limitations
+
+OCR recognizes **text location**, not whether that text is clickable.
+
+A recognized label may therefore point to a heading or other noninteractive text. It also does not detect every unlabeled icon or arbitrary visual control.
+
+For those cases, use **Grid mode**.
+
+See [VALIDATION.md](docs/VALIDATION.md) for current compatibility and testing status.
+
+## Build
+
+Requires **Xcode 26+**.
 
 ```sh
 scripts/test.sh
@@ -96,34 +173,53 @@ scripts/build.sh
 scripts/install-local.sh
 ```
 
-The install script copies the app to `~/Applications` without filesystem-provider metadata that can invalidate bundle signatures. It refuses to overwrite an existing installation.
-
-The build script stages project inputs in `/tmp` to avoid coordinated-file-read stalls observed in cloud-managed Documents folders, then places a universal ad-hoc-signed app in `build/Build/Products/Release/`.
-
-Open `SprayCan.xcodeproj` for development. `SprayCanCore` is a local Swift package containing the session state machine, label generation, geometry, and shortcut mappings. `Sources/SprayCanApp` contains the native app, event capture, discovery providers, mouse driver, and overlays.
+For development:
 
 ```sh
-# Rebuild original artwork / deterministic Xcode project
 swift scripts/generate-artwork.swift
 python3 scripts/generate-project.py
-# Render actual views with synthetic example content (requires a GUI login)
 scripts/render-docs.sh
-# Live keyboard/click test in an isolated fixture (requires permissions)
 scripts/integration-test.sh
-# Local OCR fixture check
 swift scripts/ocr-smoke.swift
-# Build a distributable preview and matching Homebrew cask
-scripts/release.sh 0.1.0-preview.1 preview
+scripts/release.sh 0.1.0 adhoc
 ```
 
-## Coverage and limitations
+Open `SprayCan.xcodeproj` in Xcode.
 
-- Native controls, browser content, and Electron accessibility trees vary by application. Scans may return partial results when an app is slow.
-- OCR text targets can include noninteractive text. Custom canvases, remote desktops, and unlabeled icons may need grid mode.
-- All-visible-windows targeting is optional; occlusion checks are conservative. An accessible target that moved or cannot be revalidated must be refreshed or reached by grid.
-- Secure Input, protected content, system permission boundaries, and other event-tap tools can restrict operation.
-- Cross-version, multiple-display, fullscreen, and third-party app acceptance checks are tracked in [VALIDATION.md](docs/VALIDATION.md).
+`SprayCanCore` contains the session state machine, label generation, geometry, and shortcut mappings. `Sources/SprayCanApp` contains the app UI, event capture, discovery providers, mouse driver, and overlays.
 
-## Credits and license
+## Status
 
-Original implementation and artwork under the [MIT License](LICENSE). Workflow research: [Scoot](https://github.com/mjrusso/scoot) and [Vimac](https://github.com/nchudleigh/vimac). No source code or visual assets from either project are bundled. See [architecture and research notes](docs/ARCHITECTURE.md).
+Spray Can 0.1.0 is available for macOS 14 and later.
+
+The navigation core has been stress-tested with **1,000 rapid activation cycles**, and a native fixture completed **60 element/grid click cycles** without missed clicks or leaked input.
+
+Third-party app, multi-display, fullscreen, and cross-version compatibility are still being validated.
+
+See [VALIDATION.md](docs/VALIDATION.md).
+
+## Community
+
+[Issues and feature ideas](https://github.com/Kymer0615/spray_can/issues), testing, and [contributions](https://github.com/Kymer0615/spray_can/pulls) are welcome.
+
+Useful areas include:
+
+* Accessibility coverage
+* OCR validation
+* UI and interaction design
+* documentation
+* cross-app testing
+
+If Spray Can helps you, you can [buy me a coffee](https://buymeacoffee.com/ziyang). Support is optional and never unlocks features.
+
+## Credits
+
+Original implementation and artwork are released under the [MIT License](LICENSE).
+
+Workflow inspiration:
+[Scoot](https://github.com/mjrusso/scoot) ·
+[Vimac](https://github.com/nchudleigh/vimac)
+
+No source code or visual assets from either project are bundled.
+
+See [architecture and research notes](docs/ARCHITECTURE.md).

@@ -1,6 +1,6 @@
 # Validation status
 
-Tested on 2026-09-23 using macOS 27.0 (26A428), Apple Silicon, Xcode 27.0 (27A266a), with a macOS 14 deployment target. Preview status is intentional: build compatibility is broader than the runtime environments verified here.
+Tested on 2026-09-23 using macOS 27.0 (26A428), Apple Silicon, Xcode 27.0 (27A266a), with a macOS 14 deployment target. Build compatibility is broader than the runtime environments verified here.
 
 ## Automated and live results
 
@@ -14,7 +14,7 @@ Tested on 2026-09-23 using macOS 27.0 (26A428), Apple Silicon, Xcode 27.0 (27A26
 | Held activation modifiers | Alternated on every live cycle; passed |
 | Cursor directly over selected control on next activation | Passed after excluding WindowServer cursor windows from occlusion |
 | Universal application build | arm64 and x86_64 |
-| Extracted preview ZIP signature | Ad-hoc signature verified with `codesign --verify --deep --strict` |
+| Extracted release ZIP signature | Ad-hoc signature verified with `codesign --verify --deep --strict` |
 | OCR fixture | All four expected strings found: Projects, Research, Personal, Documents |
 | Documentation views | Settings, element/grid overlays, and illustrated workflow GIFs rendered and inspected |
 
@@ -28,7 +28,7 @@ The first cold OCR smoke run took approximately 63 seconds in this environment, 
 scripts/test.sh
 scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
-scripts/release.sh 0.1.0-preview.1 preview
+scripts/release.sh 0.1.0 adhoc
 ```
 
 Live tests need an interactive desktop and Accessibility/Input Monitoring for the executing app/terminal. They create a temporary fixture with synthetic controls, inject input only while it is frontmost, then close it. They do not click personal documents or browser content.
@@ -54,4 +54,14 @@ These are unverified, not implied by a successful compile:
 
 ## Release gate
 
-A preview may carry the above limitations explicitly. Before a stable release, complete the runtime matrix, verify capture permissions and warm OCR latency, test real drag/drop and modified/right/middle/double clicks, exercise cancellation during drag, and run installation/uninstallation on a clean Mac. No universal clickable-element coverage claim is made.
+Version 0.1.0 ships with the limitations above explicitly documented. To broaden compatibility confidence, complete the runtime matrix, verify capture permissions and warm OCR latency, test real drag/drop and modified/right/middle/double clicks, exercise cancellation during drag, and run installation/uninstallation on a clean Mac. No universal clickable-element coverage claim is made.
+
+## Appearance and community update — 2026-09-23
+
+The universal build passed with native Liquid Glass hint views, five persistent sRGB color preferences, and the About support link. The core suite now contains 10 passing tests, including invalid/missing color defaults and sRGB normalization. A separate live run passed 30 element and 30 immediate grid click cycles with no leaked characters or duplicate clicks. An earlier run correctly aborted when a documentation window took focus; it was rerun without concurrent window rendering.
+
+Documentation images now capture only synthetic windows through ScreenCaptureKit, because view bitmap caching omits WindowServer-composited glass. Appearance and About images were visually inspected. The built bundle's universal architectures and ad-hoc signature were verified. Older-macOS material fallback, Reduce Transparency, custom-color persistence across a full application relaunch, and mixed-display glass appearance still require manual acceptance. No new release was published.
+
+## Adaptive label placement — 2026-09-23
+
+The core suite now has 15 passing tests. New geometry coverage includes vertical/horizontal clusters, coincident targets, corners, translated display origins, fixed grid centers, connector endpoints, deterministic ordering, and best-effort handling of impossible density. Placement is cached for the full target set before prefix filtering. The universal build passed; the native live fixture again completed 30 element and 30 immediate grid click cycles without missed/duplicate clicks or leaked characters. The synthetic cluster image was rendered and visually inspected: vertical controls use side offsets, horizontal controls use above/below offsets, and connector dots identify the original target centers. Physical multi-display and arbitrary third-party dense-control acceptance remain pending.

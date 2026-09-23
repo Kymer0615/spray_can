@@ -18,6 +18,20 @@ final class Settings: ObservableObject {
               let value = try? JSONDecoder().decode([NavigationMode: Shortcut].self, from: data) else { return Shortcut.defaults }
         return Shortcut.defaults.merging(value) { _, new in new }
     }() { didSet { if let data = try? JSONEncoder().encode(shortcuts) { save("shortcuts", data) } } }
+    @Published var colors: [String: String] = UserDefaults.standard.dictionary(forKey: "appearanceColors") as? [String: String] ?? [:] {
+        didSet { save("appearanceColors", colors) }
+    }
+    func color(_ role: AppearanceColor) -> Color { Color(nsColor: nsColor(role)) }
+    func nsColor(_ role: AppearanceColor) -> NSColor {
+        let hex = role.validated(colors[role.rawValue])
+        let rgb = UInt32(hex, radix: 16)!
+        return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
+    }
+    func setColor(_ color: Color, for role: AppearanceColor) {
+        guard let rgb = NSColor(color).usingColorSpace(.sRGB) else { return }
+        colors[role.rawValue] = String(format: "%02X%02X%02X", Int((rgb.redComponent * 255).rounded()), Int((rgb.greenComponent * 255).rounded()), Int((rgb.blueComponent * 255).rounded()))
+    }
+    func restoreColors() { colors = [:] }
     private func save(_ key: String, _ value: Any) { UserDefaults.standard.set(value, forKey: key) }
 }
 

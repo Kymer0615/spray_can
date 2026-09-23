@@ -1,21 +1,21 @@
 # Releases and Homebrew
 
-## Preview
+## Ad-hoc signed releases
 
 ```sh
 scripts/test.sh
-scripts/release.sh 0.1.0-preview.1 preview
+scripts/release.sh 0.1.0 adhoc
 ```
 
-Produces `dist/SprayCan-0.1.0-preview.1-universal.zip`, its SHA-256 sidecar, and `dist/spray-can.rb`. The bundle contains arm64 and x86_64 executables, original icons, and deployment metadata for macOS 14+. Previews use an ad-hoc signature and are explicitly unnotarized. Rebuilt ad-hoc apps may require macOS permissions to be granted again.
+Produces `dist/SprayCan-0.1.0-universal.zip`, its SHA-256 sidecar, and `dist/spray-can.rb`. The bundle contains arm64 and x86_64 executables, original icons, and deployment metadata for macOS 14+. Ad-hoc releases are explicitly unnotarized. Rebuilt ad-hoc apps may require macOS permissions to be granted again.
 
-The release workflow runs on version tags. Tags with a prerelease suffix create unnotarized GitHub prereleases. Stable tags require signing credentials and fail if credentials or notarization are unavailable. Every release has immutable versioned filenames and a checksum; no `latest.zip` URL is used by the cask.
+The release workflow runs on version tags. A normal version tag creates a normal GitHub release; a prerelease suffix creates a GitHub prerelease. Signing is configured independently with the repository variable `RELEASE_SIGNING_MODE`: `adhoc` (default) or `signed`. Signed mode requires credentials and fails if signing or notarization is unavailable. Every release has immutable versioned filenames and a checksum; no `latest.zip` URL is used by the cask.
 
-The repository can stay private while testing. Download URLs in a private repository require authentication and are not ready for general Homebrew distribution.
+Source and release downloads are public so Homebrew can fetch archives without authentication.
 
 ## Developer ID signing later
 
-Configure these GitHub Actions secrets:
+Set `RELEASE_SIGNING_MODE=signed` and configure these GitHub Actions secrets:
 
 - `DEVELOPER_ID_P12_BASE64`, `DEVELOPER_ID_P12_PASSWORD`
 - `SIGNING_KEYCHAIN_PASSWORD`
@@ -30,9 +30,9 @@ For local signed packaging, set `SPRAYCAN_SIGN_IDENTITY` and `SPRAYCAN_NOTARY_PR
 
 ## Homebrew publication
 
-1. Complete the compatibility checklist and provide a stable, signed/notarized release.
-2. Make release downloads publicly accessible when ready for public distribution.
-3. Copy the generated `spray-can.rb` into `Casks/` in a dedicated Homebrew tap.
+1. Publish a versioned release and disclose its signing status.
+2. Verify the public download, checksum, universal architectures, and signature.
+3. Copy the generated `spray-can.rb` into `Casks/` in [Kymer0615/homebrew-tap](https://github.com/Kymer0615/homebrew-tap), then commit and push after validation.
 4. Run `brew style` and `brew audit --cask` against the cask, and test install/uninstall on a fresh Mac.
 5. Publish the tap. Consider a homebrew-cask submission separately, according to its current acceptance requirements.
 

@@ -128,7 +128,7 @@ final class AppController: ObservableObject {
     }
     private func render() {
         guard active else { return }
-        overlay.render(targets: session.mode == .scroll ? [] : session.visibleTargets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame)
+        overlay.render(targets: session.mode == .scroll ? [] : session.targets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame)
     }
     func handle(_ key: CapturedKey) {
         guard active else { return }

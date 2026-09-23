@@ -7,13 +7,15 @@ permissions:
 jobs:
   release:
     runs-on: macos-15
+    env:
+      RELEASE_SIGNING_MODE: ${{ vars.RELEASE_SIGNING_MODE || 'adhoc' }}
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode 26
         run: sudo xcode-select -s /Applications/Xcode_26.0.app/Contents/Developer
       - run: scripts/test.sh
-      - name: Configure signing for stable releases
-        if: ${{ !contains(github.ref_name, '-') }}
+      - name: Configure Developer ID signing
+        if: ${{ env.RELEASE_SIGNING_MODE == 'signed' }}
         env:
           CERTIFICATE: ${{ secrets.DEVELOPER_ID_P12_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_P12_PASSWORD }}
@@ -39,16 +41,15 @@ jobs:
           SPRAYCAN_NOTARY_PROFILE: SprayCan
           SPRAYCAN_NOTARY_KEYCHAIN: ${{ runner.temp }}/signing.keychain-db
         run: |
-          channel=signed
-          if [[ "$RELEASE_TAG" == *-* ]]; then channel=preview; fi
-          scripts/release.sh "${RELEASE_TAG#v}" "$channel"
+          scripts/release.sh "${RELEASE_TAG#v}" "$RELEASE_SIGNING_MODE"
       - name: Publish release assets
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
           flags=()
-          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease --notes-file docs/PREVIEW_RELEASE.md); fi
+          if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
+          if [[ "$RELEASE_SIGNING_MODE" == adhoc ]]; then flags+=(--notes-file docs/ADHOC_RELEASE.md); fi
           gh release create "$RELEASE_TAG" dist/*.zip dist/*.sha256 dist/spray-can.rb --title "Spray Can $RELEASE_TAG" --generate-notes "${flags[@]}"
       - name: Remove temporary signing material
         if: always()

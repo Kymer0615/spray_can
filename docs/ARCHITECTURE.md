@@ -15,7 +15,7 @@ Vimac demonstrates focus-independent event capture, separate system-UI discovery
 - **KeyboardCapture:** session event tap on a dedicated run loop. A lock protects only capture state; handlers enqueue main-thread work. Carbon registration detects shortcut conflicts. Idle events pass through without storage. Matching key-up events are swallowed for consumed keys.
 - **AppController:** serial UI/session coordination, early-input queue, click sequencing, cancellation, and stale-result guards.
 - **AccessibilityProvider:** cancellable generation-scoped scans with an 850 ms initial scan budget and one bounded 2 s retry for a cold/incomplete accessibility server, per-app messaging timeouts, cycle/depth/node limits, clipping, and action/role discovery. Reads are batched; closed menu trees are skipped. Cursor-layer windows are excluded from occlusion checks. System roots include menu bar, Dock, and Control Center. Partial results remain usable.
-- **OCRProvider:** optional ScreenCaptureKit snapshots and local Apple Vision recognition, cancellable between operations. Screen images are not persisted. Purple hints represent text, not verified controls.
+- **OCRProvider:** optional ScreenCaptureKit snapshots and local Apple Vision recognition, cancellable between operations. Screen images are not persisted. OCR hints (indigo by default, customizable) represent text, not verified controls.
 - **OverlayManager:** nonactivating click-through panels in each display's Cocoa coordinates. Target data stays in global Quartz points until drawing. A compact SwiftUI HUD uses Liquid Glass when available.
 - **MouseDriver:** synthesized pointer, drag, click, and pixel-scroll events.
 
@@ -39,3 +39,9 @@ Secure Input and macOS permissions can block input capture. Recovery reports una
 - [Apple: recognizing text in images](https://developer.apple.com/documentation/vision/recognizing-text-in-images)
 - [Apple: Liquid Glass modifier](https://developer.apple.com/documentation/swiftui/view/glasseffect(_:in:))
 - [Apple: event tap disabled by timeout](https://developer.apple.com/documentation/coregraphics/cgeventtype/tapdisabledbytimeout)
+
+## Adaptive hint placement
+
+`HintLayout` is a pure geometry helper in the core package. It receives target rectangles and measured badge sizes in display-local coordinates and returns badge frames, unchanged target anchors, and connector endpoints. Candidate positions are constrained to a four-point display inset before scoring overlaps, connector crossings, preferred cluster axis, and distance. Stable IDs break ties. Search is bounded to three badge-sized steps; impossible density retains every target with a best-effort placement.
+
+The overlay receives the full session target set and caches placements by geometry and badge size. Prefix filtering affects visibility only, so surviving hints do not move while typing. Grid hints remain centered, and selection/click coordinates continue to come from the original target. Native glass badges sit above the canvas-drawn connectors and endpoint dots.
