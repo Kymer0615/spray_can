@@ -55,9 +55,10 @@ final class OverlayManager {
 }
 
 struct GlassSurface: ViewModifier {
+    @ObservedObject private var settings = Settings.shared
     @Environment(\.accessibilityReduceTransparency) var reduceTransparency
     func body(content: Content) -> some View {
-        if reduceTransparency {
+        if reduceTransparency || !settings.glassEnabled {
             content.background(Color(nsColor: .windowBackgroundColor), in: RoundedRectangle(cornerRadius: 22))
         } else if #available(macOS 26, *) {
             content.glassEffect(.regular, in: .rect(cornerRadius: 22))
@@ -99,31 +100,23 @@ struct SprayCanMark: Shape {
     }
 }
 
-struct HintBadge: View {
-    let label: String
-    let prefix: String
-    let ocr: Bool
+struct HintBackground: View {
     @ObservedObject private var settings = Settings.shared
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+    let ocr: Bool
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 5) }
-    private var text: some View {
-        (Text(String(label.prefix(prefix.count)).uppercased()).foregroundColor(settings.color(.highlight)) +
-         Text(String(label.dropFirst(prefix.count)).uppercased()).foregroundColor(settings.color(.text)))
-            .font(.system(size: settings.fontSize, weight: .semibold, design: .monospaced))
-            .padding(.horizontal, 6).padding(.vertical, 3).fixedSize()
-    }
     var body: some View {
         let tint = settings.color(ocr ? .ocr : .label)
-        if reduceTransparency {
-            text.background(tint, in: shape)
-        } else if #available(macOS 26, *) {
-            text.glassEffect(.regular.tint(tint.opacity(settings.contrast)), in: shape)
-                // Nonactivating panels can neutralize system glass tint; retain the
-                // chosen source color in the outline without replacing the material.
-                .overlay(shape.stroke(tint.opacity(settings.contrast), lineWidth: 1))
+        if reduceTransparency { shape.fill(tint) }
+        else { surface(tint: tint).opacity(settings.glassEnabled ? 1 : settings.contrast) }
+    }
+    @ViewBuilder private func surface(tint: Color) -> some View {
+        if !settings.glassEnabled { shape.fill(tint) }
+        else if #available(macOS 26, *) {
+            shape.fill(.clear).glassEffect(.regular.tint(tint), in: shape)
+                .overlay(shape.stroke(tint, lineWidth: 1))
         } else {
-            text.background(tint.opacity(settings.contrast * 0.6), in: shape)
-                .background(.regularMaterial, in: shape)
+            shape.fill(tint.opacity(0.6)).background(.regularMaterial, in: shape)
                 .overlay(shape.stroke(.white.opacity(0.3), lineWidth: 0.75))
         }
     }
@@ -141,7 +134,8 @@ private struct HintLayer: View {
     private var badges: some View {
         ZStack(alignment: .topLeading) {
             ForEach(hints) { hint in
-                HintBadge(label: hint.target.label, prefix: prefix, ocr: hint.target.source == .text)
+                HintBackground(ocr: hint.target.source == .text)
+                    .frame(width: hint.frame.width, height: hint.frame.height)
                     .position(x: hint.frame.midX, y: height - hint.frame.midY)
             }
         }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -152,6 +146,26 @@ private struct HintLayer: View {
                 GlassEffectContainer(spacing: 0) { badges }
             } else { badges }
         }.environment(\.controlActiveState, .active).allowsHitTesting(false)
+    }
+}
+
+/// Keep glyphs outside SwiftUI's glass container and above every material layer.
+private final class HintTextCanvas: NSView {
+    var hints: [PlacedHint] = []
+    var prefix = ""
+    override var isOpaque: Bool { false }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func draw(_ dirtyRect: NSRect) {
+        let settings = Settings.shared
+        let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
+        for hint in hints {
+            let string = hint.target.label.uppercased()
+            let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: settings.nsColor(.text)])
+            let matched = min((prefix.uppercased() as NSString).length, text.length)
+            if matched > 0 { text.addAttribute(.foregroundColor, value: settings.nsColor(.highlight), range: NSRange(location: 0, length: matched)) }
+            let size = text.size()
+            text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
+        }
     }
 }
 
@@ -178,10 +192,15 @@ final class HintCanvas: NSView {
     private var placements: [HintPlacement] = []
     private var appearanceChanges: AnyCancellable?
     private var accessibilityChanges: NSObjectProtocol?
+    private let letters = HintTextCanvas()
     private let badges = NSHostingView(rootView: HintLayer(hints: [], prefix: "", height: 0))
     override init(frame: NSRect) {
         super.init(frame: frame)
+        wantsLayer = true
         addSubview(badges)
+        letters.wantsLayer = true
+        addSubview(letters, positioned: .above, relativeTo: badges)
+        letters.layer?.zPosition = 1
         appearanceChanges = Settings.shared.objectWillChange.sink { [weak self] _ in
             DispatchQueue.main.async { self?.needsLayout = true; self?.needsDisplay = true }
         }
@@ -211,7 +230,7 @@ final class HintCanvas: NSView {
         }
         let settings = Settings.shared
         let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
-        let visible = targets.filter { bounds.contains(CGPoint(x: local($0.frame).midX, y: local($0.frame).midY)) }
+        let visible = TargetCollection.unique(targets).filter { bounds.contains(CGPoint(x: local($0.frame).midX, y: local($0.frame).midY)) }
         let items = visible.map { target in
             let size = (target.label.uppercased() as NSString).size(withAttributes: [.font: font])
             return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6), fixed: target.source == .grid)
@@ -220,11 +239,13 @@ final class HintCanvas: NSView {
             layoutItems = items; layoutBounds = bounds
             placements = HintLayout.place(items, in: bounds)
         }
-        let frames = Dictionary(uniqueKeysWithValues: placements.map { ($0.id, $0.frame) })
+        let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
             guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
             return PlacedHint(id: target.id, target: target, frame: frame)
         }
+        letters.frame = bounds
+        letters.hints = placed; letters.prefix = prefix; letters.needsDisplay = true
         badges.frame = bounds
         badges.rootView = HintLayer(hints: placed, prefix: prefix, height: bounds.height)
         needsDisplay = true

@@ -26,7 +26,7 @@ final class IntegrationHarness {
         statePath = ProcessInfo.processInfo.environment["SPRAYCAN_FIXTURE_STATE"] ?? "/tmp/spraycan-fixture-state.json"
     }
     func start() {
-        guard controller.accessibilityGranted, controller.keyboardGranted else { finish("Accessibility/Input Monitoring unavailable"); return }
+        guard controller.accessibilityGranted else { finish("Accessibility unavailable"); return }
         guard let executable = ProcessInfo.processInfo.environment["SPRAYCAN_FIXTURE_EXECUTABLE"] else { finish("Fixture executable missing"); return }
         controller.settings.cellSize = 32; controller.settings.instantClick = false
         controller.settings.vision = false; controller.settings.vi = false
@@ -48,6 +48,7 @@ final class IntegrationHarness {
         }
         switch phase {
         case 0:
+            guard controller.keyboardReady else { return }
             guard Date().timeIntervalSince(phaseStarted) > 0.5 else { return }
             activate(.elements); next(1)
         case 1:

@@ -94,7 +94,7 @@ Example drag:
 
 Spray Can is built with Swift and AppKit.
 
-It uses **Liquid Glass on macOS 26+**, native materials on macOS 14–15, and respects Reduce Transparency.
+It uses **Liquid Glass on macOS 26+**, native materials on macOS 14–15, and respects Reduce Transparency. Turn off **Use Liquid Glass** in Appearance for plain label and status-panel backgrounds. With glass off, label background opacity is adjustable without fading the text. The slider is disabled while glass or Reduce Transparency is enabled.
 
 You can customize:
 
@@ -104,7 +104,7 @@ You can customize:
 - vi bindings
 - label size
 - grid spacing
-- tint strength
+- background opacity
 - label, OCR, grid, text, and selection colors
 
 ![Appearance customization](docs/images/appearance.png)
@@ -130,15 +130,16 @@ Ordinary uninstall preserves preferences. If you installed manually, quit Spray 
 
 Alternatively, download the universal ZIP from [Releases](https://github.com/Kymer0615/spray_can/releases), extract it, and move **Spray Can.app** into Applications.
 
-Release 0.1.0 is **ad-hoc signed and not notarized**. If macOS blocks a build you trust:
+Release 0.1.1 is **ad-hoc signed and not notarized**. If macOS blocks a build you trust:
 
 **System Settings → Privacy & Security → Open Anyway**
 
 Spray Can may request:
 
-1. **Accessibility** — discover controls and perform pointer actions.
-2. **Input Monitoring** — capture navigation keys while other apps remain focused.
-3. **Screen Recording** — optional, used only for on-device OCR.
+1. **Accessibility** — discover controls, capture navigation keys, and perform pointer actions.
+2. **Screen Recording** — optional, used only for on-device OCR.
+
+Keyboard capture uses Accessibility access; it does not require a separate Input Monitoring setup. The Permissions page reports whether capture is actually running.
 
 Release archives and their SHA-256 checksums are versioned. See [release instructions](docs/RELEASING.md).
 
@@ -181,7 +182,7 @@ python3 scripts/generate-project.py
 scripts/render-docs.sh
 scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
-scripts/release.sh 0.1.0 adhoc
+scripts/release.sh 0.1.1 adhoc
 ```
 
 Open `SprayCan.xcodeproj` in Xcode.
@@ -190,7 +191,7 @@ Open `SprayCan.xcodeproj` in Xcode.
 
 ## Status
 
-Spray Can 0.1.0 is available for macOS 14 and later.
+Spray Can 0.1.1 is available for macOS 14 and later.
 
 The navigation core has been stress-tested with **1,000 rapid activation cycles**, and a native fixture completed **60 element/grid click cycles** without missed clicks or leaked input.
 

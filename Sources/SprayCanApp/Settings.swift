@@ -4,6 +4,7 @@ import SprayCanCore
 
 final class Settings: ObservableObject {
     static let shared = Settings()
+    @Published var glassEnabled = UserDefaults.standard.object(forKey: "glassEnabled") as? Bool ?? true { didSet { save("glassEnabled", glassEnabled) } }
     @Published var vision = UserDefaults.standard.bool(forKey: "vision") { didSet { save("vision", vision) } }
     @Published var allWindows = UserDefaults.standard.bool(forKey: "allWindows") { didSet { save("allWindows", allWindows) } }
     @Published var instantClick = UserDefaults.standard.bool(forKey: "instantClick") { didSet { save("instantClick", instantClick) } }

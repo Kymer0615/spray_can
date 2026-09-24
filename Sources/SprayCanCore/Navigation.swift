@@ -22,6 +22,32 @@ public struct Target: Identifiable, Equatable {
     }
 }
 
+/// Hash collisions must never become identity collisions. Equality determines reuse.
+public struct DiscoveryIdentity<Key: Hashable> {
+    private var ids: [Key: String] = [:]
+    private let namespace: String
+    public init(namespace: String) { self.namespace = namespace }
+    public mutating func id(for key: Key) -> String {
+        if let id = ids[key] { return id }
+        let id = "\(namespace)-\(ids.count)"
+        ids[key] = id
+        return id
+    }
+}
+public enum TargetCollection {
+    public static func unique(_ targets: [Target]) -> [Target] {
+        var seen = Set<String>()
+        return targets.filter { seen.insert($0.id).inserted && $0.frame.minX.isFinite && $0.frame.minY.isFinite && $0.frame.width.isFinite && $0.frame.height.isFinite }
+    }
+    public static func ordered(_ targets: [Target]) -> [Target] {
+        unique(targets).sorted {
+            if $0.frame.minY != $1.frame.minY { return $0.frame.minY < $1.frame.minY }
+            if $0.frame.minX != $1.frame.minX { return $0.frame.minX < $1.frame.minX }
+            return $0.id < $1.id
+        }
+    }
+}
+
 /// Coordinates in the core are always global Quartz points (top-left origin).
 public enum Geometry {
     public static func cocoa(_ rect: CGRect, primaryHeight: CGFloat) -> CGRect {
@@ -57,6 +83,7 @@ public enum Geometry {
 
 public enum HintLabels {
     public static func assign(_ targets: [Target], vi: Bool = false) -> [Target] {
+        let targets = TargetCollection.unique(targets)
         let keys = Array(vi ? "asdfgqwertyuiopzxcvbnm" : "asdfjklghqweruioptyzxcvbnm")
         var length = 1, capacity = keys.count
         while capacity < targets.count { length += 1; capacity *= keys.count }

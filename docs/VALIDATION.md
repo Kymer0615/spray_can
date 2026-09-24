@@ -65,3 +65,28 @@ Documentation images now capture only synthetic windows through ScreenCaptureKit
 ## Adaptive label placement — 2026-09-23
 
 The core suite now has 15 passing tests. New geometry coverage includes vertical/horizontal clusters, coincident targets, corners, translated display origins, fixed grid centers, connector endpoints, deterministic ordering, and best-effort handling of impossible density. Placement is cached for the full target set before prefix filtering. The universal build passed; the native live fixture again completed 30 element and 30 immediate grid click cycles without missed/duplicate clicks or leaked characters. The synthetic cluster image was rendered and visually inspected: vertical controls use side offsets, horizontal controls use above/below offsets, and connector dots identify the original target centers. Physical multi-display and arbitrary third-party dense-control acceptance remain pending.
+
+## Browser and appearance fixes — 2026-09-24
+
+- The crash report from September 23 identified `Dictionary.init(uniqueKeysWithValues:)` in `HintCanvas.layout()` as the fatal duplicate-key trap. Accessibility identity now uses equality-aware, generation-scoped unique IDs instead of `CFHash` values. Defensive deduplication precedes labels/rendering, and discovery sorting is transitive.
+- All 18 core tests passed, including deliberate hash collisions, repeated IDs, and deterministic ordering. The universal app built successfully; a clean staged copy and the installed app passed architecture and ad-hoc signature verification.
+- A disposable Chrome window passed discovery, tab revalidation, AXPress activation, and the selected-state assertion. A later repeat fixture failed to expose its named tab within the scan period; this is recorded rather than treated as a universal Chrome pass. Pinned/reordered/removed tabs, tab close buttons, and obscured/modified-click browser cases still need broader manual acceptance.
+- Bilibili's homepage completed five accessibility discovery/layout cycles with 140 unique targets, then five further cycles with 139 unique targets. On-device OCR returned 198 unique text targets that also completed label assignment/layout. This verifies the previously failing identity/layout path, not every possible page state.
+- The live native fixture passed 30 element and 30 immediate grid click cycles with no missed/duplicate clicks or leaked characters.
+- Synthetic window captures at 40% and 100% background opacity were inspected with glass enabled and disabled. Text remains separate from the faded background. The opacity and glass preferences were read back through fresh Settings instances, and the runner restored the original values afterward. The two-column color controls and glass-off switch were visually inspected. System Reduce Transparency and cross-version appearance still require manual acceptance.
+
+The local app was updated with a backup of the previous bundle. These changes have not been released or published to the Homebrew tap.
+
+## Glass text, keyboard status, and first-entry movement — 2026-09-24
+
+Label letters now render in a transparent AppKit foreground view above the native glass hosting view. Composited captures using the actual HintCanvas in a nonactivating panel show visible letters with glass enabled at 40% and 100% background opacity; the glyph layer never inherits material opacity. Glass-off behavior is retained.
+
+The misleading Input Monitoring permission row and listen-access preflight gate were removed. Keyboard capture reports the actual active event tap, Accessibility state, and Secure Input availability. Accessibility and optional Screen Recording have separate request/open-settings actions. This app uses an active `.defaultTap`, not a passive listen-only tap. Fresh-install/revocation checks across older macOS versions remain manual.
+
+Completing an element label now validates its bounds without requiring click-level hit testing. Actual clicks still revalidate the hit target. A disposable Bilibili window passed 12 cursor-movement checks, each with exactly one label entry and no clicks posted. The full 18-test suite and 60-cycle live keyboard/click harness passed. The universal build and installed app signature verified.
+
+The ignored `build/Test/Spray Can.app` path now links to the installed app in `~/Applications`, avoiding FileProvider metadata that repeatedly invalidated signatures inside the project directory. Previous app copies were preserved outside the repository. No app bundle was staged or committed, and no release was published.
+
+## Glass opacity policy — 2026-09-24
+
+The background-opacity slider is now disabled whenever Use Liquid Glass or Reduce Transparency is enabled. Glass renders at its native material opacity, and opacity shortcuts explain the restriction instead of changing an ineffective saved value. Turning glass off restores the saved opacity for plain backgrounds. This supersedes the earlier attempt to fade native glass through an outer opacity modifier. The universal app build is used to validate this small UI change.

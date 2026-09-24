@@ -7,6 +7,7 @@ import SprayCanCore
 struct SettingsView: View {
     @ObservedObject var controller: AppController
     @ObservedObject private var settings = Settings.shared
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     @State private var permissionRevision = 0
     @State private var loginEnabled = SMAppService.mainApp.status == .enabled
     @State private var loginError = ""
@@ -83,25 +84,35 @@ struct SettingsView: View {
         case "Appearance":
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
             AppearancePreview().frame(height: 100)
-            ForEach(AppearanceColor.allCases, id: \.self) { role in
-                ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)
+            Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
+                ForEach(AppearanceColor.allCases, id: \.self) { role in
+                    ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)
+                        .font(.callout)
+                }
             }
             Button("Restore default colors") { settings.restoreColors() }
             VStack(alignment: .leading) { Text("Label size · \(Int(settings.fontSize)) pt"); Slider(value: $settings.fontSize, in: 10...22, step: 1) }
             VStack(alignment: .leading) { Text("Grid cell size · \(Int(settings.cellSize)) pt"); Slider(value: $settings.cellSize, in: 32...240, step: 4) }
-            VStack(alignment: .leading) { Text("Label tint strength"); Slider(value: $settings.contrast, in: 0.4...1) }
-            Text("Liquid Glass on macOS 26 and later. System materials on macOS 14–15. Labels respect Reduce Transparency; navigation never depends on animation.").font(.caption).foregroundStyle(.secondary)
+            VStack(alignment: .leading) {
+                Text(reduceTransparency ? "Label background opacity · Opaque" : settings.glassEnabled ? "Label background opacity · System managed" : "Label background opacity · \(Int(settings.contrast * 100))%")
+                Slider(value: $settings.contrast, in: 0.4...1).disabled(settings.glassEnabled || reduceTransparency)
+            }
+            if reduceTransparency { Text("Reduce Transparency is enabled in macOS. Label backgrounds stay opaque.").font(.caption).foregroundStyle(.secondary) }
+            else if settings.glassEnabled { Text("Glass appearance is managed by macOS. Turn off Use Liquid Glass to adjust background opacity.").font(.caption).foregroundStyle(.secondary) }
+            Text("Glass uses Liquid Glass on macOS 26+ and system materials on macOS 14–15. Turn it off for plain backgrounds. Reduce Transparency keeps labels opaque.").font(.caption).foregroundStyle(.secondary)
         case "Permissions":
             Text("Only the access needed to navigate.").foregroundStyle(.secondary)
             permission("Accessibility", detail: "Find controls and move, click, drag, and scroll.", granted: controller.accessibilityGranted, action: controller.requestAccessibility)
-            permission("Input Monitoring", detail: "Capture navigation shortcuts without waiting for overlay focus.", granted: controller.keyboardGranted, action: controller.requestKeyboard)
+            LabeledContent("Keyboard capture", value: controller.keyboardReady ? "Ready" : "Not running")
+            Text("Keyboard capture uses Accessibility access. Screen Recording is separate and only needed for OCR.").font(.caption).foregroundStyle(.secondary)
             permission("Screen Recording", detail: "Optional. Find text from an on-demand screenshot.", granted: controller.screenGranted, action: controller.requestScreen)
             Button("Retry keyboard capture") { controller.start() }.buttonStyle(.borderedProminent).tint(.teal)
             Text(controller.status).font(.caption).foregroundStyle(.secondary)
             Text("After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings.").font(.caption).foregroundStyle(.secondary)
         default:
             SprayCanMark().stroke(.teal, style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)).frame(width: 66, height: 88)
-            Text("Spray Can 0.1.0").font(.title2.bold())
+            Text("Spray Can \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "Development")").font(.title2.bold())
             Text("Keyboard-driven navigation, built for your Mac. Free and open source under the MIT License.").foregroundStyle(.secondary)
             Link("Source, releases & documentation ↗", destination: URL(string: "https://github.com/Kymer0615/spray_can")!)
             Link(destination: URL(string: "https://buymeacoffee.com/ziyang")!) {
@@ -121,7 +132,7 @@ struct SettingsView: View {
         case .ocr: return "OCR label tint"
         case .grid: return "Grid lines"
         case .text: return "Label text"
-        case .highlight: return "Matched letters & selection"
+        case .highlight: return "Match & selection"
         }
     }
     private func permission(_ title: String, detail: String, granted: Bool, action: @escaping () -> Void) -> some View {

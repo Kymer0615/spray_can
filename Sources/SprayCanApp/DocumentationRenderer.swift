@@ -12,7 +12,7 @@ enum DocumentationRenderer {
         let directory = ProcessInfo.processInfo.environment["SPRAYCAN_DOCS_DIR"] ?? "docs/images"
         try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
         @discardableResult func save(_ view: NSView, name: String, size: CGSize) -> CGImage? {
-            let window = NSWindow(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless], backing: .buffered, defer: false)
+            let window = OverlayPanel(contentRect: CGRect(origin: .zero, size: size), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
             window.contentView = view; view.frame = CGRect(origin: .zero, size: size)
             window.orderFrontRegardless()
             RunLoop.main.run(until: Date().addingTimeInterval(0.25))
@@ -44,6 +44,29 @@ enum DocumentationRenderer {
                 if let data = bitmap.representation(using: .png, properties: [:]) { try? data.write(to: URL(fileURLWithPath: directory).appendingPathComponent(name)) }
             }
             return captured
+        }
+        if ProcessInfo.processInfo.environment["SPRAYCAN_OPACITY_CHECK_ONLY"] == "1" {
+            let settings = Settings.shared
+            let original = settings.contrast
+            let originalGlass = settings.glassEnabled
+            defer { settings.contrast = original; settings.glassEnabled = originalGlass }
+            for glass in [true, false] {
+              settings.glassEnabled = glass
+              precondition(Settings().glassEnabled == glass, "Glass preference did not persist")
+              for opacity in [0.4, 1.0] {
+                settings.contrast = opacity
+                precondition(Settings().contrast == opacity, "Opacity did not persist")
+                let sample = NSView(frame: CGRect(x: 0, y: 0, width: 300, height: 120))
+                let backdrop = NSHostingView(rootView: LinearGradient(colors: [.blue, .orange], startPoint: .leading, endPoint: .trailing))
+                backdrop.frame = sample.bounds; sample.addSubview(backdrop)
+                let hints = HintCanvas(frame: sample.bounds); hints.primaryHeight = 120
+                hints.targets = [Target(id: "sample", frame: CGRect(x: 145, y: 55, width: 10, height: 10), source: .accessibility, label: "ab")]
+                hints.prefix = "a"; sample.addSubview(hints)
+                save(sample, name: "opacity-\(glass ? "glass" : "plain")-\(Int(opacity * 100)).png", size: CGSize(width: 300, height: 120))
+              }
+            }
+            save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance")), name: "appearance.png", size: CGSize(width: 696, height: 540))
+            return
         }
         save(NSHostingView(rootView: SettingsView(controller: AppController())), name: "settings.png", size: CGSize(width: 696, height: 540))
         save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance")), name: "appearance.png", size: CGSize(width: 696, height: 540))

@@ -8,3 +8,6 @@ xcuserdata/
 *.p12
 *.mobileprovision
 .env
+
+# Local macOS application bundles must never be committed.
+*.app/

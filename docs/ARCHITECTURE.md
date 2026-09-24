@@ -45,3 +45,13 @@ Secure Input and macOS permissions can block input capture. Recovery reports una
 `HintLayout` is a pure geometry helper in the core package. It receives target rectangles and measured badge sizes in display-local coordinates and returns badge frames, unchanged target anchors, and connector endpoints. Candidate positions are constrained to a four-point display inset before scoring overlaps, connector crossings, preferred cluster axis, and distance. Stable IDs break ties. Search is bounded to three badge-sized steps; impossible density retains every target with a best-effort placement.
 
 The overlay receives the full session target set and caches placements by geometry and badge size. Prefix filtering affects visibility only, so surviving hints do not move while typing. Grid hints remain centered, and selection/click coordinates continue to come from the original target. Native glass badges sit above the canvas-drawn connectors and endpoint dots.
+
+## Target identity and browser tabs
+
+Accessibility hashes are used only by equality-aware collections, never as target IDs. Each scan assigns unique IDs scoped to its generation and retains the exact AX element for selection. Duplicate provider IDs are removed defensively before label assignment and rendering. Discovery uses a strict position/ID ordering.
+
+Chrome tab-strip radio buttons inside a tab group can use AXPress for unmodified single left-clicks. Before activation, the tab must remain enabled, visible, and in Chrome's focused foreground window; stale generations are rejected. Close buttons and web-page radio controls do not enter this path. Other mouse actions retain pointer-event delivery. No fallback click is posted after an accessibility action attempt.
+
+The label background is rendered independently of its text. Glyphs are drawn by an AppKit sibling view above the SwiftUI material host, outside the glass container. Background opacity affects only the plain tinted surface; native glass uses system-managed appearance and disables the opacity control and shortcuts. Reduce Transparency overrides opacity with an opaque surface. The status HUD follows the glass preference but not label background opacity.
+
+Keyboard capture uses an active `.defaultTap`; the UI reports actual event-tap readiness instead of interpreting listen-only permission preflight as an independent Input Monitoring requirement. [Apple event-tap documentation](https://developer.apple.com/documentation/coregraphics/cgevent/tapcreate(tap:place:options:eventsofinterest:callback:userinfo:)). Pointer-only selection validates geometry, while activation retains strict hit testing.

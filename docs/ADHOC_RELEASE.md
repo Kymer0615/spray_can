@@ -1,4 +1,4 @@
-This release is **ad-hoc signed and not notarized by Apple**. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust. Enable Accessibility and Input Monitoring for navigation; Screen Recording is optional for on-device OCR.
+This release is **ad-hoc signed and not notarized by Apple**. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust. Enable Accessibility for navigation; Screen Recording is optional for on-device OCR.
 
 Install through Homebrew:
 

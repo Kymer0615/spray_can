@@ -12,6 +12,11 @@ struct CapturedKey {
 
 /// No discovery, rendering, logging of text, or synchronous main-thread work in the callback.
 final class KeyboardCapture {
+    var onReady: (() -> Void)?
+    var isRunning: Bool {
+        lock.lock(); let port = tap; lock.unlock()
+        return port.map { CGEvent.tapIsEnabled(tap: $0) } ?? false
+    }
     var onActivate: ((NavigationMode) -> Void)?
     var onKey: ((CapturedKey) -> Void)?
     var onInterrupted: ((String) -> Void)?
@@ -68,13 +73,15 @@ final class KeyboardCapture {
             guard let ref else { return Unmanaged.passUnretained(event) }
             return Unmanaged<KeyboardCapture>.fromOpaque(ref).takeUnretainedValue().receive(type, event)
         }, userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
-            DispatchQueue.main.async { self.started = false; self.onInterrupted?("Keyboard capture unavailable. Grant Accessibility and Input Monitoring, then retry.") }
+            DispatchQueue.main.async { self.started = false; self.onInterrupted?("Keyboard capture unavailable. Grant Accessibility, then retry.") }
             return
         }
-        tap = port; loop = CFRunLoopGetCurrent()
+        lock.lock(); tap = port; lock.unlock()
+        loop = CFRunLoopGetCurrent()
         let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, port, 0)
         CFRunLoopAddSource(loop, source, .commonModes)
         CGEvent.tapEnable(tap: port, enable: true)
+        DispatchQueue.main.async { self.onReady?() }
         CFRunLoopRun()
     }
     private func receive(_ type: CGEventType, _ event: CGEvent) -> Unmanaged<CGEvent>? {

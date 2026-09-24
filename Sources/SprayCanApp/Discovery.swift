@@ -60,7 +60,68 @@ final class AccessibilityProvider: TargetProvider {
             DispatchQueue.main.async { completion(completed) }
         }
     }
-    func validate(_ element: AXUIElement, within original: CGRect, completion: @escaping (CGRect?) -> Void) {
+    /// Chrome exposes tab-strip tabs as radio buttons inside a tab group.
+    private func tabWindow(_ element: AXUIElement) -> AXUIElement? {
+        var pid: pid_t = 0
+        guard AXUIElementGetPid(element, &pid) == .success,
+              NSRunningApplication(processIdentifier: pid)?.bundleIdentifier?.hasPrefix("com.google.Chrome") == true,
+              ["AXRadioButton", "AXTab"].contains(axValue(element, kAXRoleAttribute) as String? ?? "") else { return nil }
+        var node: AXUIElement? = element
+        var group = false
+        for _ in 0..<20 {
+            guard let current = node else { return nil }
+            let role: String = axValue(current, kAXRoleAttribute) ?? ""
+            if role == "AXWebArea" { return nil }
+            if role == "AXTabGroup" { group = true }
+            if role == kAXWindowRole { return group ? current : nil }
+            node = axValue(current, kAXParentAttribute)
+        }
+        return nil
+    }
+    private func visibleTab(_ element: AXUIElement, frame: CGRect) -> Bool {
+        guard let window = tabWindow(element),
+              !(axValue(element, "AXHidden") as Bool? ?? false),
+              axValue(element, kAXEnabledAttribute) as Bool? ?? true else { return false }
+        var pid: pid_t = 0; AXUIElementGetPid(element, &pid)
+        guard NSWorkspace.shared.frontmostApplication?.processIdentifier == pid,
+              let focused: AXUIElement = axValue(AXUIElementCreateApplication(pid), kAXFocusedWindowAttribute), CFEqual(window, focused),
+              let windowFrame = axFrame(window), windowFrame.contains(CGPoint(x: frame.midX, y: frame.midY)) else { return false }
+        // A tab must still belong to the visible tab strip (including scroll clipping).
+        var node: AXUIElement? = element
+        for _ in 0..<20 {
+            guard let current = node else { return false }
+            if CFEqual(current, window) { break }
+            if axValue(current, "AXHidden") as Bool? == true { return false }
+            if axValue(current, kAXRoleAttribute) as String? == kAXScrollAreaRole,
+               let clip = axFrame(current), !clip.contains(CGPoint(x: frame.midX, y: frame.midY)) { return false }
+            node = axValue(current, kAXParentAttribute)
+        }
+        var hit: AXUIElement?
+        guard AXUIElementCopyElementAtPosition(AXUIElementCreateSystemWide(), Float(frame.midX), Float(frame.midY), &hit) == .success else { return false }
+        // Accept Chrome's container hit-test result only in the same focused window.
+        for _ in 0..<24 {
+            guard let current = hit else { return false }
+            if CFEqual(current, window) { return true }
+            hit = axValue(current, kAXParentAttribute)
+        }
+        return false
+    }
+    /// nil means this isn't an actionable browser tab; false means validation/action failed.
+    func pressTab(_ element: AXUIElement, within original: CGRect, generation: Int, completion: @escaping (Bool?) -> Void) {
+        queue.async {
+            guard self.current(generation) else { DispatchQueue.main.async { completion(false) }; return }
+            guard self.tabWindow(element) != nil else { DispatchQueue.main.async { completion(nil) }; return }
+            var actions: CFArray?
+            AXUIElementCopyActionNames(element, &actions)
+            guard (actions as? [String] ?? []).contains(kAXPressAction) else { DispatchQueue.main.async { completion(nil) }; return }
+            guard let frame = axFrame(element), original.contains(CGPoint(x: frame.midX, y: frame.midY)), self.visibleTab(element, frame: frame), self.current(generation) else {
+                DispatchQueue.main.async { completion(false) }; return
+            }
+            let success = AXUIElementPerformAction(element, kAXPressAction as CFString) == .success
+            DispatchQueue.main.async { completion(success) }
+        }
+    }
+    func validate(_ element: AXUIElement, within original: CGRect, hitTest: Bool = true, completion: @escaping (CGRect?) -> Void) {
         queue.async {
             let enabled: Bool = axValue(element, kAXEnabledAttribute) ?? true
             var frame = enabled ? axFrame(element) : nil
@@ -68,7 +129,11 @@ final class AccessibilityProvider: TargetProvider {
                 // Preserve the visible portion of partially clipped controls; reject relocated targets.
                 let clipped = current.intersection(original)
                 if clipped.isNull || clipped.width < 2 || clipped.height < 2 { frame = nil }
-                else {
+                else if !hitTest {
+                    // Moving the pointer is not an activation. Dynamic browser descendants
+                    // can fail hit testing until hovered; enforce hit testing when clicking.
+                    frame = clipped
+                } else {
                     frame = clipped
                     let system = AXUIElementCreateSystemWide()
                     AXUIElementSetMessagingTimeout(system, 0.06)
@@ -82,7 +147,7 @@ final class AccessibilityProvider: TargetProvider {
                             hit = axValue(node, kAXParentAttribute)
                         }
                     }
-                    if !matches { frame = nil }
+                    if !matches && !self.visibleTab(element, frame: clipped) { frame = nil }
                 }
             }
             DispatchQueue.main.async { completion(frame) }
@@ -107,6 +172,7 @@ final class AccessibilityProvider: TargetProvider {
             return nil
         }
         var seen = Set<AXUIElement>()
+        var identities = DiscoveryIdentity<AXUIElement>(namespace: "ax-\(context.generation)")
         var count = 0
         let actionable: Set<String> = [kAXButtonRole, kAXCheckBoxRole, kAXRadioButtonRole, kAXPopUpButtonRole, kAXMenuButtonRole, kAXMenuItemRole, kAXTextFieldRole, kAXTextAreaRole, kAXSliderRole, kAXIncrementorRole, "AXLink", kAXCellRole, kAXRowRole, "AXTab", "AXDockItem", "AXDisclosureTriangle", "AXHandle"]
         func traverse(_ root: AXUIElement, pid: pid_t, clip: CGRect?, system: Bool, depth: Int = 0) {
@@ -150,7 +216,7 @@ final class AccessibilityProvider: TargetProvider {
                     if !actionable.contains(role) { AXUIElementCopyActionNames(root, &actions) }
                     let names = actions as? [String] ?? []
                     let title = values[5] as? String ?? values[6] as? String ?? ""
-                    let id = "ax-\(pid)-\(CFHash(root))"
+                    let id = identities.id(for: root)
                     let target = Target(id: id, frame: clipped, source: .accessibility, title: title, role: role)
                     if role == kAXScrollAreaRole { result.scrollAreas.append(target) }
                     if actionable.contains(role) || names.contains(kAXPressAction) || names.contains(kAXPickAction) {
@@ -197,10 +263,7 @@ final class AccessibilityProvider: TargetProvider {
                 }
             }
         }
-        result.targets.sort {
-            if abs($0.frame.minY - $1.frame.minY) > 8 { return $0.frame.minY < $1.frame.minY }
-            return $0.frame.minX < $1.frame.minX
-        }
+        result.targets = TargetCollection.ordered(result.targets)
         return result
     }
 }

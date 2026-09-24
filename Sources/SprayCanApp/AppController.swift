@@ -40,6 +40,7 @@ final class AppController: ObservableObject {
                 self.cancel(); self.status = "The target window changed. Activate again to refresh."
             } else { self.scheduleRefresh() }
         }
+        keyboard.onReady = { [weak self] in self?.status = "Ready when you are" }
         keyboard.onActivate = { [weak self] mode in self?.activate(mode) }
         keyboard.onKey = { [weak self] key in self?.handle(key) }
         keyboard.onInterrupted = { [weak self] message in
@@ -61,18 +62,25 @@ final class AppController: ObservableObject {
         observers.append(NotificationCenter.default.addObserver(forName: NSApplication.didChangeScreenParametersNotification, object: nil, queue: .main) { [weak self] _ in self?.cancel(); self?.overlay.rebuild() })
     }
     var accessibilityGranted: Bool { AXIsProcessTrusted() }
-    var keyboardGranted: Bool { CGPreflightListenEventAccess() }
+    var keyboardReady: Bool { accessibilityGranted && keyboard.isRunning && !IsSecureEventInputEnabled() }
     var screenGranted: Bool { CGPreflightScreenCaptureAccess() }
     func start() {
         guard accessibilityGranted else { status = "Grant Accessibility to enable navigation."; return }
         keyboard.configure(settings.shortcuts); shortcutIssues = keyboard.conflicts
-        keyboard.start(); status = "Ready when you are"
+        keyboard.start(); status = keyboardReady ? "Ready when you are" : "Starting keyboard capture…"
     }
     func requestAccessibility() {
         _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
+        if !accessibilityGranted { openPrivacyPane("Privacy_Accessibility") }
     }
-    func requestKeyboard() { _ = CGRequestListenEventAccess() }
-    func requestScreen() { _ = CGRequestScreenCaptureAccess() }
+    private func openPrivacyPane(_ pane: String) {
+        guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?\(pane)"), NSWorkspace.shared.open(url) else {
+            status = "Open System Settings → Privacy & Security to enable access."; return
+        }
+    }
+    func requestScreen() {
+        if !CGRequestScreenCaptureAccess() { openPrivacyPane("Privacy_ScreenCapture") }
+    }
     func activate(_ mode: NavigationMode) {
         guard accessibilityGranted, !IsSecureEventInputEnabled() else {
             keyboard.setActive(false); status = "Navigation unavailable. Check permissions or Secure Input."; openSettings?(); return
@@ -173,7 +181,13 @@ final class AppController: ObservableObject {
         case .toggleLines: settings.showLines.toggle(); render()
         case .toggleLabels: settings.showLabels.toggle(); render()
         case .cellSize(let direction): settings.cellSize = min(240, max(32, settings.cellSize + Double(direction * 12))); rebuildGrid()
-        case .contrast(let direction): settings.contrast = min(1, max(0.4, settings.contrast + Double(direction) * 0.05)); render()
+        case .contrast(let direction):
+            if NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency {
+                status = "Reduce Transparency keeps label backgrounds opaque."
+            } else if settings.glassEnabled {
+                status = "Turn off Use Liquid Glass in Appearance to adjust opacity."
+            } else { settings.contrast = min(1, max(0.4, settings.contrast + Double(direction) * 0.05)) }
+            render()
         default: break
         }
     }
@@ -208,7 +222,7 @@ final class AppController: ObservableObject {
             else { self.drain() }
         }
         if let element = result.elements[target.id], target.source == .accessibility {
-            selecting = true; accessibility.validate(element, within: target.frame, completion: finish)
+            selecting = true; accessibility.validate(element, within: target.frame, hitTest: false, completion: finish)
         } else { finish(target.frame) }
     }
     private func performClick(_ button: Int, modifiers: KeyModifiers, count: Int = 1) {
@@ -227,7 +241,17 @@ final class AppController: ObservableObject {
             }
         }
         if let target = selectedTarget, let element = result.elements[target.id], !mouse.holding {
-            selecting = true; accessibility.validate(element, within: target.frame, completion: click)
+            selecting = true
+            if button == 0 && modifiers.isEmpty && count == 1 {
+                accessibility.pressTab(element, within: target.frame, generation: generation) { [weak self] pressed in
+                    guard let self, self.active, self.session.generation == generation else { return }
+                    if let pressed {
+                        self.selecting = false
+                        if pressed { self.cancel(); self.status = "Ready when you are" }
+                        else { self.deferred = []; self.status = "Tab changed · Activate again to refresh"; self.render() }
+                    } else { self.accessibility.validate(element, within: target.frame, completion: click) }
+                }
+            } else { accessibility.validate(element, within: target.frame, completion: click) }
         } else { click(nil) }
     }
     private func drain() {

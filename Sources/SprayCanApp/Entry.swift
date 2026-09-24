@@ -25,7 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateIcon(); rebuildMenu()
         if ProcessInfo.processInfo.arguments.contains("--render-docs") { DocumentationRenderer.render(); NSApp.terminate(nil); return }
         if ProcessInfo.processInfo.arguments.contains("--diagnose") {
-            print("Accessibility: \(controller.accessibilityGranted); Input Monitoring: \(controller.keyboardGranted); Screen Recording: \(controller.screenGranted)")
+            print("Accessibility: \(controller.accessibilityGranted); Keyboard capture running: \(controller.keyboardReady); Screen Recording: \(controller.screenGranted)")
             NSApp.terminate(nil); return
         }
         if ProcessInfo.processInfo.arguments.contains("--integration-test") {
