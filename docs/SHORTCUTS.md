@@ -31,7 +31,7 @@ Return clicks left; `[` clicks middle; `]` clicks right; `\` double-clicks left.
 
 Esc / ⌘. / ⌃G clear a partial label or queued input; with no prefix they exit. Delete removes a prefix character. ⌘, opens Settings. ⌃= toggles grid lines; ⌃⇧= toggles labels; ⇧⌘= / ⇧⌘− change cell size; ⌘= / ⌘− change background opacity when glass and Reduce Transparency are both off.
 
-Repeated label keys are ignored, while repeated movement and scroll keys are accepted. Input is queued during discovery (up to 32 events). Queue overflow gives visible feedback; Escape clears it.
+When the target window or app changes, Elements and Scroll modes re-scan and show fresh labels; any partial label is cleared. ⌘Tab and ⌘` pass through to macOS, and labels follow the newly focused window once Command is released. Repeated label keys are ignored, while repeated movement and scroll keys are accepted. Input is queued during discovery (up to 32 events). Queue overflow gives visible feedback; Escape clears it.
 
 ## Dedicated scroll mode
 

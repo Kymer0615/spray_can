@@ -76,7 +76,7 @@ struct NavigationHUD: View {
         HStack(spacing: 12) {
             SprayCanMark().stroke(.primary, style: StrokeStyle(lineWidth: 1.5, lineCap: .round, lineJoin: .round)).frame(width: 22, height: 30)
             VStack(alignment: .leading, spacing: 3) {
-                Text("Spray Can · \(mode.title)").font(.system(size: 13, weight: .semibold))
+                Text("Spray Can · \(mode.localizedTitle)").font(.system(size: 13, weight: .semibold))
                 Text(status).font(.system(size: 11)).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
@@ -189,6 +189,7 @@ final class HintCanvas: NSView {
     private var placed: [PlacedHint] = []
     private var layoutItems: [HintLayoutItem] = []
     private var layoutBounds = CGRect.zero
+    private var layoutStyle = HintPlacementStyle.centered
     private var placements: [HintPlacement] = []
     private var appearanceChanges: AnyCancellable?
     private var accessibilityChanges: NSObjectProtocol?
@@ -235,9 +236,10 @@ final class HintCanvas: NSView {
             let size = (target.label.uppercased() as NSString).size(withAttributes: [.font: font])
             return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6), fixed: target.source == .grid)
         }
-        if items != layoutItems || bounds != layoutBounds {
-            layoutItems = items; layoutBounds = bounds
-            placements = HintLayout.place(items, in: bounds)
+        let style = settings.hintStyle
+        if items != layoutItems || bounds != layoutBounds || style != layoutStyle {
+            layoutItems = items; layoutBounds = bounds; layoutStyle = style
+            placements = HintLayout.place(items, in: bounds, style: style)
         }
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in

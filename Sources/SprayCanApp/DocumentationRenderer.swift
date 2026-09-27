@@ -114,20 +114,20 @@ private struct DemoDesktop: View {
         ZStack {
             LinearGradient(colors: [Color(red: 0.07, green: 0.24, blue: 0.28), Color(red: 0.15, green: 0.47, blue: 0.49), Color(red: 0.60, green: 0.74, blue: 0.69)], startPoint: .topLeading, endPoint: .bottomTrailing)
             VStack(spacing: 0) {
-                HStack { Image(systemName: "apple.logo"); Text("Finder").bold(); Text("File   Edit   View   Go   Window   Help"); Spacer(); Text("Spray Can demo") }.font(.system(size: 13)).padding(.horizontal, 20).frame(height: 28).background(.ultraThinMaterial)
+                HStack { Image(systemName: "apple.logo"); Text(verbatim: "Finder").bold(); Text(verbatim: "File   Edit   View   Go   Window   Help"); Spacer(); Text(verbatim: "Spray Can demo") }.font(.system(size: 13)).padding(.horizontal, 20).frame(height: 28).background(.ultraThinMaterial)
                 HStack(spacing: 0) {
                     VStack(alignment: .leading, spacing: 22) {
-                        Text("FAVORITES").font(.caption).foregroundStyle(.secondary)
-                        Label("Recents", systemImage: "clock")
-                        Label("Documents", systemImage: "doc")
-                        Label("Downloads", systemImage: "arrow.down.circle")
+                        Text(verbatim: "FAVORITES").font(.caption).foregroundStyle(.secondary)
+                        Label(String("Recents"), systemImage: "clock")
+                        Label(String("Documents"), systemImage: "doc")
+                        Label(String("Downloads"), systemImage: "arrow.down.circle")
                         Spacer()
                     }.padding(24).frame(width: 205).background(.thinMaterial)
                     VStack(alignment: .leading, spacing: 35) {
-                        HStack { Text("Documents").font(.title2.bold()); Spacer(); Label("Search", systemImage: "magnifyingglass").foregroundStyle(.secondary).frame(width: 200, alignment: .leading).padding(8).background(.quaternary, in: RoundedRectangle(cornerRadius: 8)) }
+                        HStack { Text(verbatim: "Documents").font(.title2.bold()); Spacer(); Label(String("Search"), systemImage: "magnifyingglass").foregroundStyle(.secondary).frame(width: 200, alignment: .leading).padding(8).background(.quaternary, in: RoundedRectangle(cornerRadius: 8)) }
                         HStack(spacing: 45) { folder("Projects"); folder("Research"); folder("Personal") }
                         Spacer()
-                        Text("Example workspace · No personal files shown").font(.caption).foregroundStyle(.secondary)
+                        Text(verbatim: "Example workspace · No personal files shown").font(.caption).foregroundStyle(.secondary)
                     }.padding(30).frame(maxWidth: .infinity).background(Color(nsColor: .windowBackgroundColor))
                 }.frame(height: 460).clipShape(RoundedRectangle(cornerRadius: 14)).shadow(color: .black.opacity(0.2), radius: 25, y: 15).padding(40)
                 Spacer()

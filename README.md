@@ -14,6 +14,10 @@
 </p>
 
 <p align="center">
+  🌐 <strong>English</strong> · <a href="README.zh-Hans.md">简体中文</a> · <a href="README.zh-Hant.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a>
+</p>
+
+<p align="center">
   <a href="https://buymeacoffee.com/ziyang">
     <img src="docs/images/buymeacoffee.png" width="36" alt="Buy me a coffee"><br>
     Support Spray Can
@@ -64,7 +68,11 @@ Keyboard input is captured independently of the overlay, so typing can begin imm
 
 Before clicking, accessible targets are revalidated to reduce stale-target errors.
 
+Labels follow your focus. When the target window changes — switching tabs, opening a window, moving or resizing it, or moving to another app with ⌘Tab or a click — Spray Can searches again and shows fresh labels. A partly typed label is cleared, and an in-progress drag is cancelled rather than dropped somewhere unexpected. Grid and Freestyle modes cover whole screens, so they are unaffected.
+
 ## Clear labels, even in dense interfaces
+
+Labels sit **beside** their element by default, so they never hide what you are about to click. Choose left, right, above, below, or on the element in **Appearance**, and fine-tune the placement with horizontal and vertical offsets.
 
 Crowded labels automatically shift around nearby controls instead of simply overlapping them. Connector lines show exactly which target each displaced label belongs to.
 
@@ -100,12 +108,16 @@ You can customize:
 
 - navigation shortcuts
 - target scope
-- OCR
+- OCR and its recognition languages
 - vi bindings
+- label position and offsets
 - label size
 - grid spacing
 - background opacity
 - label, OCR, grid, text, and selection colors
+- the interface language
+
+Spray Can's interface is available in English, 简体中文, 繁體中文, 日本語, 한국어, and Español. It follows your Mac's language by default; choose another in **General → Language** and restart Spray Can when prompted.
 
 ![Appearance customization](docs/images/appearance.png)
 
@@ -130,7 +142,7 @@ Ordinary uninstall preserves preferences. If you installed manually, quit Spray 
 
 Alternatively, download the universal ZIP from [Releases](https://github.com/Kymer0615/spray_can/releases), extract it, and move **Spray Can.app** into Applications.
 
-Release 0.1.1 is **ad-hoc signed and not notarized**. If macOS blocks a build you trust:
+Release 0.1.2 is **ad-hoc signed and not notarized**. If macOS blocks a build you trust:
 
 **System Settings → Privacy & Security → Open Anyway**
 
@@ -153,6 +165,12 @@ Spray Can is designed to work locally.
 - no analytics
 - no cloud inference
 - no account or subscription required
+
+## OCR languages
+
+OCR can read **several languages at the same time**. In **General → Text recognition languages**, select any languages that Apple Vision supports on your Mac and put them in order. Text in every selected language is labelled in the same scan, so an English toolbar, a Chinese document, and a Japanese menu can all be reached together.
+
+Languages that share a writing system, such as English, French, and Spanish, are recognized together. Each additional writing system, such as Chinese, Japanese, or Korean, adds a recognition pass on the same screenshot, so scans take a little longer. By default Spray Can selects your Mac's preferred languages plus English.
 
 ## OCR limitations
 
@@ -182,16 +200,20 @@ python3 scripts/generate-project.py
 scripts/render-docs.sh
 scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
-scripts/release.sh 0.1.1 adhoc
+swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
+python3 scripts/check-localizations.py
+scripts/release.sh 0.1.2 adhoc
 ```
 
 Open `SprayCan.xcodeproj` in Xcode.
 
-`SprayCanCore` contains the session state machine, label generation, geometry, and shortcut mappings. `Sources/SprayCanApp` contains the app UI, event capture, discovery providers, mouse driver, and overlays.
+Interface translations live in `Resources/<language>.lproj/Localizable.strings`; English keys are the source text. `scripts/check-localizations.py` checks that every language has every key and matching placeholders.
+
+`SprayCanCore` contains the session state machine, label generation and placement, OCR language grouping, refresh rules, geometry, and shortcut mappings. `Sources/SprayCanApp` contains the app UI, event capture, discovery providers, mouse driver, and overlays.
 
 ## Status
 
-Spray Can 0.1.1 is available for macOS 14 and later.
+Spray Can 0.1.2 is available for macOS 14 and later.
 
 The navigation core has been stress-tested with **1,000 rapid activation cycles**, and a native fixture completed **60 element/grid click cycles** without missed clicks or leaked input.
 

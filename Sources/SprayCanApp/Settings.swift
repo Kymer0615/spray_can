@@ -12,6 +12,27 @@ final class Settings: ObservableObject {
     @Published var cellSize = UserDefaults.standard.object(forKey: "cellSize") as? Double ?? 100 { didSet { save("cellSize", cellSize) } }
     @Published var fontSize = UserDefaults.standard.object(forKey: "fontSize") as? Double ?? 13 { didSet { save("fontSize", fontSize) } }
     @Published var contrast = UserDefaults.standard.object(forKey: "contrast") as? Double ?? 0.85 { didSet { save("contrast", contrast) } }
+    /// Ordered Vision language codes; every selected script is recognized in the same scan.
+    @Published var ocrLanguages: [String] = OCRLanguages.normalized(
+        UserDefaults.standard.stringArray(forKey: "ocrLanguages")
+            ?? OCRLanguages.defaultSelection(preferred: Locale.preferredLanguages, supported: OCRProvider.supportedLanguages),
+        supported: OCRProvider.supportedLanguages
+    ) { didSet { save("ocrLanguages", ocrLanguages) } }
+    /// Interface language chosen in Settings; nil follows macOS. Applies after relaunch.
+    @Published var appLanguage: String? = AppLanguage.saved { didSet { AppLanguage.save(appLanguage) } }
+    /// The choice in effect for this launch; a different selection needs a relaunch.
+    let launchLanguage = AppLanguage.saved
+    /// Labels sit beside their element by default so they never hide it.
+    @Published var hintPosition = HintPosition(rawValue: UserDefaults.standard.string(forKey: "hintPosition") ?? "") ?? .leading {
+        didSet { save("hintPosition", hintPosition.rawValue) }
+    }
+    @Published var hintOffsetX = UserDefaults.standard.object(forKey: "hintOffsetX") as? Double ?? 0 { didSet { save("hintOffsetX", hintOffsetX) } }
+    @Published var hintOffsetY = UserDefaults.standard.object(forKey: "hintOffsetY") as? Double ?? 0 { didSet { save("hintOffsetY", hintOffsetY) } }
+    /// Overlay views use bottom-left-origin coordinates.
+    var hintStyle: HintPlacementStyle {
+        HintPlacementStyle(position: hintPosition, offset: CGSize(width: hintOffsetX, height: hintOffsetY), yAxisUp: true)
+    }
+    func restoreHintPlacement() { hintPosition = .leading; hintOffsetX = 0; hintOffsetY = 0 }
     @Published var showLines = true
     @Published var showLabels = true
     @Published var shortcuts: [NavigationMode: Shortcut] = {
@@ -36,6 +57,42 @@ final class Settings: ObservableObject {
     private func save(_ key: String, _ value: Any) { UserDefaults.standard.set(value, forKey: key) }
 }
 
+/// Interface languages shipped in the app bundle, named in their own language.
+enum AppLanguage {
+    static let options: [(code: String, name: String)] = [
+        ("en", "English"), ("zh-Hans", "简体中文"), ("zh-Hant", "繁體中文"), ("ja", "日本語"), ("ko", "한국어"), ("es", "Español")
+    ]
+    /// Only Spray Can's own domain is read or written, never the global language list.
+    static var saved: String? {
+        let domain = UserDefaults.standard.persistentDomain(forName: Bundle.main.bundleIdentifier ?? "") ?? [:]
+        return (domain["AppleLanguages"] as? [String])?.first.flatMap { code in options.first { $0.code == code }?.code }
+    }
+    static func save(_ code: String?) {
+        if let code { UserDefaults.standard.set([code], forKey: "AppleLanguages") }
+        else { UserDefaults.standard.removeObject(forKey: "AppleLanguages") }
+    }
+    /// The localization macOS chose for this launch.
+    static var current: String { Bundle.main.preferredLocalizations.first ?? "en" }
+    static func relaunch() {
+        let configuration = NSWorkspace.OpenConfiguration()
+        configuration.createsNewApplicationInstance = true
+        NSWorkspace.shared.openApplication(at: Bundle.main.bundleURL, configuration: configuration) { _, error in
+            if error == nil { DispatchQueue.main.async { NSApp.terminate(nil) } }
+        }
+    }
+}
+
+extension NavigationMode {
+    var localizedTitle: String {
+        switch self {
+        case .elements: return String(localized: "Elements")
+        case .grid: return String(localized: "Grid")
+        case .freestyle: return String(localized: "Freestyle")
+        case .scroll: return String(localized: "Scroll")
+        }
+    }
+}
+
 extension KeyModifiers {
     init(_ flags: CGEventFlags) {
         var value: Self = []
@@ -57,5 +114,5 @@ extension KeyModifiers {
 let physicalKeys: [UInt16: String] = [0:"a",1:"s",2:"d",3:"f",4:"h",5:"g",6:"z",7:"x",8:"c",9:"v",11:"b",12:"q",13:"w",14:"e",15:"r",16:"y",17:"t",18:"1",19:"2",20:"3",21:"4",22:"6",23:"5",24:"=",25:"9",26:"7",27:"-",28:"8",29:"0",30:"]",31:"o",32:"u",33:"[",34:"i",35:"p",37:"l",38:"j",39:"'",40:"k",41:";",42:"\\",43:",",44:"/",45:"n",46:"m",47:"."]
 
 func shortcutTitle(_ shortcut: Shortcut) -> String {
-    shortcut.modifiers.symbols + (physicalKeys[shortcut.keyCode]?.uppercased() ?? "Key \(shortcut.keyCode)")
+    shortcut.modifiers.symbols + (physicalKeys[shortcut.keyCode]?.uppercased() ?? String(localized: "Key \(shortcut.keyCode)"))
 }

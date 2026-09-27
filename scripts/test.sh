@@ -5,3 +5,4 @@ if [[ -z "${DEVELOPER_DIR:-}" && "$(xcode-select -p)" == */CommandLineTools && -
   export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 fi
 swift test --build-system native
+python3 scripts/check-localizations.py

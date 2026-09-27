@@ -16,16 +16,22 @@ for path in sorted((root / 'Sources/SprayCanApp').glob('*.swift')):
     builds.append(obj('build'+rel, f'isa = PBXBuildFile; fileRef = {ref};'))
 assets = obj('assets', 'isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Resources/Assets.xcassets; sourceTree = "<group>";')
 assetbuild = obj('assetbuild', f'isa = PBXBuildFile; fileRef = {assets};')
+# Interface translations: one Localizable.strings per Resources/<language>.lproj.
+languages = sorted(p.parent.stem for p in (root / 'Resources').glob('*.lproj/Localizable.strings'))
+languages = ['en'] + [l for l in languages if l != 'en']
+strings = [obj('strings-'+l, f'isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "{l}"; path = "{l}.lproj/Localizable.strings"; sourceTree = "<group>";') for l in languages]
+variant = obj('localizable', f'isa = PBXVariantGroup; children = ({",".join(strings)},); name = Localizable.strings; path = Resources; sourceTree = "<group>";')
+variantbuild = obj('localizablebuild', f'isa = PBXBuildFile; fileRef = {variant};')
 product = obj('app', 'isa = PBXFileReference; explicitFileType = wrapper.application; path = "Spray Can.app"; sourceTree = BUILT_PRODUCTS_DIR;')
 package = obj('package', 'isa = XCLocalSwiftPackageReference; relativePath = .;')
 core = obj('core', f'isa = XCSwiftPackageProductDependency; package = {package}; productName = SprayCanCore;')
 corebuild = obj('corebuild', f'isa = PBXBuildFile; productRef = {core};')
 sources = obj('sources', f'isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ({",".join(builds)},); runOnlyForDeploymentPostprocessing = 0;')
-resources = obj('resources', f'isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ({assetbuild},); runOnlyForDeploymentPostprocessing = 0;')
+resources = obj('resources', f'isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ({assetbuild},{variantbuild},); runOnlyForDeploymentPostprocessing = 0;')
 frameworks = obj('frameworks', f'isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = ({corebuild},); runOnlyForDeploymentPostprocessing = 0;')
 products = obj('products', f'isa = PBXGroup; children = ({product},); name = Products; sourceTree = "<group>";')
-group = obj('group', f'isa = PBXGroup; children = ({",".join(refs+[assets,products])},); sourceTree = "<group>";')
-common = '''SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES;'''
+group = obj('group', f'isa = PBXGroup; children = ({",".join(refs+[assets,variant,products])},); sourceTree = "<group>";')
+common = '''SWIFT_EMIT_LOC_STRINGS = YES; SDKROOT = macosx; MACOSX_DEPLOYMENT_TARGET = 14.0; SWIFT_VERSION = 5.0; CLANG_ENABLE_MODULES = YES;'''
 app_settings = '''PRODUCT_NAME = "Spray Can"; EXECUTABLE_NAME = SprayCan; PRODUCT_BUNDLE_IDENTIFIER = io.github.Kymer0615.SprayCan; INFOPLIST_FILE = Resources/Info.plist; GENERATE_INFOPLIST_FILE = NO; CODE_SIGN_ENTITLEMENTS = Resources/SprayCan.entitlements; CODE_SIGN_STYLE = Manual; CODE_SIGN_IDENTITY = "-"; ENABLE_HARDENED_RUNTIME = YES; ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; COMBINE_HIDPI_IMAGES = YES; LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";'''
 for owner in ['project', 'target']:
     configs = []
@@ -34,7 +40,7 @@ for owner in ['project', 'target']:
         configs.append(obj(owner+config, f'isa = XCBuildConfiguration; buildSettings = {{ {common} {app_settings if owner=="target" else ""} {options} }}; name = {config};'))
     obj(owner+'configs', f'isa = XCConfigurationList; buildConfigurations = ({",".join(configs)},); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release;')
 target = obj('target', f'isa = PBXNativeTarget; buildConfigurationList = {uid("targetconfigs")}; buildPhases = ({sources},{frameworks},{resources},); buildRules = (); dependencies = (); name = SprayCan; packageProductDependencies = ({core},); productName = "Spray Can"; productReference = {product}; productType = "com.apple.product-type.application";')
-project = obj('project', f'isa = PBXProject; attributes = {{ LastUpgradeCheck = 2600; }}; buildConfigurationList = {uid("projectconfigs")}; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en,Base); mainGroup = {group}; productRefGroup = {products}; projectDirPath = ""; projectRoot = ""; packageReferences = ({package},); targets = ({target},);')
+project = obj('project', f'isa = PBXProject; attributes = {{ LastUpgradeCheck = 2600; }}; buildConfigurationList = {uid("projectconfigs")}; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = ({",".join(f'"{l}"' for l in dict.fromkeys(['en','Base']+languages))}); mainGroup = {group}; productRefGroup = {products}; projectDirPath = ""; projectRoot = ""; packageReferences = ({package},); targets = ({target},);')
 (root/'SprayCan.xcodeproj/project.pbxproj').write_text('// !$*UTF8*$!\n{ archiveVersion = 1; classes = {}; objectVersion = 56; objects = {\n'+'\n'.join(objects)+f'\n}}; rootObject = {project}; }}\n')
 (root/'SprayCan.xcodeproj/xcshareddata/xcschemes/SprayCan.xcscheme').write_text(f'''<?xml version="1.0" encoding="UTF-8"?>
 <Scheme LastUpgradeVersion="2600" version="1.3">

@@ -19,7 +19,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        item.button?.toolTip = "Spray Can — keyboard navigation"
+        item.button?.toolTip = String(localized: "Spray Can — keyboard navigation")
         controller.stateChanged = { [weak self] in self?.updateIcon(); self?.rebuildMenu() }
         controller.openSettings = { [weak self] in self?.showSettings() }
         updateIcon(); rebuildMenu()
@@ -55,19 +55,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let title = NSMenuItem(title: "Spray Can", action: nil, keyEquivalent: ""); title.isEnabled = false; menu.addItem(title)
         let status = NSMenuItem(title: controller.status, action: nil, keyEquivalent: ""); status.isEnabled = false; menu.addItem(status)
         for mode in NavigationMode.allCases {
-            let entry = NSMenuItem(title: "\(mode.title)  \(shortcutTitle(controller.settings.shortcuts[mode]!))", action: #selector(startMode(_:)), keyEquivalent: "")
+            let entry = NSMenuItem(title: "\(mode.localizedTitle)  \(shortcutTitle(controller.settings.shortcuts[mode]!))", action: #selector(startMode(_:)), keyEquivalent: "")
             entry.representedObject = mode.rawValue; entry.target = self; menu.addItem(entry)
         }
         menu.addItem(.separator())
-        let preferences = NSMenuItem(title: "Settings…", action: #selector(settingsAction), keyEquivalent: ","); preferences.target = self; menu.addItem(preferences)
-        let help = NSMenuItem(title: "Help & Shortcuts", action: #selector(helpAction), keyEquivalent: ""); help.target = self; menu.addItem(help)
-        let quit = NSMenuItem(title: "Quit Spray Can", action: #selector(quitAction), keyEquivalent: "q"); quit.target = self; menu.addItem(quit)
+        let preferences = NSMenuItem(title: String(localized: "Settings…"), action: #selector(settingsAction), keyEquivalent: ","); preferences.target = self; menu.addItem(preferences)
+        let help = NSMenuItem(title: String(localized: "Help & Shortcuts"), action: #selector(helpAction), keyEquivalent: ""); help.target = self; menu.addItem(help)
+        let quit = NSMenuItem(title: String(localized: "Quit Spray Can"), action: #selector(quitAction), keyEquivalent: "q"); quit.target = self; menu.addItem(quit)
         item.menu = menu
     }
     func menuWillOpen(_ menu: NSMenu) {
         menu.item(at: 1)?.title = controller.status
         for (index, mode) in NavigationMode.allCases.enumerated() {
-            menu.item(at: index + 2)?.title = "\(mode.title)  \(shortcutTitle(controller.settings.shortcuts[mode]!))"
+            menu.item(at: index + 2)?.title = "\(mode.localizedTitle)  \(shortcutTitle(controller.settings.shortcuts[mode]!))"
         }
     }
     @objc private func startMode(_ sender: NSMenuItem) {
@@ -75,7 +75,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { self.controller.activate(mode) }
     }
     @objc private func settingsAction() { showSettings() }
-    @objc private func helpAction() { NSWorkspace.shared.open(URL(string: "https://github.com/Kymer0615/spray_can#shortcuts")!) }
+    @objc private func helpAction() { NSWorkspace.shared.open(URL(string: "https://github.com/Kymer0615/spray_can/blob/main/docs/SHORTCUTS.md")!) }
     @objc private func quitAction() { NSApp.terminate(nil) }
     func showSettings() {
         controller.cancel()

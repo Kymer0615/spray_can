@@ -61,4 +61,46 @@ final class HintLayoutTests: XCTestCase {
         XCTAssertEqual(result, HintLayout.place(items, in: small))
         XCTAssertTrue(result.allSatisfy { small.insetBy(dx: 4, dy: 4).contains($0.frame) })
     }
+    func testLabelsBesideElementsDoNotCoverThem() {
+        let buttons = (0..<4).map { HintLayoutItem(id: "\($0)", target: CGRect(x: 200 + Double($0) * 70, y: 180, width: 40, height: 24), size: CGSize(width: 28, height: 20)) }
+        for position in HintPosition.allCases where position != .center {
+            for yAxisUp in [true, false] {
+                let result = HintLayout.place(buttons, in: bounds, style: HintPlacementStyle(position: position, yAxisUp: yAxisUp))
+                assertClear(result, in: bounds)
+                for hint in result {
+                    let target = buttons.first { $0.id == hint.id }!.target
+                    XCTAssertTrue(hint.frame.intersection(target).isNull || hint.frame.intersection(target).width * hint.frame.intersection(target).height == 0, "\(position) covers its element")
+                    XCTAssertFalse(hint.displaced, "Uncrowded labels stay at their preferred spot")
+                }
+            }
+        }
+    }
+    func testPositionsAndOffsetsUseScreenDirections() {
+        let target = CGRect(x: 100, y: 100, width: 40, height: 20), size = CGSize(width: 20, height: 10)
+        let up = HintPlacementStyle(position: .above, yAxisUp: true).frame(for: target, size: size)
+        XCTAssertEqual(up.minY, target.maxY + HintPlacementStyle.gap)
+        let down = HintPlacementStyle(position: .above, yAxisUp: false).frame(for: target, size: size)
+        XCTAssertEqual(down.maxY, target.minY - HintPlacementStyle.gap)
+        XCTAssertEqual(HintPlacementStyle(position: .leading).frame(for: target, size: size).maxX, target.minX - HintPlacementStyle.gap)
+        XCTAssertEqual(HintPlacementStyle(position: .trailing).frame(for: target, size: size).minX, target.maxX + HintPlacementStyle.gap)
+        // Positive offsets move right and down on screen in either coordinate space.
+        let base = HintPlacementStyle(position: .leading).frame(for: target, size: size)
+        let moved = HintPlacementStyle(position: .leading, offset: CGSize(width: 5, height: 7)).frame(for: target, size: size)
+        XCTAssertEqual(moved.minX - base.minX, 5); XCTAssertEqual(moved.minY - base.minY, -7)
+        let flipped = HintPlacementStyle(position: .leading, offset: CGSize(width: 5, height: 7), yAxisUp: false).frame(for: target, size: size)
+        XCTAssertEqual(flipped.minY - base.minY, 7)
+        XCTAssertEqual(HintPlacementStyle.centered.frame(for: target, size: size).midX, target.midX)
+    }
+    func testLabelsAtTheScreenEdgeMoveOffTheirElement() {
+        let edge = HintLayoutItem(id: "edge", target: CGRect(x: 4, y: 180, width: 60, height: 24), size: CGSize(width: 28, height: 20))
+        let hint = HintLayout.place([edge], in: bounds, style: HintPlacementStyle(position: .leading))[0]
+        XCTAssertTrue(bounds.insetBy(dx: 4, dy: 4).contains(hint.frame))
+        let cover = hint.frame.intersection(edge.target.insetBy(dx: 2, dy: 2))
+        XCTAssertTrue(cover.isNull || cover.width * cover.height == 0)
+    }
+    func testGridLabelsStayCenteredInTheirCells() {
+        let cell = HintLayoutItem(id: "cell", target: CGRect(x: 100, y: 100, width: 80, height: 80), size: CGSize(width: 28, height: 20), fixed: true)
+        let hint = HintLayout.place([cell], in: bounds, style: HintPlacementStyle(position: .leading, offset: CGSize(width: 9, height: 9)))[0]
+        XCTAssertEqual(hint.frame.midX, cell.target.midX); XCTAssertEqual(hint.frame.midY, cell.target.midY)
+    }
 }

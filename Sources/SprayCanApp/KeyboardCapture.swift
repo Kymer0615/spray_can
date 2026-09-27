@@ -20,6 +20,11 @@ final class KeyboardCapture {
     var onActivate: ((NavigationMode) -> Void)?
     var onKey: ((CapturedKey) -> Void)?
     var onInterrupted: ((String) -> Void)?
+    /// ⌘Tab or ⌘` passed through to macOS during a session.
+    var onAppSwitchStarted: (() -> Void)?
+    /// Command was released after an app switch, whether or not focus moved.
+    var onAppSwitchEnded: (() -> Void)?
+    private var switching = false
     private let lock = NSLock()
     private var active = false
     private var activationModifiers = ActivationModifiers()
@@ -39,7 +44,7 @@ final class KeyboardCapture {
         var seen: [Shortcut] = []
         for (index, mode) in NavigationMode.allCases.enumerated() {
             guard let shortcut = bindings[mode] else { continue }
-            guard !seen.contains(shortcut) else { conflicts.append("\(mode.title): duplicate shortcut"); blocked.insert(mode); continue }
+            guard !seen.contains(shortcut) else { conflicts.append(String(localized: "\(mode.localizedTitle): duplicate shortcut")); blocked.insert(mode); continue }
             seen.append(shortcut)
             var carbon: UInt32 = 0
             if shortcut.modifiers.contains(.shift) { carbon |= UInt32(shiftKey) }
@@ -49,7 +54,7 @@ final class KeyboardCapture {
             var ref: EventHotKeyRef?
             let status = RegisterEventHotKey(UInt32(shortcut.keyCode), carbon, EventHotKeyID(signature: 0x53505259, id: UInt32(index + 1)), GetApplicationEventTarget(), 0, &ref)
             if status == noErr, let ref { hotKeys.append(ref) }
-            else { conflicts.append("\(mode.title): \(shortcutTitle(shortcut)) is already registered"); blocked.insert(mode) }
+            else { conflicts.append(String(localized: "\(mode.localizedTitle): \(shortcutTitle(shortcut)) is already registered")); blocked.insert(mode) }
         }
         lock.lock(); shortcuts = bindings; disabledModes = blocked; lock.unlock()
     }
@@ -63,7 +68,7 @@ final class KeyboardCapture {
             guard let self else { return }
             if IsSecureEventInputEnabled() {
                 self.setActive(false)
-                self.onInterrupted?("Secure Input is enabled by another app. Disable it there to resume navigation.")
+                self.onInterrupted?(String(localized: "Secure Input is enabled by another app. Disable it there to resume navigation."))
             }
         }
     }
@@ -73,7 +78,7 @@ final class KeyboardCapture {
             guard let ref else { return Unmanaged.passUnretained(event) }
             return Unmanaged<KeyboardCapture>.fromOpaque(ref).takeUnretainedValue().receive(type, event)
         }, userInfo: Unmanaged.passUnretained(self).toOpaque()) else {
-            DispatchQueue.main.async { self.started = false; self.onInterrupted?("Keyboard capture unavailable. Grant Accessibility, then retry.") }
+            DispatchQueue.main.async { self.started = false; self.onInterrupted?(String(localized: "Keyboard capture unavailable. Grant Accessibility, then retry.")) }
             return
         }
         lock.lock(); tap = port; lock.unlock()
@@ -88,7 +93,7 @@ final class KeyboardCapture {
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
             if let tap { CGEvent.tapEnable(tap: tap, enable: true) }
             setActive(false)
-            DispatchQueue.main.async { self.onInterrupted?("Keyboard capture recovered. Start navigation again.") }
+            DispatchQueue.main.async { self.onInterrupted?(String(localized: "Keyboard capture recovered. Start navigation again.")) }
             return Unmanaged.passUnretained(event)
         }
         let code = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
@@ -96,7 +101,13 @@ final class KeyboardCapture {
         lock.lock()
         defer { lock.unlock() }
         activationModifiers.observe(modifiers)
-        if type == .flagsChanged { return Unmanaged.passUnretained(event) }
+        if type == .flagsChanged {
+            if switching && !modifiers.contains(.command) {
+                switching = false
+                DispatchQueue.main.async { self.onAppSwitchEnded?() }
+            }
+            return Unmanaged.passUnretained(event)
+        }
         if type == .keyUp {
             if consumed.remove(code) != nil { return nil }
             return Unmanaged.passUnretained(event)
@@ -116,8 +127,8 @@ final class KeyboardCapture {
         guard active else { return Unmanaged.passUnretained(event) }
         // System app switching must stay available, even during a navigation session.
         if !inheritedLabel && ((code == 48 && modifiers.contains(.command)) || (code == 12 && modifiers.contains(.command))) {
-            active = false
-            DispatchQueue.main.async { self.onInterrupted?("") }
+            active = false; switching = true
+            DispatchQueue.main.async { self.onAppSwitchStarted?() }
             return Unmanaged.passUnretained(event)
         }
         consumed.insert(code)

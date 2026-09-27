@@ -270,10 +270,41 @@ final class AccessibilityProvider: TargetProvider {
 
 final class OCRProvider {
     private var task: Task<Void, Never>?
+    /// Languages this Mac's Vision revision can read, in Apple's order.
+    static let supportedLanguages: [String] = {
+        let request = VNRecognizeTextRequest()
+        request.revision = VNRecognizeTextRequestRevision3
+        request.recognitionLevel = .accurate
+        return (try? request.supportedRecognitionLanguages()) ?? [OCRLanguages.fallback]
+    }()
+    /// Runs one request per language pass on the same image and keeps the most
+    /// confident reading where passes overlap. Rects are normalized to the image.
+    static func recognize(_ image: CGImage, languages: [String]) throws -> [OCRText] {
+        var passes: [[OCRText]] = []
+        for pass in OCRLanguages.passes(selected: languages, supported: supportedLanguages) {
+            let request = VNRecognizeTextRequest()
+            request.revision = VNRecognizeTextRequestRevision3
+            request.recognitionLevel = .accurate
+            request.usesLanguageCorrection = false
+            request.recognitionLanguages = pass
+            do { try VNImageRequestHandler(cgImage: image).perform([request]) }
+            catch {
+                // Fall back to the pass's primary language if Vision rejects the combination.
+                guard pass.count > 1 else { continue }
+                request.recognitionLanguages = [pass[0]]
+                try VNImageRequestHandler(cgImage: image).perform([request])
+            }
+            passes.append((request.results ?? []).compactMap { observation in
+                guard let text = observation.topCandidates(1).first else { return nil }
+                return OCRText(frame: observation.boundingBox, text: text.string, confidence: text.confidence)
+            })
+        }
+        return OCRLanguages.merge(passes)
+    }
     func cancel() { task?.cancel(); task = nil }
-    func discover(screens: [CGRect], regions: [CGRect], completion: @escaping ([Target], String?) -> Void) {
+    func discover(screens: [CGRect], regions: [CGRect], languages: [String], completion: @escaping ([Target], String?) -> Void) {
         cancel()
-        guard CGPreflightScreenCaptureAccess() else { completion([], "Enable Screen Recording to use text targeting."); return }
+        guard CGPreflightScreenCaptureAccess() else { completion([], String(localized: "Enable Screen Recording to use text targeting.")); return }
         task = Task {
             do {
                 let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
@@ -288,19 +319,16 @@ final class OCRProvider {
                     // OCR at native logical resolution keeps processing bounded on Retina displays.
                     config.width = Int(bounds.width); config.height = Int(bounds.height); config.showsCursor = false
                     let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
-                    let request = VNRecognizeTextRequest()
-                    request.recognitionLevel = .accurate
-                    request.usesLanguageCorrection = false
-                    try VNImageRequestHandler(cgImage: image).perform([request])
+                    let recognized = try Self.recognize(image, languages: languages)
                     try Task.checkCancellation()
-                    for (index, observation) in (request.results ?? []).enumerated() {
-                        guard let text = observation.topCandidates(1).first, text.confidence >= 0.65 else { continue }
-                        let b = observation.boundingBox
+                    for (index, text) in recognized.enumerated() {
+                        guard text.confidence >= 0.65 else { continue }
+                        let b = text.frame
                         let rect = CGRect(x: bounds.minX + b.minX * bounds.width,
                                           y: bounds.minY + (1 - b.maxY) * bounds.height,
                                           width: b.width * bounds.width, height: b.height * bounds.height)
                         guard regions.contains(where: { $0.contains(CGPoint(x: rect.midX, y: rect.midY)) }) else { continue }
-                        targets.append(Target(id: "text-\(display.displayID)-\(index)", frame: rect, source: .text, title: text.string))
+                        targets.append(Target(id: "text-\(display.displayID)-\(index)", frame: rect, source: .text, title: text.text))
                     }
                 }
                 let output = targets
@@ -308,40 +336,51 @@ final class OCRProvider {
             } catch is CancellationError {
                 return
             } catch {
-                await MainActor.run { completion([], "Text targeting unavailable. Accessibility and grid navigation still work.") }
+                await MainActor.run { completion([], String(localized: "Text targeting unavailable. Accessibility and grid navigation still work.")) }
             }
         }
     }
 }
 
 /// Observe only the active target app; no global accessibility mutation.
+/// Per-window notifications follow focus, so a newly focused window is watched too.
 final class AccessibilityChanges {
     private var observer: AXObserver?
-    var changed: (() -> Void)?
+    private var app: AXUIElement?
+    private var window: AXUIElement?
+    private static let windowNotifications = [kAXMovedNotification, kAXResizedNotification, kAXUIElementDestroyedNotification, kAXTitleChangedNotification]
+    var changed: ((RefreshTrigger) -> Void)?
     func stop() {
         if let observer { CFRunLoopRemoveSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(observer), .commonModes) }
-        observer = nil
+        observer = nil; app = nil; window = nil
     }
     func start(pid: pid_t) {
         stop()
         var newObserver: AXObserver?
-        guard AXObserverCreate(pid, { _, _, _, context in
+        guard AXObserverCreate(pid, { _, _, notification, context in
             guard let context else { return }
-            Unmanaged<AccessibilityChanges>.fromOpaque(context).takeUnretainedValue().changed?()
+            Unmanaged<AccessibilityChanges>.fromOpaque(context).takeUnretainedValue().received(notification as String)
         }, &newObserver) == .success, let newObserver else { return }
         observer = newObserver
         let app = AXUIElementCreateApplication(pid)
+        self.app = app
         AXUIElementSetMessagingTimeout(app, 0.06)
-        let context = Unmanaged.passUnretained(self).toOpaque()
-        for notification in [kAXFocusedWindowChangedNotification, kAXWindowCreatedNotification, kAXMenuOpenedNotification] {
+        for notification in [kAXFocusedWindowChangedNotification, kAXMainWindowChangedNotification, kAXWindowCreatedNotification, kAXMenuOpenedNotification] {
             AXObserverAddNotification(newObserver, app, notification as CFString, context)
         }
-        if let window: AXUIElement = axValue(app, kAXFocusedWindowAttribute) {
-            for notification in [kAXMovedNotification, kAXResizedNotification, kAXUIElementDestroyedNotification] {
-                AXObserverAddNotification(newObserver, window, notification as CFString, context)
-            }
-        }
+        watchFocusedWindow()
         CFRunLoopAddSource(CFRunLoopGetMain(), AXObserverGetRunLoopSource(newObserver), .commonModes)
+    }
+    private var context: UnsafeMutableRawPointer { Unmanaged.passUnretained(self).toOpaque() }
+    private func watchFocusedWindow() {
+        guard let observer, let app else { return }
+        if let window { for notification in Self.windowNotifications { AXObserverRemoveNotification(observer, window, notification as CFString) } }
+        window = axValue(app, kAXFocusedWindowAttribute)
+        if let window { for notification in Self.windowNotifications { AXObserverAddNotification(observer, window, notification as CFString, context) } }
+    }
+    private func received(_ notification: String) {
+        if notification == kAXFocusedWindowChangedNotification || notification == kAXMainWindowChangedNotification { watchFocusedWindow() }
+        changed?(notification == kAXTitleChangedNotification ? .title : .structural)
     }
     deinit { stop() }
 }

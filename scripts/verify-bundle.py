@@ -11,5 +11,9 @@ architectures = set(subprocess.check_output(['/usr/bin/lipo', '-archs', str(bina
 assert {'arm64', 'x86_64'} <= architectures, f'Missing architectures: {architectures}'
 assert info['LSMinimumSystemVersion'] == '14.0'
 assert info['CFBundleIdentifier'] == 'io.github.Kymer0615.SprayCan'
+resources = app / 'Contents/Resources'
+localizations = sorted(p.stem for p in resources.glob('*.lproj') if (p / 'Localizable.strings').exists())
+expected = {'en', 'es', 'ja', 'ko', 'zh-Hans', 'zh-Hant'}
+assert expected <= set(localizations), f'Missing localizations: {expected - set(localizations)}'
 subprocess.run(['codesign', '--verify', '--deep', '--strict', str(app)], check=True)
-print('Bundle verified: arm64 + x86_64, macOS 14+, signature intact.')
+print(f'Bundle verified: arm64 + x86_64, macOS 14+, localizations {", ".join(localizations)}, signature intact.')
