@@ -103,14 +103,21 @@ final class HintLayoutTests: XCTestCase {
         let hint = HintLayout.place([cell], in: bounds, style: HintPlacementStyle(position: .leading, offset: CGSize(width: 9, height: 9)))[0]
         XCTAssertEqual(hint.frame.midX, cell.target.midX); XCTAssertEqual(hint.frame.midY, cell.target.midY)
     }
+    /// Items on a square lattice, filled row by row.
+    private func lattice(_ prefix: String, count: Int, columns: Int, x: Double, y: Double, pitch: Double) -> [HintLayoutItem] {
+        (0..<count).map { (index: Int) -> HintLayoutItem in
+            let column = Double(index % columns), row = Double(index / columns)
+            return item("\(prefix)\(index)", x + column * pitch, y + row * pitch)
+        }
+    }
     private func crossings(_ placements: [HintPlacement]) -> Int {
         placements.reduce(0) { $0 + HintLayout.conflicts($1, placements) }
     }
     func testConnectorsDoNotCrossInClusters() {
         let clusters: [[HintLayoutItem]] = [
-            (0..<6).map { item("v\($0)", 200, 150 + Double($0) * 10) },
-            (0..<6).map { item("h\($0)", 150 + Double($0) * 12, 200) },
-            (0..<9).map { item("g\($0)", 200 + Double($0 % 3) * 12, 180 + Double($0 / 3) * 12) },
+            lattice("v", count: 6, columns: 1, x: 200, y: 150, pitch: 10),
+            lattice("h", count: 6, columns: 6, x: 150, y: 200, pitch: 12),
+            lattice("g", count: 9, columns: 3, x: 200, y: 180, pitch: 12),
         ]
         for items in clusters {
             for style in [HintPlacementStyle.centered, HintPlacementStyle(position: .leading)] {
@@ -130,8 +137,8 @@ final class HintLayoutTests: XCTestCase {
         }
     }
     func testNeighborsGetDistinctColors() {
-        let cluster = (0..<8).map { item("c\($0)", 200 + Double($0 % 4) * 14, 200 + Double($0 / 4) * 14) }
-        let spread = (0..<4).map { item("s\($0)", 40 + Double($0) * 150, 360) }
+        let cluster = lattice("c", count: 8, columns: 4, x: 200, y: 200, pitch: 14)
+        let spread = lattice("s", count: 4, columns: 4, x: 40, y: 360, pitch: 150)
         let placements = HintLayout.place(cluster + spread, in: bounds, style: HintPlacementStyle(position: .leading))
         let colors = HintLayout.colorGroups(placements)
         XCTAssertEqual(Set(cluster.compactMap { colors[$0.id] }).count, 8)

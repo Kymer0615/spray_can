@@ -117,9 +117,15 @@ public enum HintLayout {
             }
             // Try candidates nearest first, and only compare against labels that can interact:
             // a connector never leaves the box spanning its label and element.
-            let candidates = frames.map(constrain).enumerated().map { ($0.offset, $0.element, hypot($0.element.midX - home.x, $0.element.midY - home.y)) }
-                .sorted { $0.2 != $1.2 ? $0.2 < $1.2 : $0.0 < $1.0 }
-            let region = candidates.reduce(t) { $0.union($1.1) }.insetBy(dx: -4, dy: -4)
+            var candidates: [(rank: Int, frame: CGRect, distance: CGFloat)] = []
+            var region = t
+            for (rank, raw) in frames.enumerated() {
+                let frame = constrain(raw)
+                candidates.append((rank, frame, hypot(frame.midX - home.x, frame.midY - home.y)))
+                region = region.union(frame)
+            }
+            candidates.sort { a, b in a.distance != b.distance ? a.distance < b.distance : a.rank < b.rank }
+            region = region.insetBy(dx: -4, dy: -4)
             let placed = placed.filter { $0.id != item.id && $0.frame.union($0.target).intersects(region) }
             let reserved = reserved.filter { $0.intersects(region) }
             let others = elements.filter { $0.0 != item.id && $0.1.intersects(region) }.map(\.1)
@@ -128,16 +134,19 @@ public enum HintLayout {
             var bestScore: [Double] = []
             for (rank, frame, distance) in candidates {
                 // Cost is at least the distance, so no farther candidate can beat a clear best.
-                if let first = bestScore.first, first == 0, bestScore[1] == 0, bestScore[2] < distance { break }
+                if let first = bestScore.first, first == 0, bestScore[1] == 0, bestScore[2] < Double(distance) { break }
                 let candidate = HintPlacement(id: item.id, frame: frame, anchor: anchor, home: home, target: t)
-                let collisions = placed.reduce(0.0) { $0 + overlap(frame, $1.frame) } + reserved.reduce(0.0) { $0 + overlap(frame, $1) }
+                let labelCollisions: Double = placed.reduce(0.0) { $0 + overlap(frame, $1.frame) }
+                let collisions: Double = labelCollisions + reserved.reduce(0.0) { $0 + overlap(frame, $1) }
                 let crossings = Double(conflicts(candidate, placed))
                 var cost = 0.0
                 if style.position != .center {
-                    cost += area(frame, own) * 2 + others.reduce(0.0) { $0 + area(frame, $1) } * 0.3
+                    let covered: Double = others.reduce(0.0) { $0 + area(frame, $1) }
+                    cost += area(frame, own) * 2 + covered * 0.3
                 }
                 // Short displacements are cheap; beyond a few label heights they are strongly discouraged.
-                cost += distance + max(0, distance - reach * (h + 4)) * 6
+                let travel = Double(distance), limit = Double(reach * (h + 4))
+                cost += travel + max(0, travel - limit) * 6
                 let score = [collisions, crossings, cost, Double(rank)]
                 if best == nil || score.lexicographicallyPrecedes(bestScore) { best = candidate; bestScore = score }
             }
