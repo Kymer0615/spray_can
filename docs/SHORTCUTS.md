@@ -29,6 +29,8 @@ Global bindings take precedence over local bindings. In vi mode, the default ⌃
 
 Return clicks left; `[` clicks middle; `]` clicks right; `\` double-clicks left. Modifiers pass through to click events. **⇧Return is Shift-click, not double-click**. Space or `=` holds left; the labels stay, so typing another label drags there, and Space, `=`, or Return releases it. A held drag glides to each destination in small steps, because some apps (including the macOS screenshot tool, ⇧⌘4) ignore a drag that jumps. Escape after clearing any prefix, ⌘H, mode reactivation, and session interruptions release a held button.
 
+With **Let macOS shortcuts work during navigation** on (the default, in General), ⌘ and ⌃ shortcuts that Spray Can has no binding for — ⌘C, ⌘V, ⌘W, ⌘Space, ⌃Space, and so on — go to macOS and the app while labels are shown. Spray Can's own bindings below still win, and plain, Shift, and ⌥ keys never pass through. Turn the setting off to have Spray Can capture every key during navigation.
+
 Esc / ⌘. / ⌃G clear a partial label or queued input; with no prefix they exit. Delete removes a prefix character. ⌘, opens Settings. ⌃= toggles grid lines; ⌃⇧= toggles labels; ⇧⌘= / ⇧⌘− change cell size; ⌘= / ⌘− change background opacity when glass and Reduce Transparency are both off.
 
 When the target window or app changes, Elements and Scroll modes re-scan and show fresh labels; any partial label is cleared. ⌘Tab and ⌘` pass through to macOS, and labels follow the newly focused window once Command is released. Repeated label keys are ignored, while repeated movement and scroll keys are accepted. Input is queued during discovery (up to 32 events). Queue overflow gives visible feedback; Escape clears it.
@@ -44,6 +46,6 @@ When the target window or app changes, Elements and Scroll modes re-scan and sho
 | Next / previous scroll area | Tab / ⇧Tab |
 | Exit | Esc / ⌃[ |
 
-Top/bottom use large pixel scroll events; virtualized/infinite lists may require repeated commands. J always scrolls down and K up, whether or not natural scrolling is on; the same holds for the scroll shortcuts in the other modes.
+Top/bottom use large pixel scroll events; virtualized/infinite lists may require repeated commands. Scrolling glides smoothly, and holding a key scrolls continuously. While an area is active the pointer waits at its bottom-right corner, off the content (macOS sends scroll events wherever the pointer is), and returns to where it was when scroll mode ends. J always scrolls down and K up, whether or not natural scrolling is on; the same holds for the scroll shortcuts in the other modes.
 
 Apps that expose no accessibility scroll areas, such as VS Code and other Electron apps, scroll whatever is under the pointer: point at the editor, terminal, or sidebar first (with element labels or the grid), then activate scroll mode. If the pointer is outside the window, Tab moves it to the app's content area.

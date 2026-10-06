@@ -63,6 +63,7 @@
 "Language" = "言語";
 "Launch at login" = "ログイン時に起動";
 "Left of the element" = "要素の左";
+"Let macOS shortcuts work during navigation" = "ナビゲーション中も macOS のショートカットを使う";
 "Match & selection" = "一致と選択";
 "MIT License · © 2026 Spray Can contributors" = "MIT License · © 2026 Spray Can contributors";
 "More languages" = "その他の言語";
@@ -141,3 +142,4 @@
 "Window changed · " = "ウインドウが変わりました · ";
 "Your keyboard, everywhere." = "キーボードで、どこへでも。";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   要素のラベルを表示\nラベルを入力   ポインタを移動\nReturn   クリック\nEsc   入力をクリアし、次に終了";
+"⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can が使わない ⌘ と ⌃ のショートカット（コピー、ペースト、ウインドウを閉じる、Spotlight など）は macOS や App に渡されます。";

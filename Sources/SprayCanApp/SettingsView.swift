@@ -55,6 +55,8 @@ struct SettingsView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     Toggle("Click as soon as a label is complete", isOn: $settings.instantClick)
                     Text("By default, labels move the pointer. Return clicks.").font(.caption).foregroundStyle(.secondary)
+                    Toggle("Let macOS shortcuts work during navigation", isOn: $settings.passSystemShortcuts)
+                    Text("⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps.").font(.caption).foregroundStyle(.secondary)
                     Toggle("Include all visible windows", isOn: $settings.allWindows)
                     Toggle("Use on-device text recognition", isOn: $settings.vision)
                     Text("Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)

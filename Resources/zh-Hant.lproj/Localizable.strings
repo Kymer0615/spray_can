@@ -63,6 +63,7 @@
 "Language" = "語言";
 "Launch at login" = "登入時啟動";
 "Left of the element" = "元素左側";
+"Let macOS shortcuts work during navigation" = "導覽時允許使用 macOS 快速鍵";
 "Match & selection" = "符合與選取";
 "MIT License · © 2026 Spray Can contributors" = "MIT License · © 2026 Spray Can 貢獻者";
 "More languages" = "更多語言";
@@ -141,3 +142,4 @@
 "Window changed · " = "視窗已變更 · ";
 "Your keyboard, everywhere." = "你的鍵盤，無所不及。";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   顯示元素標籤\n輸入標籤   移動指標\nReturn   點按\nEsc   清除前綴，再次按下則結束";
+"⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can 未使用的 ⌘ 和 ⌃ 快速鍵（拷貝、貼上、關閉視窗、Spotlight 等）會交給 macOS 和 App。";

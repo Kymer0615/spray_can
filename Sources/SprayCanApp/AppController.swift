@@ -31,6 +31,8 @@ final class AppController: ObservableObject {
     /// Scroll mode in an app without accessible scroll areas (VS Code, other Electron apps):
     /// scroll wherever the pointer is until Tab moves it to a content area.
     private var scrollUnderPointer = false
+    /// Where the pointer was before scroll mode moved it; put back when the session ends.
+    private var pointerBeforeScroll: CGPoint?
     private var previousG = false
     private var centerIndex = 0
     private var subscriptions = Set<AnyCancellable>()
@@ -63,6 +65,9 @@ final class AppController: ObservableObject {
             } else { self.cancel() }
         }
         keyboard.onAppSwitchEnded = { [weak self] in self?.resumeFollow(after: 0.15) }
+        settings.$passSystemShortcuts.combineLatest(settings.$vi).sink { [weak self] pass, vi in
+            self?.keyboard.setKeyRules(passThrough: pass, vi: vi)
+        }.store(in: &subscriptions)
         settings.$shortcuts.dropFirst().debounce(for: .milliseconds(150), scheduler: RunLoop.main).sink { [weak self] bindings in
             self?.keyboard.configure(bindings); self?.shortcutIssues = self?.keyboard.conflicts ?? []
         }.store(in: &subscriptions)
@@ -104,6 +109,8 @@ final class AppController: ObservableObject {
             keyboard.setActive(false); status = String(localized: "Navigation unavailable. Check permissions or Secure Input."); openSettings?(); return
         }
         refreshWork?.cancel(); ocr.cancel(); accessibilityChanges.stop(); mouse.release(); mouse.resetPosition(); deferred = []; selecting = false; selectedTarget = nil; selectedFrame = nil
+        // Leaving or refreshing scroll mode: put the pointer back before anything else uses it.
+        if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
         clearFollow(); windowChanged = false
         targetPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
         guard targetPID != getpid(), targetPID != 0 else { keyboard.setActive(false); status = String(localized: "Switch to another app, then activate navigation."); return }
@@ -165,6 +172,7 @@ final class AppController: ObservableObject {
         refreshWork?.cancel(); ocr.cancel(); accessibilityChanges.stop(); session.cancel(); accessibility.invalidate(session.generation)
         deferred = []; selecting = false; active = false; selectedTarget = nil; selectedFrame = nil
         mouse.release(); mouse.resetPosition(); keyboard.setActive(false); overlay.hide(); stateChanged?()
+        if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
     }
     private func frontWindow(of pid: pid_t) -> CGRect? {
         let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
@@ -364,7 +372,12 @@ final class AppController: ObservableObject {
         guard !result.scrollAreas.isEmpty else { return }
         if scrollUnderPointer { selectedFrame = nil; render(); return }
         let target = result.scrollAreas[scrollIndex % result.scrollAreas.count]
-        selectedFrame = target.frame; mouse.move(to: target.point); render()
+        // Wheel events go wherever the pointer is, so it must be inside the area; a corner
+        // near the scroll bar keeps it off the content being read.
+        if pointerBeforeScroll == nil { pointerBeforeScroll = mouse.point }
+        let frame = target.frame
+        let corner = CGPoint(x: frame.maxX - min(16, frame.width / 2), y: frame.maxY - min(16, frame.height / 2))
+        selectedFrame = frame; mouse.move(to: corner); render()
     }
     private func handleScroll(_ key: CapturedKey) {
         if key.text == "[" && key.modifiers == .control { cancel(); return }
@@ -388,8 +401,8 @@ final class AppController: ObservableObject {
         case "d": mouse.scroll(x: 0, y: Int(frame.height / 2))
         case "u": mouse.scroll(x: 0, y: -Int(frame.height / 2))
         case "g":
-            if half { mouse.scroll(x: 0, y: 100000) }
-            else if previousG { mouse.scroll(x: 0, y: -100000) }
+            if half { mouse.scroll(x: 0, y: 100000, instant: true) }
+            else if previousG { mouse.scroll(x: 0, y: -100000, instant: true) }
             else { previousG = true; return }
         default: break
         }

@@ -1,5 +1,20 @@
 # Changelog
 
+## Spray Can 0.1.10
+
+- Smooth scrolling: each scroll step glides in eased increments over about 150 ms instead of jumping, and holding a key scrolls continuously. Top/bottom jumps (gg / G) stay instant.
+- Scroll mode no longer puts the pointer in the middle of the window. macOS delivers scroll events wherever the pointer is, so it now waits at the active area's bottom-right corner and returns to where it was when scroll mode ends.
+- Use macOS shortcuts during navigation: ⌘ and ⌃ shortcuts Spray Can doesn't use (copy, paste, close window, Spotlight, input source) now reach macOS and apps while labels are shown. Turn it off in General → Let macOS shortcuts work during navigation.
+
+Validation: 48 core tests (including eased scroll steps and which shortcuts pass through) and a localization check passed. In a native scroll view, one J moved through 16 positions over 155 ms to exactly 55 pt, and a held J scrolled continuously. Pass-through and the pointer corner were not exercised live through the keyboard capture; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.9
 
 - Color schemes for color coding: Vivid (default), Pastel, Color-blind safe (Okabe–Ito based), Bold, and Neon. Each scheme's eight colors are chosen for large perceptual distances, and badge text switches between black and white for contrast.

@@ -54,6 +54,7 @@ final class MouseDriver {
     }
     /// Releases immediately (cancellation); a glide in progress jumps to its end first.
     func release() {
+        cancelScroll()
         clickGeneration += 1
         pendingRelease?(); pendingRelease = nil
         dragTimer?.invalidate(); dragTimer = nil
@@ -89,7 +90,24 @@ final class MouseDriver {
     }
     /// Positive `y` scrolls down (reveals content below), positive `x` scrolls right, whatever the
     /// natural-scrolling setting; it is read on every scroll so a change applies immediately.
-    func scroll(x: Int, y: Int) {
+    /// Scrolls smoothly: the distance is added to what is still pending and sent in eased steps at
+    /// 120 Hz, so held keys glide continuously. `instant` sends it as one event (top and bottom jumps).
+    func scroll(x: Int, y: Int, instant: Bool = false) {
+        if instant { cancelScroll(); postScroll(x: x, y: y); return }
+        pendingScroll.x += Double(x); pendingScroll.y += Double(y)
+        guard scrollTimer == nil else { return }
+        scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 120, repeats: true) { [weak self] _ in self?.stepScroll() }
+    }
+    func cancelScroll() { scrollTimer?.invalidate(); scrollTimer = nil; pendingScroll = (0, 0) }
+    private var pendingScroll: (x: Double, y: Double) = (0, 0)
+    private var scrollTimer: Timer?
+    private func stepScroll() {
+        let x = ScrollAnimation.next(remaining: pendingScroll.x), y = ScrollAnimation.next(remaining: pendingScroll.y)
+        pendingScroll = (x.remaining, y.remaining)
+        if x.step == 0 && y.step == 0 { cancelScroll(); return }
+        postScroll(x: x.step, y: y.step)
+    }
+    private func postScroll(x: Int, y: Int) {
         let natural = UserDefaults.standard.object(forKey: "com.apple.swipescrolldirection") as? Bool ?? true
         let wheel = ScrollDirection.wheelDeltas(x: x, y: y, natural: natural)
         CGEvent(scrollWheelEvent2Source: source, units: .pixel, wheelCount: 2, wheel1: wheel.vertical, wheel2: wheel.horizontal, wheel3: 0)?.post(tap: .cghidEventTap)

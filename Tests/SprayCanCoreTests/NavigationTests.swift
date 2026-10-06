@@ -150,4 +150,35 @@ final class NavigationTests: XCTestCase {
         XCTAssertTrue(ScrollDirection.wheelDeltas(x: 40, y: -30, natural: true) == (-30, 40))
         XCTAssertTrue(ScrollDirection.wheelDeltas(x: 0, y: 100_000_000_000, natural: true).vertical == Int32.max)
     }
+    func testScrollAnimationEasesToAnExactTotal() {
+        for total in [55.0, -55.0, 300.0, 1.0, -3.0] {
+            var remaining = total, steps: [Int] = []
+            while abs(remaining) >= 1 { let next = ScrollAnimation.next(remaining: remaining); steps.append(next.step); remaining = next.remaining }
+            XCTAssertEqual(steps.reduce(0, +), Int(total), "\(total)")
+            XCTAssertTrue(steps.allSatisfy { $0 != 0 && ($0 > 0) == (total > 0) }, "\(total)")
+            XCTAssertTrue(zip(steps, steps.dropFirst()).allSatisfy { abs($0) >= abs($1) }, "steps ease out: \(steps)")
+            if abs(total) == 55 { XCTAssertGreaterThan(steps.count, 5); XCTAssertLessThanOrEqual(steps.count, 25) }
+        }
+        // A new request mid-animation adds to what is left.
+        let first = ScrollAnimation.next(remaining: 55)
+        XCTAssertEqual(ScrollAnimation.next(remaining: first.remaining + 55).remaining + Double(ScrollAnimation.next(remaining: first.remaining + 55).step), first.remaining + 55)
+        XCTAssertEqual(ScrollAnimation.next(remaining: 0.6).step, 0)
+    }
+    func testUnusedSystemShortcutsPassThrough() {
+        func passes(_ code: UInt16, _ text: String, _ m: KeyModifiers, vi: Bool = false) -> Bool { KeyMap.passesThrough(code: code, text: text, modifiers: m, vi: vi) }
+        XCTAssertTrue(passes(8, "c", .command))          // copy
+        XCTAssertTrue(passes(9, "v", .command))          // paste
+        XCTAssertTrue(passes(13, "w", .command))         // close window
+        XCTAssertTrue(passes(49, "", .command))          // Spotlight
+        XCTAssertTrue(passes(49, "", .control))          // input source
+        XCTAssertFalse(passes(4, "h", .command))         // Spray Can: hide
+        XCTAssertFalse(passes(43, ",", .command))        // Spray Can: settings
+        XCTAssertFalse(passes(24, "=", .command))        // Spray Can: opacity
+        XCTAssertFalse(passes(123, "", .command))        // Spray Can: screen edge
+        XCTAssertFalse(passes(0, "a", .control))         // Emacs: line start
+        XCTAssertFalse(passes(3, "f", .control, vi: true)) // vi: scroll
+        XCTAssertFalse(passes(38, "j", []))               // label
+        XCTAssertFalse(passes(11, "b", .option))          // movement / typing
+        XCTAssertFalse(passes(33, "[", .control))         // scroll mode exit
+    }
 }

@@ -63,6 +63,7 @@
 "Language" = "언어";
 "Launch at login" = "로그인 시 실행";
 "Left of the element" = "요소 왼쪽";
+"Let macOS shortcuts work during navigation" = "탐색 중에도 macOS 단축키 사용";
 "Match & selection" = "일치 및 선택";
 "MIT License · © 2026 Spray Can contributors" = "MIT License · © 2026 Spray Can 기여자";
 "More languages" = "추가 언어";
@@ -141,3 +142,4 @@
 "Window changed · " = "윈도우 변경됨 · ";
 "Your keyboard, everywhere." = "어디서나, 키보드로.";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   요소 레이블 표시\n레이블 입력   포인터 이동\nReturn   클릭\nEsc   입력 지우기, 이어서 종료";
+"⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can이 쓰지 않는 ⌘ 및 ⌃ 단축키(복사, 붙여넣기, 윈도우 닫기, Spotlight 등)는 macOS와 앱으로 전달됩니다.";

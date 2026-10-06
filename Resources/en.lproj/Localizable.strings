@@ -63,6 +63,7 @@
 "Language" = "Language";
 "Launch at login" = "Launch at login";
 "Left of the element" = "Left of the element";
+"Let macOS shortcuts work during navigation" = "Let macOS shortcuts work during navigation";
 "Match & selection" = "Match & selection";
 "MIT License · © 2026 Spray Can contributors" = "MIT License · © 2026 Spray Can contributors";
 "More languages" = "More languages";
@@ -141,3 +142,4 @@
 "Window changed · " = "Window changed · ";
 "Your keyboard, everywhere." = "Your keyboard, everywhere.";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit";
+"⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps.";

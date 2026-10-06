@@ -63,6 +63,7 @@
 "Language" = "语言";
 "Launch at login" = "登录时启动";
 "Left of the element" = "元素左侧";
+"Let macOS shortcuts work during navigation" = "导航时允许使用 macOS 快捷键";
 "Match & selection" = "匹配与选中";
 "MIT License · © 2026 Spray Can contributors" = "MIT License · © 2026 Spray Can 贡献者";
 "More languages" = "更多语言";
@@ -141,3 +142,4 @@
 "Window changed · " = "窗口已变化 · ";
 "Your keyboard, everywhere." = "键盘，无处不达。";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   显示元素标签\n输入标签   移动指针\nReturn   点按\nEsc   先清除前缀，再退出";
+"⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can 未使用的 ⌘ 和 ⌃ 快捷键（拷贝、粘贴、关闭窗口、聚焦搜索等）会交给 macOS 和应用。";

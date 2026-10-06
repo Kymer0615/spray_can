@@ -33,6 +33,8 @@ final class Settings: ObservableObject {
         HintPlacementStyle(position: hintPosition, offset: CGSize(width: hintOffsetX, height: hintOffsetY), yAxisUp: true)
     }
     func restoreHintPlacement() { hintPosition = .leading; hintOffsetX = 0; hintOffsetY = 0 }
+    /// Let ⌘ and ⌃ shortcuts Spray Can doesn't use reach macOS and apps during navigation.
+    @Published var passSystemShortcuts = Settings.flag("passSystemShortcuts", true) { didSet { save("passSystemShortcuts", passSystemShortcuts) } }
     /// Skip OCR text that an element label already covers.
     @Published var dedupeOCR = Settings.flag("dedupeOCR", true) { didSet { save("dedupeOCR", dedupeOCR) } }
     /// Draw each element label, its connector, and a box around its element in a shared color.
@@ -48,12 +50,14 @@ final class Settings: ObservableObject {
     var palette: [NSColor] { colorScheme.hexes.map(Settings.color(hex:)) }
     static func color(hex: String) -> NSColor {
         let rgb = UInt32(hex, radix: 16) ?? 0
-        return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
+        let red = Double((rgb >> 16) & 255) / 255, green = Double((rgb >> 8) & 255) / 255, blue = Double(rgb & 255) / 255
+        return NSColor(srgbRed: red, green: green, blue: blue, alpha: 1)
     }
     /// Black or white label text, whichever reads better on a color-coded badge.
     static func textColor(on color: NSColor) -> NSColor {
         guard let rgb = color.usingColorSpace(.sRGB) else { return .white }
-        let luminance = 0.2126 * rgb.redComponent + 0.7152 * rgb.greenComponent + 0.0722 * rgb.blueComponent
+        let red: CGFloat = 0.2126 * rgb.redComponent, green: CGFloat = 0.7152 * rgb.greenComponent, blue: CGFloat = 0.0722 * rgb.blueComponent
+        let luminance: CGFloat = red + green + blue
         return luminance > 0.55 ? NSColor(white: 0.08, alpha: 1) : .white
     }
     @Published var showLines = true
@@ -70,7 +74,8 @@ final class Settings: ObservableObject {
     func nsColor(_ role: AppearanceColor) -> NSColor {
         let hex = role.validated(colors[role.rawValue])
         let rgb = UInt32(hex, radix: 16)!
-        return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
+        let red = Double((rgb >> 16) & 255) / 255, green = Double((rgb >> 8) & 255) / 255, blue = Double(rgb & 255) / 255
+        return NSColor(srgbRed: red, green: green, blue: blue, alpha: 1)
     }
     func setColor(_ color: Color, for role: AppearanceColor) {
         guard let rgb = NSColor(color).usingColorSpace(.sRGB) else { return }

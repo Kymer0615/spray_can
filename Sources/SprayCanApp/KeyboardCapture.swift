@@ -34,6 +34,10 @@ final class KeyboardCapture {
     private var loop: CFRunLoop?
     private var hotKeys: [EventHotKeyRef] = []
     private var disabledModes = Set<NavigationMode>()
+    /// Let unbound ⌘/⌃ shortcuts through during navigation; vi changes which ⌃ keys are bound.
+    private var passThrough = true
+    private var vi = false
+    func setKeyRules(passThrough: Bool, vi: Bool) { lock.lock(); self.passThrough = passThrough; self.vi = vi; lock.unlock() }
     private var started = false
     private var watchdog: Timer?
     private(set) var conflicts: [String] = []
@@ -131,11 +135,15 @@ final class KeyboardCapture {
             DispatchQueue.main.async { self.onAppSwitchStarted?() }
             return Unmanaged.passUnretained(event)
         }
-        consumed.insert(code)
         // Explicit physical Latin labels work with IMEs without switching the system input source.
         var text = physicalKeys[code] ?? ""
         if modifiers.contains(.shift) && code == 43 { text = "<" }
         if modifiers.contains(.shift) && code == 47 { text = ">" }
+        // macOS and app shortcuts Spray Can doesn't use (copy, Spotlight, …) keep working.
+        if passThrough && KeyMap.passesThrough(code: code, text: text, modifiers: activationModifiers.labelModifiers(modifiers), vi: vi) {
+            return Unmanaged.passUnretained(event)
+        }
+        consumed.insert(code)
         let key = CapturedKey(code: code, text: text, modifiers: modifiers,
                               labelModifiers: activationModifiers.labelModifiers(modifiers), repeatKey: repeated)
         DispatchQueue.main.async { self.onKey?(key) }

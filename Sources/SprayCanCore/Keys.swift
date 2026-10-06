@@ -34,6 +34,13 @@ public enum KeyAction: Equatable {
 }
 
 public enum KeyMap {
+    /// ⌘ and ⌃ shortcuts Spray Can has no binding for (copy, paste, close window, Spotlight,
+    /// input-source switching) go to macOS and the app during navigation. Plain, Shift, and ⌥ keys
+    /// never pass, so labels and movement keys can't type into the app.
+    public static func passesThrough(code: UInt16, text: String, modifiers: KeyModifiers, vi: Bool) -> Bool {
+        guard !modifiers.isDisjoint(with: [.command, .control]) else { return false }
+        return action(code: code, text: text, modifiers: modifiers, vi: vi) == .none
+    }
     public static func action(code: UInt16, text: String, modifiers m: KeyModifiers, vi: Bool) -> KeyAction {
         let c = text.lowercased()
         if code == 53 || (c == "g" && m == .control) || (c == "." && m == .command) { return .escape }
@@ -114,5 +121,20 @@ public enum KeyMap {
 public enum ScrollDirection {
     public static func wheelDeltas(x: Int, y: Int, natural: Bool) -> (vertical: Int32, horizontal: Int32) {
         natural ? (Int32(clamping: y), Int32(clamping: x)) : (Int32(clamping: -y), Int32(clamping: -x))
+    }
+}
+
+/// Eased scrolling: each tick sends a fraction of what is left, so motion starts quickly and settles
+/// smoothly. Whole-pixel steps; the fraction is carried, so the total arrives exactly.
+public enum ScrollAnimation {
+    public static let fraction = 0.18
+    /// The pixels to send this tick and what remains afterwards.
+    public static func next(remaining: Double) -> (step: Int, remaining: Double) {
+        guard abs(remaining) >= 1 else { return (0, remaining) }
+        let wanted = remaining * fraction
+        // At least one pixel per tick, never past the target.
+        let magnitude = min(abs(remaining).rounded(.down), max(1, abs(wanted).rounded()))
+        let step = Int(remaining < 0 ? -magnitude : magnitude)
+        return (step, remaining - Double(step))
     }
 }
