@@ -44,4 +44,6 @@ When the target window or app changes, Elements and Scroll modes re-scan and sho
 | Next / previous scroll area | Tab / ⇧Tab |
 | Exit | Esc / ⌃[ |
 
-Top/bottom use large pixel scroll events; virtualized/infinite lists may require repeated commands. Only scroll areas exposed through accessibility are listed.
+Top/bottom use large pixel scroll events; virtualized/infinite lists may require repeated commands. J always scrolls down and K up, whether or not natural scrolling is on; the same holds for the scroll shortcuts in the other modes.
+
+Apps that expose no accessibility scroll areas, such as VS Code and other Electron apps, scroll whatever is under the pointer: point at the editor, terminal, or sidebar first (with element labels or the grid), then activate scroll mode. If the pointer is outside the window, Tab moves it to the app's content area.

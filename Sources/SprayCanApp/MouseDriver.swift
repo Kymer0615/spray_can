@@ -87,8 +87,12 @@ final class MouseDriver {
         }
         send(1)
     }
+    /// Positive `y` scrolls down (reveals content below), positive `x` scrolls right, whatever the
+    /// natural-scrolling setting; it is read on every scroll so a change applies immediately.
     func scroll(x: Int, y: Int) {
-        CGEvent(scrollWheelEvent2Source: source, units: .pixel, wheelCount: 2, wheel1: Int32(-y), wheel2: Int32(-x), wheel3: 0)?.post(tap: .cghidEventTap)
+        let natural = UserDefaults.standard.object(forKey: "com.apple.swipescrolldirection") as? Bool ?? true
+        let wheel = ScrollDirection.wheelDeltas(x: x, y: y, natural: natural)
+        CGEvent(scrollWheelEvent2Source: source, units: .pixel, wheelCount: 2, wheel1: wheel.vertical, wheel2: wheel.horizontal, wheel3: 0)?.post(tap: .cghidEventTap)
     }
     private func post(_ type: CGEventType, button: CGMouseButton, modifiers: KeyModifiers, count: Int = 1, at location: CGPoint? = nil) {
         let event = CGEvent(mouseEventSource: source, mouseType: type, mouseCursorPosition: location ?? point, mouseButton: button)

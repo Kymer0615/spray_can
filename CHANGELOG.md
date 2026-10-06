@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.6
+
+- Fix scroll direction with natural scrolling on: J now scrolls down and K up (and H/L, D/U, gg/G, and the scroll shortcuts in other modes follow suit). macOS applies the natural-scrolling setting to synthesized scroll events too, so Spray Can now follows it.
+- Scroll in VS Code and other apps that expose no accessibility scroll areas: scroll mode scrolls under the pointer, and Tab moves to the app's content area.
+
+Validation: 45 core tests (including scroll direction with natural scrolling on and off) and a localization check passed. A native scroll-view fixture confirmed J/K/H/L directions with natural scrolling on, and a VS Code editor scrolled down and back under the pointer. Scroll direction with natural scrolling off is covered by unit tests only; see docs/VALIDATION.md.
+
+This release is ad-hoc signed and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.5
 
 - Shade elements in their label's color, so each label and its element pair up at a glance. Choose Always (default), While typing, or Off in Appearance, and adjust the shading opacity.

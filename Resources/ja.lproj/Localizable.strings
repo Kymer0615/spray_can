@@ -97,6 +97,7 @@
 "Right of the element" = "要素の右";
 "Screen Recording" = "画面収録";
 "Scroll" = "スクロール";
+"Scrolling under the pointer · HJKL scroll · Tab moves to content" = "ポインタの下をスクロール · HJKL でスクロール · Tab でコンテンツへ移動";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "別のアプリがセキュア入力を有効にしています。ナビゲーションを再開するには、そのアプリで無効にしてください。";
 "Settings…" = "設定…";
 "Shade elements" = "要素の塗り";

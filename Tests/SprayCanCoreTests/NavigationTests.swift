@@ -142,4 +142,12 @@ final class NavigationTests: XCTestCase {
         // A folder row holding only its untitled disclosure triangle keeps its own label.
         XCTAssertEqual(kept, ["button", "list", "tri", "toggle", "inner", "folder", "opener"])
     }
+    func testScrollSignFollowsNaturalScrolling() {
+        // Down and right are positive in; macOS flips synthesized wheel events when natural scrolling is on.
+        XCTAssertTrue(ScrollDirection.wheelDeltas(x: 0, y: 55, natural: false) == (-55, 0))
+        XCTAssertTrue(ScrollDirection.wheelDeltas(x: 0, y: 55, natural: true) == (55, 0))
+        XCTAssertTrue(ScrollDirection.wheelDeltas(x: 40, y: -30, natural: false) == (30, -40))
+        XCTAssertTrue(ScrollDirection.wheelDeltas(x: 40, y: -30, natural: true) == (-30, 40))
+        XCTAssertTrue(ScrollDirection.wheelDeltas(x: 0, y: 100_000_000_000, natural: true).vertical == Int32.max)
+    }
 }

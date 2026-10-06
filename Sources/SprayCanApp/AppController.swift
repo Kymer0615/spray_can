@@ -28,6 +28,9 @@ final class AppController: ObservableObject {
     private var selectedTarget: Target?
     private var selectedFrame: CGRect?
     private var scrollIndex = 0
+    /// Scroll mode in an app without accessible scroll areas (VS Code, other Electron apps):
+    /// scroll wherever the pointer is until Tab moves it to a content area.
+    private var scrollUnderPointer = false
     private var previousG = false
     private var centerIndex = 0
     private var subscriptions = Set<AnyCancellable>()
@@ -129,7 +132,15 @@ final class AppController: ObservableObject {
         accessibility.discover(context) { [weak self] discovered in
             guard let self, self.active, self.session.generation == generation else { return }
             self.result = discovered
-            let targets = mode == .scroll ? discovered.scrollAreas : discovered.targets
+            self.scrollUnderPointer = false
+            if mode == .scroll && discovered.scrollAreas.isEmpty, let window = discovered.captureRects.first {
+                // No accessible scroll areas: fall back to web content areas (largest first), else the window,
+                // and start by scrolling under the pointer when it is already over the window.
+                let areas = discovered.webAreas.filter { $0.width > 40 && $0.height > 40 }.sorted { $0.width * $0.height > $1.width * $1.height }
+                self.result.scrollAreas = (areas.isEmpty ? [window] : areas).enumerated().map { Target(id: "scroll-\($0.offset)", frame: $0.element, source: .accessibility, role: kAXScrollAreaRole) }
+                self.scrollUnderPointer = window.contains(self.mouse.point)
+            }
+            let targets = mode == .scroll ? self.result.scrollAreas : discovered.targets
             _ = self.session.publish(targets, generation: generation, vi: self.settings.vi)
             self.scrollIndex = 0
             self.updateReadyStatus()
@@ -162,7 +173,11 @@ final class AppController: ObservableObject {
     }
     private func updateReadyStatus() {
         if session.mode == .freestyle { status = String(localized: "Move with arrows · Return to click") }
-        else if session.mode == .scroll { status = result.scrollAreas.isEmpty ? String(localized: "No scroll areas · ⇧⌘L for pointer scrolling") : String(localized: "HJKL scroll · Tab changes area · Esc exits") }
+        else if session.mode == .scroll {
+            status = result.scrollAreas.isEmpty ? String(localized: "No scroll areas · ⇧⌘L for pointer scrolling")
+                : scrollUnderPointer ? String(localized: "Scrolling under the pointer · HJKL scroll · Tab moves to content")
+                : String(localized: "HJKL scroll · Tab changes area · Esc exits")
+        }
         else { status = session.targets.isEmpty ? String(localized: "No targets found · ⇧⌘K opens the grid") : String(localized: "\(session.targets.count) targets · Type a label · Return clicks") }
         if result.timedOut && session.mode == .elements { status += String(localized: " · Partial scan") }
         if windowChanged { status = String(localized: "Window changed · ") + status }
@@ -347,13 +362,19 @@ final class AppController: ObservableObject {
     }
     private func focusScrollArea() {
         guard !result.scrollAreas.isEmpty else { return }
+        if scrollUnderPointer { selectedFrame = nil; render(); return }
         let target = result.scrollAreas[scrollIndex % result.scrollAreas.count]
         selectedFrame = target.frame; mouse.move(to: target.point); render()
     }
     private func handleScroll(_ key: CapturedKey) {
         if key.text == "[" && key.modifiers == .control { cancel(); return }
         guard !result.scrollAreas.isEmpty else { return }
-        if key.code == 48 { scrollIndex = (scrollIndex + (key.modifiers.contains(.shift) ? result.scrollAreas.count - 1 : 1)) % result.scrollAreas.count; previousG = false; focusScrollArea(); return }
+        if key.code == 48 {
+            // The first Tab after scrolling under the pointer moves to the first area.
+            if scrollUnderPointer { scrollUnderPointer = false; scrollIndex = 0 }
+            else { scrollIndex = (scrollIndex + (key.modifiers.contains(.shift) ? result.scrollAreas.count - 1 : 1)) % result.scrollAreas.count }
+            previousG = false; updateReadyStatus(); focusScrollArea(); return
+        }
         let frame = result.scrollAreas[scrollIndex].frame
         let c = key.text
         let half = key.modifiers.contains(.shift)

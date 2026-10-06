@@ -97,6 +97,7 @@
 "Right of the element" = "元素右侧";
 "Screen Recording" = "屏幕录制";
 "Scroll" = "滚动";
+"Scrolling under the pointer · HJKL scroll · Tab moves to content" = "在指针下方滚动 · HJKL 滚动 · Tab 移到内容区域";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "另一个应用启用了安全输入。请在该应用中停用以恢复导航。";
 "Settings…" = "设置…";
 "Shade elements" = "元素着色";

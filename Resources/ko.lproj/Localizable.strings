@@ -97,6 +97,7 @@
 "Right of the element" = "요소 오른쪽";
 "Screen Recording" = "화면 기록";
 "Scroll" = "스크롤";
+"Scrolling under the pointer · HJKL scroll · Tab moves to content" = "포인터 아래 스크롤 · HJKL 스크롤 · Tab으로 콘텐츠로 이동";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "다른 앱이 보안 입력을 켰습니다. 탐색을 재개하려면 해당 앱에서 끄십시오.";
 "Settings…" = "설정…";
 "Shade elements" = "요소 음영";

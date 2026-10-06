@@ -19,6 +19,8 @@ struct DiscoveryResult {
     var icons: [CGRect] = []
     /// Visible static text frames: exact where apps expose them, unlike visual text detection.
     var texts: [CGRect] = []
+    /// Web content areas; Electron and browser panes scroll inside them without exposing scroll areas.
+    var webAreas: [CGRect] = []
     var timedOut = false
     var needsRetry = false
 }
@@ -227,6 +229,7 @@ final class AccessibilityProvider: TargetProvider {
                     let target = Target(id: id, frame: clipped, source: .accessibility, title: title, role: role)
                     if role == kAXScrollAreaRole { result.scrollAreas.append(target) }
                     if role == kAXImageRole && clipped.width < 200 && clipped.height < 200 { result.icons.append(clipped) }
+                    if role == "AXWebArea" && !result.webAreas.contains(clipped) { result.webAreas.append(clipped) }
                     if role == kAXStaticTextRole { result.texts.append(clipped) }
                     if (actionable.contains(role) || names.contains(kAXPressAction) || names.contains(kAXPickAction)) && (!inRow || rowControls.contains(role)) {
                         result.targets.append(target); result.elements[id] = root

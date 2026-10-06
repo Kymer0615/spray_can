@@ -107,3 +107,12 @@ public enum KeyMap {
         return .none
     }
 }
+
+/// Wheel values for a scroll where positive `y` reveals content below and positive `x` content to the right.
+/// macOS applies the natural-scrolling setting to synthesized wheel events as well (it flips their sign in
+/// transit), so the posted sign must follow that setting for keys to scroll the way they say.
+public enum ScrollDirection {
+    public static func wheelDeltas(x: Int, y: Int, natural: Bool) -> (vertical: Int32, horizontal: Int32) {
+        natural ? (Int32(clamping: y), Int32(clamping: x)) : (Int32(clamping: -y), Int32(clamping: -x))
+    }
+}
