@@ -127,6 +127,36 @@ final class AccessibilityProvider: TargetProvider {
             DispatchQueue.main.async { completion(success) }
         }
     }
+    /// Whether a click at `point` reaches `element` rather than something covering it.
+    /// Chromium's hit testing is coarse and asynchronous: it can answer with an ancestor of the
+    /// element, or with the whole page on the first call and the real element a moment later.
+    /// So an ancestor counts as a match, a non-match is asked again, and finally any answer from
+    /// the element's own window is accepted. A different window or app on top still fails.
+    func reachable(_ element: AXUIElement, at point: CGPoint) -> Bool {
+        let system = AXUIElementCreateSystemWide()
+        AXUIElementSetMessagingTimeout(system, 0.06)
+        var ancestors: [AXUIElement] = []
+        var node: AXUIElement? = element
+        for _ in 0..<40 { guard let current = node else { break }; ancestors.append(current); node = axValue(current, kAXParentAttribute) }
+        var last: AXUIElement?
+        for attempt in 0..<3 {
+            if attempt > 0 { Thread.sleep(forTimeInterval: 0.04) }
+            var hit: AXUIElement?
+            guard AXUIElementCopyElementAtPosition(system, Float(point.x), Float(point.y), &hit) == .success, let hit else { continue }
+            last = hit
+            // The element itself or something inside it.
+            var inside: AXUIElement? = hit
+            for _ in 0..<12 { guard let current = inside else { break }; if CFEqual(current, element) { return true }; inside = axValue(current, kAXParentAttribute) }
+            // A coarse answer: one of the element's ancestors, below its window.
+            if let index = ancestors.firstIndex(where: { CFEqual($0, hit) }), (axValue(hit, kAXRoleAttribute) as String?) != kAXWindowRole, index < ancestors.count - 1 { return true }
+        }
+        guard let last else { return false }
+        var hitPid: pid_t = 0, elementPid: pid_t = 0
+        AXUIElementGetPid(last, &hitPid); AXUIElementGetPid(element, &elementPid)
+        guard hitPid == elementPid, let hitWindow: AXUIElement = axValue(last, kAXWindowAttribute),
+              let elementWindow: AXUIElement = axValue(element, kAXWindowAttribute) else { return false }
+        return CFEqual(hitWindow, elementWindow)
+    }
     func validate(_ element: AXUIElement, within original: CGRect, hitTest: Bool = true, completion: @escaping (CGRect?) -> Void) {
         queue.async {
             let enabled: Bool = axValue(element, kAXEnabledAttribute) ?? true
@@ -141,19 +171,7 @@ final class AccessibilityProvider: TargetProvider {
                     frame = clipped
                 } else {
                     frame = clipped
-                    let system = AXUIElementCreateSystemWide()
-                    AXUIElementSetMessagingTimeout(system, 0.06)
-                    var hit: AXUIElement?
-                    let error = AXUIElementCopyElementAtPosition(system, Float(clipped.midX), Float(clipped.midY), &hit)
-                    var matches = false
-                    if error == .success {
-                        for _ in 0..<12 {
-                            guard let node = hit else { break }
-                            if CFEqual(node, element) { matches = true; break }
-                            hit = axValue(node, kAXParentAttribute)
-                        }
-                    }
-                    if !matches && !self.visibleTab(element, frame: clipped) { frame = nil }
+                    if !self.reachable(element, at: CGPoint(x: clipped.midX, y: clipped.midY)) && !self.visibleTab(element, frame: clipped) { frame = nil }
                 }
             }
             DispatchQueue.main.async { completion(frame) }

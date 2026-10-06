@@ -1,5 +1,18 @@
 # Changelog
 
+## Spray Can 0.1.8
+
+- Fix Return sometimes doing nothing in Chrome (and other Chromium browsers and Electron apps), so it no longer needs a second press. Before clicking, Spray Can checks that nothing covers the target. Chromium often answers that check with a container around the link instead of the link itself, or with the whole page on the first try, so more than half of the links on a typical page failed the first check and showed "Target disappeared". An ancestor now counts as a match, the check is asked again briefly, and a target is accepted when the answer comes from its own window. A different window or app on top still blocks the click.
+
+Validation: on a live github.com page in Chrome, 39 of 40 links and buttons pass the check on the first Return (previously 19 of 40), and a link covered by another app's window is still refused.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.7
 
 - Keep permissions across updates: releases are now signed with the project's own long-lived certificate instead of an ad-hoc signature. macOS ties Accessibility and Screen Recording permission to the signing identity, so from this release on updates keep them. Grant them once more after updating to 0.1.7.
