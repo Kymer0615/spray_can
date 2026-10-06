@@ -220,4 +220,23 @@ final class HintLayoutTests: XCTestCase {
             XCTAssertGreaterThan(difference, 45, "\(p.id) and its nearest neighbor \(nearest.id) look alike")
         }
     }
+    func testEveryColorSchemeKeepsNeighborsDistinct() {
+        XCTAssertEqual(Set(LabelColorScheme.all.map(\.id)).count, LabelColorScheme.all.count)
+        XCTAssertEqual(LabelColorScheme.named("missing"), .vivid)
+        let toolbar = (0..<10).map { HintLayoutItem(id: "t\($0)", target: CGRect(x: 40 + Double($0) * 34, y: 40, width: 28, height: 24), size: CGSize(width: 28, height: 20)) }
+        let placements = HintLayout.place(toolbar, in: bounds, style: HintPlacementStyle(position: .leading))
+        for scheme in LabelColorScheme.all {
+            XCTAssertEqual(scheme.hexes.count, 8, scheme.id)
+            XCTAssertTrue(scheme.hexes.allSatisfy { AppearanceColor.label.validated($0) == $0.uppercased() }, scheme.id)
+            let lab = scheme.lab
+            // Pastels are inherently close; every other scheme is well separated.
+            let floor = scheme == .pastel ? 15.0 : 25.0
+            for (i, a) in lab.enumerated() { for b in lab.dropFirst(i + 1) { XCTAssertGreaterThan(a.distance(to: b), floor, scheme.id) } }
+            let colors = HintLayout.colorGroups(placements, palette: lab)
+            for index in 1..<10 {
+                let difference = lab[colors["t\(index)"]!].distance(to: lab[colors["t\(index - 1)"]!])
+                XCTAssertGreaterThan(difference, floor, "\(scheme.id): adjacent toolbar labels look alike")
+            }
+        }
+    }
 }

@@ -12,8 +12,9 @@ struct SettingsView: View {
     @State private var loginEnabled = SMAppService.mainApp.status == .enabled
     @State private var loginError = ""
     @State private var tab = "General"
-    init(controller: AppController, initialTab: String = "General") {
-        self.controller = controller
+    private let height: CGFloat
+    init(controller: AppController, initialTab: String = "General", height: CGFloat = 540) {
+        self.controller = controller; self.height = height
         _tab = State(initialValue: initialTab)
     }
     private let timer = Timer.publish(every: 2, on: .main, in: .common).autoconnect()
@@ -40,7 +41,7 @@ struct SettingsView: View {
                     content
                 }.padding(30).frame(maxWidth: .infinity, alignment: .leading)
             }.frame(width: 490).background(Color(nsColor: .windowBackgroundColor))
-        }.frame(height: 540)
+        }.frame(height: height)
             .onReceive(timer) { _ in permissionRevision += 1 }
     }
     private func icon(_ name: String) -> String {
@@ -102,49 +103,56 @@ struct SettingsView: View {
         case "Appearance":
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
             AppearancePreview().frame(height: 100)
-            Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
-            GroupBox {
-                VStack(alignment: .leading, spacing: 10) {
-                    Toggle("Color-code labels", isOn: $settings.colorCodeTargets)
-                    Text("Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color.").font(.caption).foregroundStyle(.secondary)
+            section("Labels") {
+                Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
+                VStack(alignment: .leading) { Text("Label size · \(Int(settings.fontSize)) pt"); Slider(value: $settings.fontSize, in: 10...22, step: 1) }
+                Picker("Label position", selection: $settings.hintPosition) {
+                    ForEach(HintPosition.allCases, id: \.self) { Text(positionTitle($0)).tag($0) }
+                }
+                VStack(alignment: .leading) { Text("Horizontal offset · \(Int(settings.hintOffsetX)) pt"); Slider(value: $settings.hintOffsetX, in: -40...40, step: 1) }
+                VStack(alignment: .leading) { Text("Vertical offset · \(Int(settings.hintOffsetY)) pt"); Slider(value: $settings.hintOffsetY, in: -40...40, step: 1) }
+                VStack(alignment: .leading) {
+                    Text(reduceTransparency ? "Label background opacity · Opaque" : settings.glassEnabled ? "Label background opacity · System managed" : "Label background opacity · \(Int(settings.contrast * 100))%")
+                    Slider(value: $settings.contrast, in: 0.4...1).disabled(settings.glassEnabled || reduceTransparency)
+                }
+                Text("Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you.").font(.caption).foregroundStyle(.secondary)
+                Button("Restore label placement") { settings.restoreHintPlacement() }
+            }
+            section("Color coding") {
+                Toggle("Color-code labels", isOn: $settings.colorCodeTargets)
+                Text("Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color.").font(.caption).foregroundStyle(.secondary)
+                if settings.colorCodeTargets {
+                    Text("Color scheme").font(.subheadline.weight(.semibold))
+                    ForEach(LabelColorScheme.all) { scheme in schemeRow(scheme) }
                     Picker("Shade elements", selection: $settings.elementShading) {
                         ForEach(ElementShading.allCases, id: \.self) { Text($0.title).tag($0) }
-                    }.disabled(!settings.colorCodeTargets)
-                    VStack(alignment: .leading) {
-                        Text("Shading opacity · \(Int((settings.shadingOpacity * 100).rounded()))%")
-                        Slider(value: $settings.shadingOpacity, in: 0.05...0.5, step: 0.01)
-                    }.disabled(!settings.colorCodeTargets || settings.elementShading == .off)
-                    Text("Shading tints each element in its label’s color, so labels and elements pair up at a glance.").font(.caption).foregroundStyle(.secondary)
-                    Button("Restore shading") { settings.restoreShading() }
-                }.padding(10)
-            }
-            LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
-                ForEach(AppearanceColor.allCases, id: \.self) { role in
-                    ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)
-                        .font(.callout)
+                    }
+                    if settings.elementShading != .off {
+                        VStack(alignment: .leading) {
+                            Text("Shading opacity · \(Int((settings.shadingOpacity * 100).rounded()))%")
+                            Slider(value: $settings.shadingOpacity, in: 0.05...0.5, step: 0.01)
+                        }
+                    }
+                    Button("Restore color coding") { settings.restoreShading() }
                 }
             }
-            Button("Restore default colors") { settings.restoreColors() }
-            GroupBox {
-                VStack(alignment: .leading, spacing: 10) {
-                    Picker("Label position", selection: $settings.hintPosition) {
-                        ForEach(HintPosition.allCases, id: \.self) { Text(positionTitle($0)).tag($0) }
+            section("Colors") {
+                // Color coding replaces the label colors; they still apply to grid labels.
+                LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
+                    ForEach(settings.colorCodeTargets ? [AppearanceColor.grid, .highlight] : AppearanceColor.allCases, id: \.self) { colorPicker($0) }
+                }
+                if settings.colorCodeTargets {
+                    DisclosureGroup("Plain label colors (grid mode)") {
+                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
+                            ForEach([AppearanceColor.label, .ocr, .text], id: \.self) { colorPicker($0) }
+                        }.padding(.top, 6)
                     }
-                    VStack(alignment: .leading) { Text("Horizontal offset · \(Int(settings.hintOffsetX)) pt"); Slider(value: $settings.hintOffsetX, in: -40...40, step: 1) }
-                    VStack(alignment: .leading) { Text("Vertical offset · \(Int(settings.hintOffsetY)) pt"); Slider(value: $settings.hintOffsetY, in: -40...40, step: 1) }
-                    Text("Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells.").font(.caption).foregroundStyle(.secondary)
-                    Button("Restore label placement") { settings.restoreHintPlacement() }
-                }.padding(10)
+                }
+                Button("Restore default colors") { settings.restoreColors() }
             }
-            VStack(alignment: .leading) { Text("Label size · \(Int(settings.fontSize)) pt"); Slider(value: $settings.fontSize, in: 10...22, step: 1) }
-            VStack(alignment: .leading) { Text("Grid cell size · \(Int(settings.cellSize)) pt"); Slider(value: $settings.cellSize, in: 32...240, step: 4) }
-            VStack(alignment: .leading) {
-                Text(reduceTransparency ? "Label background opacity · Opaque" : settings.glassEnabled ? "Label background opacity · System managed" : "Label background opacity · \(Int(settings.contrast * 100))%")
-                Slider(value: $settings.contrast, in: 0.4...1).disabled(settings.glassEnabled || reduceTransparency)
+            section("Grid") {
+                VStack(alignment: .leading) { Text("Grid cell size · \(Int(settings.cellSize)) pt"); Slider(value: $settings.cellSize, in: 32...240, step: 4) }
             }
-            if reduceTransparency { Text("Reduce Transparency is enabled in macOS. Label backgrounds stay opaque.").font(.caption).foregroundStyle(.secondary) }
-            else if settings.glassEnabled { Text("Glass appearance is managed by macOS. Turn off Use Liquid Glass to adjust background opacity.").font(.caption).foregroundStyle(.secondary) }
-            Text("Glass uses Liquid Glass on macOS 26+ and system materials on macOS 14–15. Turn it off for plain backgrounds. Reduce Transparency keeps labels opaque.").font(.caption).foregroundStyle(.secondary)
         case "Permissions":
             Text("Only the access needed to navigate.").foregroundStyle(.secondary)
             permission("Accessibility", id: "accessibility", detail: "Find controls and move, click, drag, and scroll.", granted: controller.accessibilityGranted, action: controller.requestAccessibility)
@@ -169,6 +177,40 @@ struct SettingsView: View {
             Text("No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content.").font(.caption).foregroundStyle(.secondary)
             Text("MIT License · © 2026 Spray Can contributors").font(.caption2).foregroundStyle(.secondary)
         }
+    }
+    private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title).font(.headline)
+            GroupBox { VStack(alignment: .leading, spacing: 10) { content() }.padding(8).frame(maxWidth: .infinity, alignment: .leading) }
+        }
+    }
+    private func colorPicker(_ role: AppearanceColor) -> some View {
+        ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false).font(.callout)
+    }
+    private func schemeTitle(_ scheme: LabelColorScheme) -> String {
+        switch scheme.id {
+        case "pastel": return String(localized: "Pastel")
+        case "colorblind": return String(localized: "Color-blind safe")
+        case "bold": return String(localized: "Bold")
+        case "neon": return String(localized: "Neon")
+        default: return String(localized: "Vivid")
+        }
+    }
+    /// One selectable scheme: its name and a strip of its eight colors.
+    private func schemeRow(_ scheme: LabelColorScheme) -> some View {
+        let selected = settings.colorScheme == scheme
+        return Button { settings.colorScheme = scheme } label: {
+            HStack(spacing: 10) {
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle").foregroundStyle(selected ? Color.accentColor : .secondary)
+                Text(schemeTitle(scheme)).frame(width: 120, alignment: .leading)
+                HStack(spacing: 3) {
+                    ForEach(scheme.hexes, id: \.self) { hex in
+                        RoundedRectangle(cornerRadius: 3).fill(Color(nsColor: Settings.color(hex: hex))).frame(width: 18, height: 14)
+                    }
+                }
+                Spacer(minLength: 0)
+            }.contentShape(Rectangle())
+        }.buttonStyle(.plain).accessibilityAddTraits(selected ? .isSelected : [])
     }
     private func colorTitle(_ role: AppearanceColor) -> String {
         switch role {

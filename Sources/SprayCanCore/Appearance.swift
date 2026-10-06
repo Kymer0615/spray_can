@@ -42,3 +42,22 @@ public struct LabColor: Equatable {
     /// Label colors: red, orange, yellow, green, cyan, blue, purple, pink.
     public static let labelPalette = ["E5484D", "F76B15", "FFC53D", "30A46C", "05A2C2", "0090FF", "8E4EC6", "D6409F"]
 }
+
+/// A named set of label colors for color coding. Colors are chosen for large CIELAB distances,
+/// so neighboring labels stay distinct.
+public struct LabelColorScheme: Equatable, Identifiable {
+    public let id: String
+    public let hexes: [String]
+    public var lab: [LabColor] { hexes.map(LabColor.init(hex:)) }
+    public static let vivid = LabelColorScheme(id: "vivid", hexes: LabColor.labelPalette)
+    /// Soft fills with dark text; gentler on busy screens.
+    public static let pastel = LabelColorScheme(id: "pastel", hexes: ["F4A7B9", "9FE2E0", "FBE7A1", "B9C3F7", "C7DDB5", "FFC8A2", "A9D6F5", "E0BBE4"])
+    /// Okabe–Ito based: distinguishable with red–green color blindness.
+    public static let colorBlindSafe = LabelColorScheme(id: "colorblind", hexes: ["E69F00", "0072B2", "009E73", "882255", "1A1A1A", "999999", "DDCC77", "D55E00"])
+    /// Deep, saturated colors with white text; stands out on light windows.
+    public static let bold = LabelColorScheme(id: "bold", hexes: ["B3123B", "1B7340", "303F9F", "6D4C41", "A84300", "5D6B00", "6A1B9A", "37474F"])
+    /// Bright colors that stand out on dark windows.
+    public static let neon = LabelColorScheme(id: "neon", hexes: ["B6FF3B", "A66BFF", "FF4545", "22E5FF", "FFC23B", "2BFF88", "FF3DD8", "3BFFD1"])
+    public static let all = [vivid, pastel, colorBlindSafe, bold, neon]
+    public static func named(_ id: String?) -> LabelColorScheme { all.first { $0.id == id } ?? .vivid }
+}

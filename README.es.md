@@ -78,7 +78,7 @@ Las etiquetas siguen a tu foco. Cuando cambia la ventana de destino —al cambia
 
 Las etiquetas se colocan **justo al lado** de su elemento —normalmente justo después de su texto— y nunca tapan el texto ni el icono en el que vas a hacer clic. Cada elemento tiene una sola etiqueta, y solo aparece una línea de conexión en el raro caso de que una etiqueta no pueda tocar su elemento. Elige izquierda, derecha, arriba, abajo o sobre el elemento en **Apariencia**, y ajusta la posición con desplazamientos horizontales y verticales.
 
-**Colorear etiquetas** da colores claramente distintos a las etiquetas cercanas y sombrea cada elemento con el color de su etiqueta, para que cada etiqueta y su elemento se emparejen de un vistazo. Muestra el sombreado siempre, solo al escribir o nunca, y ajusta su opacidad. Al escribir una letra, solo quedan los elementos que coinciden, resaltados con su color.
+**Colorear etiquetas** da colores claramente distintos a las etiquetas cercanas y sombrea cada elemento con el color de su etiqueta, para que cada etiqueta y su elemento se emparejen de un vistazo. Muestra el sombreado siempre, solo al escribir o nunca, y ajusta su opacidad. Elige un esquema de colores —Vivo, Pastel, Apto para daltonismo, Intenso o Neón— según tu pantalla. Al escribir una letra, solo quedan los elementos que coinciden, resaltados con su color.
 
 ![Colores de etiquetas antes y después de escribir una letra](docs/images/color-coding.png)
 

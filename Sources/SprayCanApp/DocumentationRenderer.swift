@@ -9,6 +9,8 @@ import UniformTypeIdentifiers
 /// Captures only synthetic documentation windows; requires Screen Recording for native glass compositing.
 enum DocumentationRenderer {
     static func render() {
+        // Light appearance regardless of this Mac's setting, so README images stay consistent.
+        NSApp.appearance = NSAppearance(named: .aqua)
         let directory = ProcessInfo.processInfo.environment["SPRAYCAN_DOCS_DIR"] ?? "docs/images"
         try? FileManager.default.createDirectory(atPath: directory, withIntermediateDirectories: true)
         @discardableResult func save(_ view: NSView, name: String, size: CGSize) -> CGImage? {
@@ -71,8 +73,13 @@ enum DocumentationRenderer {
             return
         }
         save(NSHostingView(rootView: SettingsView(controller: AppController())), name: "settings.png", size: CGSize(width: 696, height: 540))
-        save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance")), name: "appearance.png", size: CGSize(width: 696, height: 540))
+        // Tall enough to show the label and color-coding sections.
+        save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance", height: 1000)), name: "appearance.png", size: CGSize(width: 696, height: 1000))
         save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "About")), name: "about.png", size: CGSize(width: 696, height: 540))
+        // Review aid: the whole Appearance page, written only when asked for.
+        if let height = ProcessInfo.processInfo.environment["SPRAYCAN_FULL_APPEARANCE_HEIGHT"].flatMap(Double.init) {
+            save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance", height: height)), name: "appearance-full.png", size: CGSize(width: 696, height: height))
+        }
         save(NSHostingView(rootView: AppearancePreview().frame(width: 600, height: 160).background(Color(nsColor: .windowBackgroundColor))), name: "clustered-labels.png", size: CGSize(width: 600, height: 160))
         for grid in [false, true] {
             let container = NSView(frame: CGRect(x: 0, y: 0, width: 1100, height: 700))

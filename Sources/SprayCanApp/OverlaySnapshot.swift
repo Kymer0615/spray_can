@@ -84,6 +84,9 @@ final class OverlaySnapshot {
         // One-run overrides: --shading off|whileTyping|always, --shading-opacity 0.3.
         if let mode = value("--shading").flatMap(ElementShading.init(rawValue:)) { settings.elementShading = mode }
         if let level = value("--shading-opacity").flatMap(Double.init) { settings.shadingOpacity = level }
+        let scheme = settings.colorScheme
+        if let id = value("--color-scheme") { settings.colorScheme = LabelColorScheme.named(id) }
+        defer { settings.colorScheme = scheme }
         defer { settings.glassEnabled = glass; settings.elementShading = shading; settings.shadingOpacity = opacity }
         canvas.targets = HintLabels.assign(targets, vi: settings.vi)
         canvas.prefix = value("--prefix") ?? ""

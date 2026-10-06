@@ -225,6 +225,7 @@ final class HintCanvas: NSView {
     private var layoutIcons: [CGRect] = []
     private var placements: [HintPlacement] = []
     private var colorGroups: [String: Int] = [:]
+    private var groupScheme = ""
     private var layoutTime: TimeInterval = 0
     /// Counts for the readability snapshot harness.
     var snapshotSummary: String {
@@ -296,18 +297,26 @@ final class HintCanvas: NSView {
         let style = settings.hintStyle
         let obstacles = content.map(local).filter { bounds.intersects($0) }
         let images = obstacles.isEmpty ? [] : icons.map(local).filter { bounds.intersects($0) }
+        // A new scheme recolors labels without moving them.
+        if settings.colorScheme.id != groupScheme && !placements.isEmpty {
+            let fixed = Set(items.filter(\.fixed).map(\.id))
+            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) }, palette: settings.colorScheme.lab)
+            groupScheme = settings.colorScheme.id
+        }
         if items != layoutItems || bounds != layoutBounds || style != layoutStyle || obstacles != layoutContent || images != layoutIcons {
             layoutItems = items; layoutBounds = bounds; layoutStyle = style; layoutContent = obstacles; layoutIcons = images
             let started = ProcessInfo.processInfo.systemUptime
             placements = HintLayout.place(items, in: bounds, style: style, content: obstacles, icons: images)
             layoutTime = ProcessInfo.processInfo.systemUptime - started
             let fixed = Set(items.filter(\.fixed).map(\.id))
-            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) })
+            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) }, palette: settings.colorScheme.lab)
+            groupScheme = settings.colorScheme.id
         }
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
             guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
-            let color = settings.colorCodeTargets ? colorGroups[target.id].map { Settings.palette[$0] } : nil
+            let palette = settings.palette
+            let color = settings.colorCodeTargets ? colorGroups[target.id].flatMap { palette.indices.contains($0) ? palette[$0] : nil } : nil
             return PlacedHint(id: target.id, target: target, frame: frame, color: color)
         }
         letters.frame = bounds

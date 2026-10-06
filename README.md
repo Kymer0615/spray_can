@@ -74,7 +74,7 @@ Labels follow your focus. When the target window changes — switching tabs, ope
 
 Labels sit **right next to** their element — usually just after its text — and never cover the text or icon you are about to click. Each item gets one label, and a connector line appears only in the rare case a label cannot touch its element. Choose left, right, above, below, or on the element in **Appearance**, and fine-tune the placement with horizontal and vertical offsets.
 
-**Color coding** gives nearby labels clearly different colors and shades each element in its label's color, so every label and its element pair up at a glance. Show the shading always, only while typing, or not at all, and adjust its opacity. Once you type a letter, only the matching elements remain, outlined in their colors.
+**Color coding** gives nearby labels clearly different colors and shades each element in its label's color, so every label and its element pair up at a glance. Show the shading always, only while typing, or not at all, and adjust its opacity. Pick a color scheme — Vivid, Pastel, Color-blind safe, Bold, or Neon — to suit your screen. Once you type a letter, only the matching elements remain, outlined in their colors.
 
 ![Color coding before and after typing a letter](docs/images/color-coding.png)
 
@@ -123,7 +123,7 @@ You can customize:
 - OCR and its recognition languages
 - vi bindings
 - label position and offsets
-- color coding, element shading, and shading opacity
+- color coding, color schemes, element shading, and shading opacity
 - label size
 - grid spacing
 - background opacity

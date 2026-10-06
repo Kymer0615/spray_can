@@ -1,5 +1,20 @@
 # Changelog
 
+## Spray Can 0.1.9
+
+- Color schemes for color coding: Vivid (default), Pastel, Color-blind safe (Okabe–Ito based), Bold, and Neon. Each scheme's eight colors are chosen for large perceptual distances, and badge text switches between black and white for contrast.
+- A cleaner Appearance page in sections: Labels, Color coding, Colors, and Grid. With color coding on, the label tint, OCR tint, and label text pickers move into a collapsed "Plain label colors (grid mode)" group, since only grid labels still use them; scheme and shading controls are hidden while color coding is off.
+- Settings passed as command-line defaults (`-colorCodeTargets NO`, `-shadingOpacity 0.3`) now take effect; boolean and number settings previously ignored them.
+
+Validation: 46 core tests (including per-scheme color separation and neighbor contrast) and a localization check passed. The Appearance page was rendered with color coding on and off, and a real Finder window was checked in all five schemes.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.8
 
 - Fix Return sometimes doing nothing in Chrome (and other Chromium browsers and Electron apps), so it no longer needs a second press. Before clicking, Spray Can checks that nothing covers the target. Chromium often answers that check with a container around the link instead of the link itself, or with the whole page on the first try, so more than half of the links on a typical page failed the first check and showed "Target disappeared". An ancestor now counts as a match, the check is asked again briefly, and a target is accepted when the answer comes from its own window. A different window or app on top still blocks the click.
