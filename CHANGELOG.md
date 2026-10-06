@@ -4,6 +4,7 @@
 
 - Shade elements in their label's color, so each label and its element pair up at a glance. Choose Always (default), While typing, or Off in Appearance, and adjust the shading opacity.
 - Nearby labels now get clearly different colors: each label takes the palette color most different from its neighbors' colors, with the nearest neighbors counting most (no more red next to orange).
+- OCR labels are color-coded and shaded like element labels, with a dashed outline marking them as text locations.
 - Color-coded badges are solid even with Liquid Glass, which washed their colors out.
 - Typed letters on color-coded badges are dimmed instead of drawn in the highlight color, which could vanish on yellow or green badges.
 - Folder rows keep their own label when they contain a disclosure triangle.

@@ -185,6 +185,12 @@ private final class HintTextCanvas: NSView {
             let typed = hint.color == nil ? settings.nsColor(.highlight) : ink.withAlphaComponent(0.45)
             if matched > 0 { text.addAttribute(.foregroundColor, value: typed, range: NSRange(location: 0, length: matched)) }
             let size = text.size()
+            // Color-coded OCR badges keep a dashed outline: they mark text, which may not be clickable.
+            if hint.color != nil && hint.target.source == .text {
+                ink.withAlphaComponent(0.7).setStroke()
+                let outline = NSBezierPath(roundedRect: hint.frame.insetBy(dx: 1.5, dy: 1.5), xRadius: 4, yRadius: 4)
+                outline.lineWidth = 1; outline.setLineDash([3, 2], count: 2, phase: 0); outline.stroke()
+            }
             text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
         }
     }
@@ -301,7 +307,7 @@ final class HintCanvas: NSView {
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
             guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
-            let color = settings.colorCodeTargets && target.source != .text ? colorGroups[target.id].map { Settings.palette[$0] } : nil
+            let color = settings.colorCodeTargets ? colorGroups[target.id].map { Settings.palette[$0] } : nil
             return PlacedHint(id: target.id, target: target, frame: frame, color: color)
         }
         letters.frame = bounds
