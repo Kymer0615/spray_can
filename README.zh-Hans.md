@@ -149,7 +149,7 @@ brew uninstall --cask spray-can
 
 你也可以从 [Releases](https://github.com/Kymer0615/spray_can/releases) 下载通用 ZIP 包，解压后将 **Spray Can.app** 移到“应用程序”文件夹。
 
-0.1.2 版本采用 **ad-hoc 签名，未经公证**。如果 macOS 阻止了你信任的版本：
+各版本均**使用项目自有证书签名，未经公证**。所有版本都使用同一证书签名，因此更新后 macOS 会保留 Spray Can 的权限（自 0.1.7 起；从更早版本更新时需再授予一次）。如果 macOS 阻止了你信任的版本：
 
 **系统设置 → 隐私与安全性 → 仍要打开**
 
@@ -209,7 +209,7 @@ scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
 swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
 python3 scripts/check-localizations.py
-scripts/release.sh 0.1.2 adhoc
+scripts/release.sh 0.1.7 adhoc
 ```
 
 在 Xcode 中打开 `SprayCan.xcodeproj`。
@@ -220,7 +220,7 @@ scripts/release.sh 0.1.2 adhoc
 
 ## 状态
 
-Spray Can 0.1.2 适用于 macOS 14 及更高版本。
+Spray Can 0.1.7 适用于 macOS 14 及更高版本。
 
 导航核心已通过 **1,000 次快速激活循环**的压力测试，原生测试夹具完成了 **60 次元素/网格点按循环**，没有漏点，也没有输入泄漏。
 

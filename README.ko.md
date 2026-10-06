@@ -149,7 +149,7 @@ brew uninstall --cask spray-can
 
 또는 [Releases](https://github.com/Kymer0615/spray_can/releases)에서 유니버설 ZIP을 다운로드하여 압축을 풀고 **Spray Can.app**을 응용 프로그램 폴더로 옮기세요.
 
-릴리스 0.1.2는 **애드혹 서명되었으며 공증되지 않았습니다**. 신뢰하는 빌드를 macOS가 차단하는 경우:
+릴리스는 **프로젝트 자체 인증서로 서명되었으며 공증되지 않았습니다**. 모든 릴리스를 같은 인증서로 서명하므로 업데이트해도 macOS가 Spray Can의 권한을 유지합니다(0.1.7부터. 이전 버전에서 업데이트한 경우 한 번만 다시 허용하세요). 신뢰하는 빌드를 macOS가 차단하는 경우:
 
 **시스템 설정 → 개인정보 보호 및 보안 → 그래도 열기**
 
@@ -209,7 +209,7 @@ scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
 swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
 python3 scripts/check-localizations.py
-scripts/release.sh 0.1.2 adhoc
+scripts/release.sh 0.1.7 adhoc
 ```
 
 Xcode에서 `SprayCan.xcodeproj`를 여세요.
@@ -220,7 +220,7 @@ Xcode에서 `SprayCan.xcodeproj`를 여세요.
 
 ## 현황
 
-Spray Can 0.1.2는 macOS 14 이상에서 사용할 수 있습니다.
+Spray Can 0.1.7는 macOS 14 이상에서 사용할 수 있습니다.
 
 탐색 코어는 **1,000회의 빠른 활성화 사이클**로 스트레스 테스트를 거쳤으며, 네이티브 테스트 픽스처에서 **60회의 요소/그리드 클릭 사이클**을 클릭 누락이나 입력 유출 없이 완료했습니다.
 

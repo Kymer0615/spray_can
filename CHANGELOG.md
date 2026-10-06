@@ -1,5 +1,18 @@
 # Changelog
 
+## Spray Can 0.1.7
+
+- Keep permissions across updates: releases are now signed with the project's own long-lived certificate instead of an ad-hoc signature. macOS ties Accessibility and Screen Recording permission to the signing identity, so from this release on updates keep them. Grant them once more after updating to 0.1.7.
+
+Validation: two different builds signed with the certificate have identical designated requirements, and a self-signed release packaged locally verifies with `codesign --verify --deep --strict`. Permission persistence across a real Homebrew upgrade is confirmed with the next release.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.6
 
 - Fix scroll direction with natural scrolling on: J now scrolls down and K up (and H/L, D/U, gg/G, and the scroll shortcuts in other modes follow suit). macOS applies the natural-scrolling setting to synthesized scroll events too, so Spray Can now follows it.

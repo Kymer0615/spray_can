@@ -149,7 +149,7 @@ brew uninstall --cask spray-can
 
 または、[Releases](https://github.com/Kymer0615/spray_can/releases) からユニバーサル ZIP をダウンロードして展開し、**Spray Can.app** を「アプリケーション」フォルダに移動してください。
 
-リリース 0.1.2 は **アドホック署名で、公証されていません**。信頼できるビルドを macOS がブロックした場合は、次の操作を行ってください。
+リリースは **プロジェクト独自の証明書で署名されており、公証されていません**。すべてのリリースを同じ証明書で署名しているため、アップデートしても macOS は Spray Can の権限を保持します（0.1.7 以降。以前のバージョンからアップデートした場合は、もう一度だけ許可してください）。信頼できるビルドを macOS がブロックした場合は、次の操作を行ってください。
 
 **システム設定 → プライバシーとセキュリティ → このまま開く**
 
@@ -209,7 +209,7 @@ scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
 swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
 python3 scripts/check-localizations.py
-scripts/release.sh 0.1.2 adhoc
+scripts/release.sh 0.1.7 adhoc
 ```
 
 Xcode で `SprayCan.xcodeproj` を開きます。
@@ -220,7 +220,7 @@ Xcode で `SprayCan.xcodeproj` を開きます。
 
 ## ステータス
 
-Spray Can 0.1.2 は macOS 14 以降で利用できます。
+Spray Can 0.1.7 は macOS 14 以降で利用できます。
 
 ナビゲーションのコアは **1,000 回の高速な起動サイクル**によるストレステストを経ており、ネイティブのテスト用アプリでは **60 回の要素/グリッドのクリックサイクル**を、クリックの取りこぼしや入力の漏れなく完了しました。
 

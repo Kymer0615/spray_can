@@ -1,12 +1,15 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-version="${1:?Usage: scripts/release.sh VERSION [adhoc|signed]}"
+version="${1:?Usage: scripts/release.sh VERSION [adhoc|selfsigned|signed]}"
 channel="${2:-adhoc}"
 if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]]; then
   echo 'Version must be a semantic version without a leading v.' >&2; exit 1
 fi
-if [[ "$channel" != adhoc && "$channel" != signed ]]; then echo 'Unknown channel' >&2; exit 1; fi
+if [[ "$channel" != adhoc && "$channel" != selfsigned && "$channel" != signed ]]; then echo 'Unknown channel' >&2; exit 1; fi
+if [[ "$channel" == selfsigned ]]; then
+  : "${SPRAYCAN_SIGN_IDENTITY:?Self-signed code-signing identity (name or SHA-1) required}"
+fi
 if [[ "$channel" == signed ]]; then
   : "${SPRAYCAN_SIGN_IDENTITY:?Developer ID Application identity required}"
   : "${SPRAYCAN_NOTARY_PROFILE:?notarytool keychain profile required}"
@@ -28,6 +31,13 @@ if [[ "$channel" == signed ]]; then
   xcrun notarytool submit "$stage/notary.zip" --keychain-profile "$SPRAYCAN_NOTARY_PROFILE" "${notary_args[@]}" --wait
   xcrun stapler staple "$app"
   spctl --assess --type execute --verbose "$app"
+elif [[ "$channel" == selfsigned ]]; then
+  # One long-lived certificate keeps the designated requirement identical across releases,
+  # so macOS keeps Accessibility and Screen Recording permission after updates.
+  keychain_args=()
+  if [[ -n "${SPRAYCAN_SIGN_KEYCHAIN:-}" ]]; then keychain_args+=(--keychain "$SPRAYCAN_SIGN_KEYCHAIN"); fi
+  codesign --force --options runtime "${keychain_args[@]}" --sign "$SPRAYCAN_SIGN_IDENTITY" "$app"
+  codesign -d -r- "$app" 2>&1 | grep designated
 else
   codesign --force --sign - "$app"
 fi

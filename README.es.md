@@ -151,7 +151,7 @@ La desinstalación normal conserva las preferencias. Si lo instalaste manualment
 
 También puedes descargar el ZIP universal desde [Releases](https://github.com/Kymer0615/spray_can/releases), descomprimirlo y mover **Spray Can.app** a Aplicaciones.
 
-La versión 0.1.2 tiene **firma ad hoc y no está notarizada**. Si macOS bloquea una compilación en la que confías:
+Las versiones están **firmadas con el certificado propio del proyecto y no están notarizadas**. El mismo certificado firma todas las versiones, así que macOS conserva los permisos de Spray Can al actualizar (desde la 0.1.7; concédelos una vez más al actualizar desde una versión anterior). Si macOS bloquea una compilación en la que confías:
 
 **Ajustes del Sistema → Privacidad y seguridad → Abrir igualmente**
 
@@ -211,7 +211,7 @@ scripts/integration-test.sh
 swift scripts/ocr-smoke.swift
 swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
 python3 scripts/check-localizations.py
-scripts/release.sh 0.1.2 adhoc
+scripts/release.sh 0.1.7 adhoc
 ```
 
 Abre `SprayCan.xcodeproj` en Xcode.
@@ -222,7 +222,7 @@ Las traducciones de la interfaz están en `Resources/<language>.lproj/Localizabl
 
 ## Estado
 
-Spray Can 0.1.2 está disponible para macOS 14 y posteriores.
+Spray Can 0.1.7 está disponible para macOS 14 y posteriores.
 
 El núcleo de navegación se ha sometido a pruebas de estrés con **1000 ciclos rápidos de activación**, y un entorno de pruebas nativo completó **60 ciclos de clic con elementos y cuadrícula** sin clics fallidos ni fugas de entrada.
 

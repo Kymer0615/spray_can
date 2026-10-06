@@ -3,10 +3,11 @@ import hashlib, re, sys
 from pathlib import Path
 version, archive = sys.argv[1:3]
 channel = sys.argv[3] if len(sys.argv) > 3 else "adhoc"
-assert channel in ("adhoc", "signed"), "Invalid signing mode"
-caveats = "" if channel == "signed" else """
+assert channel in ("adhoc", "selfsigned", "signed"), "Invalid signing mode"
+signing = "signed with the project's own certificate" if channel == "selfsigned" else "ad hoc signed"
+caveats = "" if channel == "signed" else f"""
   caveats <<~EOS
-    This app is ad hoc signed and is not notarized by Apple.
+    This app is {signing} and is not notarized by Apple.
     If macOS blocks the first launch, allow it in System Settings >
     Privacy & Security > Open Anyway, then open it again.
   EOS

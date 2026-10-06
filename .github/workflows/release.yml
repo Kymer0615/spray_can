@@ -34,10 +34,32 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "$KEYCHAIN_PASSWORD" "$RUNNER_TEMP/signing.keychain-db"
           security list-keychains -d user -s "$RUNNER_TEMP/signing.keychain-db" login.keychain-db
           xcrun notarytool store-credentials SprayCan --apple-id "$APPLE_ID" --team-id "$APPLE_TEAM_ID" --password "$APPLE_APP_PASSWORD" --keychain "$RUNNER_TEMP/signing.keychain-db"
+      - name: Configure self-signed signing
+        # One long-lived certificate keeps macOS permissions across updates without notarization.
+        if: ${{ env.RELEASE_SIGNING_MODE == 'selfsigned' }}
+        env:
+          CERTIFICATE: ${{ secrets.SELF_SIGNED_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.SELF_SIGNED_P12_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${CERTIFICATE:?Missing self-signed certificate}"
+          keychain="$RUNNER_TEMP/selfsigned.keychain-db"; password="$(openssl rand -hex 16)"
+          printf '%s' "$CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/selfsigned.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/selfsigned.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          rm -f "$RUNNER_TEMP/selfsigned.p12"
+          identity="$(security find-certificate -c 'Spray Can Release Signing' -Z "$keychain" | awk '/SHA-1/ {print $3}')"
+          : "${identity:?Certificate not found in the imported keychain}"
+          echo "SELF_SIGNED_IDENTITY=$identity" >> "$GITHUB_ENV"
+          echo "SELF_SIGNED_KEYCHAIN=$keychain" >> "$GITHUB_ENV"
       - name: Package release
         env:
           RELEASE_TAG: ${{ github.ref_name }}
-          SPRAYCAN_SIGN_IDENTITY: ${{ secrets.DEVELOPER_ID_IDENTITY }}
+          SPRAYCAN_SIGN_IDENTITY: ${{ env.RELEASE_SIGNING_MODE == 'selfsigned' && env.SELF_SIGNED_IDENTITY || secrets.DEVELOPER_ID_IDENTITY }}
+          SPRAYCAN_SIGN_KEYCHAIN: ${{ env.SELF_SIGNED_KEYCHAIN }}
           SPRAYCAN_NOTARY_PROFILE: SprayCan
           SPRAYCAN_NOTARY_KEYCHAIN: ${{ runner.temp }}/signing.keychain-db
         run: |
@@ -50,9 +72,11 @@ jobs:
           flags=()
           if [[ "$RELEASE_TAG" == *-* ]]; then flags+=(--prerelease); fi
           if [[ "$RELEASE_SIGNING_MODE" == adhoc ]]; then flags+=(--notes-file docs/ADHOC_RELEASE.md); fi
+          if [[ "$RELEASE_SIGNING_MODE" == selfsigned ]]; then flags+=(--notes-file docs/SELFSIGNED_RELEASE.md); fi
           gh release create "$RELEASE_TAG" dist/*.zip dist/*.sha256 dist/spray-can.rb --title "Spray Can $RELEASE_TAG" --generate-notes "${flags[@]}"
       - name: Remove temporary signing material
         if: always()
         run: |
           security delete-keychain "$RUNNER_TEMP/signing.keychain-db" 2>/dev/null || true
+          security delete-keychain "$RUNNER_TEMP/selfsigned.keychain-db" 2>/dev/null || true
           rm -f "$RUNNER_TEMP/developer.p12"

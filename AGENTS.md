@@ -49,7 +49,7 @@ Use Xcode's toolchain (`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 ## Releasing and Homebrew
 
 1. Update `CHANGELOG.md`, commit, and push `main` (CI runs tests and a universal build).
-2. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`. `.github/workflows/release.yml` runs `scripts/release.sh`, which builds, signs (ad-hoc by default), zips `SprayCan-X.Y.Z-universal.zip`, writes the `.sha256`, generates `dist/spray-can.rb`, and publishes the GitHub release with those assets.
+2. Tag and push: `git tag vX.Y.Z && git push origin vX.Y.Z`. `.github/workflows/release.yml` runs `scripts/release.sh`, which builds, signs with the project's self-signed certificate (`RELEASE_SIGNING_MODE=selfsigned`; never replace the certificate, or users lose permissions on update, see `docs/RELEASING.md`), zips `SprayCan-X.Y.Z-universal.zip`, writes the `.sha256`, generates `dist/spray-can.rb`, and publishes the GitHub release with those assets.
 3. Update the tap [Kymer0615/homebrew-tap](https://github.com/Kymer0615/homebrew-tap): download the generated cask with `gh release download vX.Y.Z -R Kymer0615/spray_can -p spray-can.rb`, copy it to `Casks/spray-can.rb`, check that its `sha256` matches the release `.sha256`, commit as `spray-can X.Y.Z`, and push.
 4. Users upgrade with `brew update && brew upgrade --cask kymer0615/tap/spray-can`.
 
