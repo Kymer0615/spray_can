@@ -37,8 +37,14 @@ final class Settings: ObservableObject {
     @Published var dedupeOCR = UserDefaults.standard.object(forKey: "dedupeOCR") as? Bool ?? true { didSet { save("dedupeOCR", dedupeOCR) } }
     /// Draw each element label, its connector, and a box around its element in a shared color.
     @Published var colorCodeTargets = UserDefaults.standard.object(forKey: "colorCodeTargets") as? Bool ?? true { didSet { save("colorCodeTargets", colorCodeTargets) } }
+    /// When elements are shaded in their label's color, and how strongly.
+    @Published var elementShading = ElementShading(rawValue: UserDefaults.standard.string(forKey: "elementShading") ?? "") ?? .always {
+        didSet { save("elementShading", elementShading.rawValue) }
+    }
+    @Published var shadingOpacity = UserDefaults.standard.object(forKey: "shadingOpacity") as? Double ?? 0.16 { didSet { save("shadingOpacity", shadingOpacity) } }
+    func restoreShading() { elementShading = .always; shadingOpacity = 0.16 }
     /// Distinct hues for color-coded labels: red, orange, yellow, green, cyan, blue, purple, pink.
-    static let palette: [NSColor] = ["E5484D", "F76B15", "FFC53D", "30A46C", "05A2C2", "0090FF", "8E4EC6", "D6409F"].map { hex in
+    static let palette: [NSColor] = LabColor.labelPalette.map { hex in
         let rgb = UInt32(hex, radix: 16)!
         return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
     }
@@ -70,6 +76,17 @@ final class Settings: ObservableObject {
     }
     func restoreColors() { colors = [:] }
     private func save(_ key: String, _ value: Any) { UserDefaults.standard.set(value, forKey: key) }
+}
+
+enum ElementShading: String, CaseIterable {
+    case off, whileTyping, always
+    var title: String {
+        switch self {
+        case .off: return String(localized: "Off")
+        case .whileTyping: return String(localized: "While typing")
+        case .always: return String(localized: "Always")
+        }
+    }
 }
 
 /// Interface languages shipped in the app bundle, named in their own language.

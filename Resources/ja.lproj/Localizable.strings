@@ -10,6 +10,7 @@
 "Above the element" = "要素の上";
 "Accessibility" = "アクセシビリティ";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "macOS の権限を変更した後は、再起動が必要な場合があります。同じショートカットを使う別のツールがあると競合することがあります。Scoot を終了するか、そのキー割り当てを変更してください。";
+"Always" = "常に";
 "Appearance" = "外観";
 "Below the element" = "要素の下";
 "Buy me a coffee" = "コーヒーをおごる";
@@ -64,13 +65,14 @@
 "Move up" = "上へ移動";
 "Move with arrows · Return to click" = "矢印キーで移動 · Return でクリック";
 "Navigation unavailable. Check permissions or Secure Input." = "ナビゲーションを利用できません。権限またはセキュア入力を確認してください。";
-"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "近くのラベルは異なる色になります。入力中は、一致する要素がラベルと同じ色で囲まれます。";
+"Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "近くのラベルははっきり異なる色になります。入力中は、一致する要素がラベルと同じ色で囲まれます。";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "分析なし。クラウド推論なし。スクリーンショットの保存なし。診断情報には時間と回数のみが含まれ、入力したラベルやキャプチャした画面の内容は含まれません。";
 "No matching label · Esc clears your input" = "一致するラベルがありません · Esc で入力をクリア";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "スクロール領域がありません · ⇧⌘L でポインタスクロール";
 "No targets found · ⇧⌘K opens the grid" = "ターゲットが見つかりません · ⇧⌘K でグリッドを開く";
 "Not running" = "停止中";
 "OCR label tint" = "OCR ラベルの色";
+"Off" = "オフ";
 "On the element" = "要素の上に重ねる";
 "Only the access needed to navigate." = "ナビゲーションに必要な権限だけを使います。";
 "Open System Settings → Privacy & Security to enable access." = "システム設定 → プライバシーとセキュリティ を開いて、アクセスを有効にしてください。";
@@ -89,6 +91,7 @@
 "Restore default colors" = "デフォルトの色に戻す";
 "Restore default shortcuts" = "デフォルトのショートカットに戻す";
 "Restore label placement" = "ラベルの配置を元に戻す";
+"Restore shading" = "塗りの設定を元に戻す";
 "Retry keyboard capture" = "キーボードキャプチャを再試行";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: 左クリック · [: 中クリック · ]: 右クリック\n\\: ダブルクリック · =: 左ボタンを押したまま · Return: ドロップ\n⇧ 矢印: スクロール · ⌘H: 隠す · ⌘,: 設定";
 "Right of the element" = "要素の右";
@@ -96,6 +99,9 @@
 "Scroll" = "スクロール";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "別のアプリがセキュア入力を有効にしています。ナビゲーションを再開するには、そのアプリで無効にしてください。";
 "Settings…" = "設定…";
+"Shade elements" = "要素の塗り";
+"Shading opacity · %lld%%" = "塗りの不透明度 · %lld%%";
+"Shading tints each element in its label’s color, so labels and elements pair up at a glance." = "各要素をラベルの色で薄く塗り、ラベルと要素の対応がひと目でわかります。";
 "Shortcuts" = "ショートカット";
 "Skip recognized text that an element label already marks, such as a button’s title." = "ボタンのタイトルなど、要素ラベルがすでに示しているテキストを除外します。";
 "Source, releases & documentation ↗" = "ソース、リリース、ドキュメント ↗";
@@ -123,6 +129,7 @@
 "Use vi cursor bindings" = "vi のカーソルキー割り当てを使用";
 "Vertical offset · %lld pt" = "垂直オフセット · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "vi モードでは HJKL を移動用に予約し、ラベルには使いません。ラベルの文字は、IME が有効なときも含め、常に US 配列の物理キー位置を使います。";
+"While typing" = "入力中";
 "Window changed · " = "ウインドウが変わりました · ";
 "Your keyboard, everywhere." = "キーボードで、どこへでも。";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   要素のラベルを表示\nラベルを入力   ポインタを移動\nReturn   クリック\nEsc   入力をクリアし、次に終了";

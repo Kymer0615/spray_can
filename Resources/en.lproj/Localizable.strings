@@ -10,6 +10,7 @@
 "Above the element" = "Above the element";
 "Accessibility" = "Accessibility";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings.";
+"Always" = "Always";
 "Appearance" = "Appearance";
 "Below the element" = "Below the element";
 "Buy me a coffee" = "Buy me a coffee";
@@ -64,13 +65,14 @@
 "Move up" = "Move up";
 "Move with arrows · Return to click" = "Move with arrows · Return to click";
 "Navigation unavailable. Check permissions or Secure Input." = "Navigation unavailable. Check permissions or Secure Input.";
-"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color.";
+"Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color.";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content.";
 "No matching label · Esc clears your input" = "No matching label · Esc clears your input";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No scroll areas · ⇧⌘L for pointer scrolling";
 "No targets found · ⇧⌘K opens the grid" = "No targets found · ⇧⌘K opens the grid";
 "Not running" = "Not running";
 "OCR label tint" = "OCR label tint";
+"Off" = "Off";
 "On the element" = "On the element";
 "Only the access needed to navigate." = "Only the access needed to navigate.";
 "Open System Settings → Privacy & Security to enable access." = "Open System Settings → Privacy & Security to enable access.";
@@ -89,6 +91,7 @@
 "Restore default colors" = "Restore default colors";
 "Restore default shortcuts" = "Restore default shortcuts";
 "Restore label placement" = "Restore label placement";
+"Restore shading" = "Restore shading";
 "Retry keyboard capture" = "Retry keyboard capture";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings";
 "Right of the element" = "Right of the element";
@@ -96,6 +99,9 @@
 "Scroll" = "Scroll";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "Secure Input is enabled by another app. Disable it there to resume navigation.";
 "Settings…" = "Settings…";
+"Shade elements" = "Shade elements";
+"Shading opacity · %lld%%" = "Shading opacity · %lld%%";
+"Shading tints each element in its label’s color, so labels and elements pair up at a glance." = "Shading tints each element in its label’s color, so labels and elements pair up at a glance.";
 "Shortcuts" = "Shortcuts";
 "Skip recognized text that an element label already marks, such as a button’s title." = "Skip recognized text that an element label already marks, such as a button’s title.";
 "Source, releases & documentation ↗" = "Source, releases & documentation ↗";
@@ -123,6 +129,7 @@
 "Use vi cursor bindings" = "Use vi cursor bindings";
 "Vertical offset · %lld pt" = "Vertical offset · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active.";
+"While typing" = "While typing";
 "Window changed · " = "Window changed · ";
 "Your keyboard, everywhere." = "Your keyboard, everywhere.";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit";

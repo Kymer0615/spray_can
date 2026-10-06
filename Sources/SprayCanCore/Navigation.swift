@@ -51,10 +51,12 @@ public enum TargetCollection {
             }
             if !wraps { kept.append(target) }
         }
-        // A row that only wraps one control (a sidebar item's button) is that control.
+        // A row that only wraps one titled control (a sidebar item's button) is that control.
+        // A row holding only an untitled helper, such as a disclosure triangle, keeps its own label.
         let rows = kept.filter { $0.role == "AXRow" }
         let redundant = Set(rows.filter { row in
-            kept.filter { $0.id != row.id && row.frame.insetBy(dx: -2, dy: -2).contains($0.frame) }.count == 1
+            let inside = kept.filter { $0.id != row.id && row.frame.insetBy(dx: -2, dy: -2).contains($0.frame) }
+            return inside.count == 1 && !inside[0].title.isEmpty
         }.map(\.id))
         let ids = Set(kept.map(\.id)).subtracting(redundant)
         return targets.filter { ids.contains($0.id) }

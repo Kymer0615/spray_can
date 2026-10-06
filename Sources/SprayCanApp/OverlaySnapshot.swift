@@ -79,9 +79,12 @@ final class OverlaySnapshot {
         // HintCanvas converts global Quartz rects with these; map the window's top-left to the view origin.
         canvas.primaryHeight = area.maxY; canvas.screenOrigin = CGPoint(x: area.minX, y: 0)
         let settings = Settings.shared
-        let glass = settings.glassEnabled
+        let glass = settings.glassEnabled, shading = settings.elementShading, opacity = settings.shadingOpacity
         settings.glassEnabled = false
-        defer { settings.glassEnabled = glass }
+        // One-run overrides: --shading off|whileTyping|always, --shading-opacity 0.3.
+        if let mode = value("--shading").flatMap(ElementShading.init(rawValue:)) { settings.elementShading = mode }
+        if let level = value("--shading-opacity").flatMap(Double.init) { settings.shadingOpacity = level }
+        defer { settings.glassEnabled = glass; settings.elementShading = shading; settings.shadingOpacity = opacity }
         canvas.targets = HintLabels.assign(targets, vi: settings.vi)
         canvas.prefix = value("--prefix") ?? ""
         canvas.content = content; canvas.icons = icons

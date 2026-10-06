@@ -10,6 +10,7 @@
 "Above the element" = "Encima del elemento";
 "Accessibility" = "Accesibilidad";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "Tras cambiar los permisos de macOS, puede que haya que reiniciar la app. Otra herramienta que use estos atajos puede causar conflictos; cierra Scoot o cambia sus atajos.";
+"Always" = "Siempre";
 "Appearance" = "Apariencia";
 "Below the element" = "Debajo del elemento";
 "Buy me a coffee" = "Invítame a un café";
@@ -64,13 +65,14 @@
 "Move up" = "Subir";
 "Move with arrows · Return to click" = "Mueve con las flechas · Return para hacer clic";
 "Navigation unavailable. Check permissions or Secure Input." = "Navegación no disponible. Revisa los permisos o la Entrada segura.";
-"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "Las etiquetas cercanas tienen colores distintos. Mientras escribes, los elementos que coinciden se resaltan con el color de su etiqueta.";
+"Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "Las etiquetas cercanas tienen colores claramente distintos. Mientras escribes, los elementos que coinciden se resaltan con el color de su etiqueta.";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "Sin analíticas. Sin inferencia en la nube. Sin capturas guardadas. Los diagnósticos contienen tiempos y recuentos, no etiquetas escritas ni contenido de pantalla capturado.";
 "No matching label · Esc clears your input" = "Ninguna etiqueta coincide · Esc borra la entrada";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No hay áreas desplazables · ⇧⌘L para desplazar con el puntero";
 "No targets found · ⇧⌘K opens the grid" = "No se encontraron objetivos · ⇧⌘K abre la cuadrícula";
 "Not running" = "No activa";
 "OCR label tint" = "Tinte de etiqueta OCR";
+"Off" = "Desactivado";
 "On the element" = "Sobre el elemento";
 "Only the access needed to navigate." = "Solo el acceso necesario para navegar.";
 "Open System Settings → Privacy & Security to enable access." = "Abre Ajustes del Sistema → Privacidad y seguridad para conceder acceso.";
@@ -89,6 +91,7 @@
 "Restore default colors" = "Restaurar colores predeterminados";
 "Restore default shortcuts" = "Restaurar atajos predeterminados";
 "Restore label placement" = "Restaurar posición de etiquetas";
+"Restore shading" = "Restaurar sombreado";
 "Retry keyboard capture" = "Reintentar captura de teclado";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: clic izquierdo · [: clic central · ]: clic derecho\n\\: doble clic · =: mantener botón izquierdo · Return: soltar\n⇧ flechas: desplazar · ⌘H: ocultar · ⌘,: ajustes";
 "Right of the element" = "A la derecha del elemento";
@@ -96,6 +99,9 @@
 "Scroll" = "Desplazar";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "Otra app ha activado la Entrada segura. Desactívala allí para reanudar la navegación.";
 "Settings…" = "Ajustes…";
+"Shade elements" = "Sombrear elementos";
+"Shading opacity · %lld%%" = "Opacidad del sombreado · %lld%%";
+"Shading tints each element in its label’s color, so labels and elements pair up at a glance." = "El sombreado tiñe cada elemento con el color de su etiqueta, para emparejarlos de un vistazo.";
 "Shortcuts" = "Atajos";
 "Skip recognized text that an element label already marks, such as a button’s title." = "Omite el texto reconocido que ya marca la etiqueta de un elemento, como el título de un botón.";
 "Source, releases & documentation ↗" = "Código, versiones y documentación ↗";
@@ -123,6 +129,7 @@
 "Use vi cursor bindings" = "Usar teclas de cursor de vi";
 "Vertical offset · %lld pt" = "Desplazamiento vertical · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "El modo vi reserva HJKL para el movimiento y las quita de las etiquetas. Las letras de las etiquetas siempre usan las posiciones físicas del teclado estadounidense, incluso con un IME activo.";
+"While typing" = "Al escribir";
 "Window changed · " = "Ventana cambiada · ";
 "Your keyboard, everywhere." = "Tu teclado, en todas partes.";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   Mostrar etiquetas de elementos\nEscribe una etiqueta   Mover el puntero\nReturn   Hacer clic\nEsc   Borrar un prefijo y luego salir";

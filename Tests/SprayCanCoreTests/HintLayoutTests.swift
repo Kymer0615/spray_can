@@ -193,4 +193,31 @@ final class HintLayoutTests: XCTestCase {
         XCTAssertEqual(HUDPlacement.choose([bottom, top], avoiding: [], pointer: CGPoint(x: 500, y: 60)), top)
         XCTAssertNil(HUDPlacement.choose([], avoiding: [], pointer: nil))
     }
+    func testLabColorsAndPaletteSeparation() {
+        let white = LabColor(hex: "FFFFFF"), red = LabColor(hex: "FF0000")
+        XCTAssertEqual(white.l, 100, accuracy: 0.1); XCTAssertEqual(white.a, 0, accuracy: 0.1); XCTAssertEqual(white.b, 0, accuracy: 0.1)
+        XCTAssertEqual(red.l, 53.2, accuracy: 0.3); XCTAssertEqual(red.a, 80.1, accuracy: 0.5); XCTAssertEqual(red.b, 67.2, accuracy: 0.5)
+        let palette = LabColor.labelPalette.map(LabColor.init(hex:))
+        for (i, a) in palette.enumerated() { for b in palette.dropFirst(i + 1) { XCTAssertGreaterThan(a.distance(to: b), 30) } }
+    }
+    func testNearestNeighborsGetTheMostContrastingColors() {
+        let palette = LabColor.labelPalette.map(LabColor.init(hex:))
+        // A dense toolbar and a list: plenty of neighbors at different distances.
+        let toolbar = (0..<10).map { HintLayoutItem(id: "t\($0)", target: CGRect(x: 40 + Double($0) * 34, y: 40, width: 28, height: 24), size: CGSize(width: 28, height: 20)) }
+        let list = (0..<10).map { HintLayoutItem(id: "l\($0)", target: CGRect(x: 60, y: 90 + Double($0) * 26, width: 200, height: 22), size: CGSize(width: 28, height: 20)) }
+        let placements = HintLayout.place(toolbar + list, in: bounds, style: HintPlacementStyle(position: .leading))
+        let colors = HintLayout.colorGroups(placements)
+        XCTAssertEqual(colors, HintLayout.colorGroups(placements.reversed()))
+        func area(_ p: HintPlacement) -> CGRect { p.frame.union(p.target) }
+        for p in placements {
+            let others = placements.filter { $0.id != p.id }
+            func gap(_ o: HintPlacement) -> CGFloat {
+                let a = area(p), b = area(o)
+                return hypot(max(0, max(a.minX - b.maxX, b.minX - a.maxX)), max(0, max(a.minY - b.maxY, b.minY - a.maxY)))
+            }
+            let nearest = others.min { gap($0) < gap($1) }!
+            let difference = palette[colors[p.id]!].distance(to: palette[colors[nearest.id]!])
+            XCTAssertGreaterThan(difference, 45, "\(p.id) and its nearest neighbor \(nearest.id) look alike")
+        }
+    }
 }

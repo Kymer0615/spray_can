@@ -103,8 +103,21 @@ struct SettingsView: View {
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
             AppearancePreview().frame(height: 100)
             Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
-            Toggle("Color-code labels", isOn: $settings.colorCodeTargets)
-            Text("Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color.").font(.caption).foregroundStyle(.secondary)
+            GroupBox {
+                VStack(alignment: .leading, spacing: 10) {
+                    Toggle("Color-code labels", isOn: $settings.colorCodeTargets)
+                    Text("Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color.").font(.caption).foregroundStyle(.secondary)
+                    Picker("Shade elements", selection: $settings.elementShading) {
+                        ForEach(ElementShading.allCases, id: \.self) { Text($0.title).tag($0) }
+                    }.disabled(!settings.colorCodeTargets)
+                    VStack(alignment: .leading) {
+                        Text("Shading opacity · \(Int((settings.shadingOpacity * 100).rounded()))%")
+                        Slider(value: $settings.shadingOpacity, in: 0.05...0.5, step: 0.01)
+                    }.disabled(!settings.colorCodeTargets || settings.elementShading == .off)
+                    Text("Shading tints each element in its label’s color, so labels and elements pair up at a glance.").font(.caption).foregroundStyle(.secondary)
+                    Button("Restore shading") { settings.restoreShading() }
+                }.padding(10)
+            }
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
                 ForEach(AppearanceColor.allCases, id: \.self) { role in
                     ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)

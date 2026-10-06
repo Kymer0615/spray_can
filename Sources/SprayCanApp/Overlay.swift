@@ -122,7 +122,8 @@ struct HintBackground: View {
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 5) }
     var body: some View {
         let tint = group.map { Color(nsColor: $0) } ?? settings.color(ocr ? .ocr : .label)
-        if reduceTransparency { shape.fill(tint) }
+        // Glass would wash out a group color, so color-coded badges are always solid.
+        if reduceTransparency || group != nil { shape.fill(tint) }
         else { surface(tint: tint).opacity(settings.glassEnabled ? 1 : settings.contrast) }
     }
     @ViewBuilder private func surface(tint: Color) -> some View {
@@ -180,7 +181,9 @@ private final class HintTextCanvas: NSView {
             let ink = hint.color.map(Settings.textColor(on:)) ?? settings.nsColor(.text)
             let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: ink])
             let matched = min((prefix.uppercased() as NSString).length, text.length)
-            if matched > 0 { text.addAttribute(.foregroundColor, value: settings.nsColor(.highlight), range: NSRange(location: 0, length: matched)) }
+            // On color-coded badges the highlight color can vanish (mint on yellow); dim the typed part instead.
+            let typed = hint.color == nil ? settings.nsColor(.highlight) : ink.withAlphaComponent(0.45)
+            if matched > 0 { text.addAttribute(.foregroundColor, value: typed, range: NSRange(location: 0, length: matched)) }
             let size = text.size()
             text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
         }
@@ -207,6 +210,7 @@ final class HintCanvas: NSView {
     var primaryHeight: CGFloat = 0
     var preview = false
     private var preparingPreview = false
+    private var previewTexts: [CGRect] = []
     private var placed: [PlacedHint] = []
     private var layoutItems: [HintLayoutItem] = []
     private var layoutBounds = CGRect.zero
@@ -256,13 +260,24 @@ final class HintCanvas: NSView {
             preparingPreview = true
             defer { preparingPreview = false }
             primaryHeight = bounds.height
-            targets = (0..<6).map { index in
-                let vertical = index < 3
-                let x = vertical ? bounds.width * 0.2 : bounds.width * 0.67 + CGFloat(index - 3) * 18
-                let y = vertical ? bounds.height / 2 - 14 + CGFloat(index) * 14 : bounds.height / 2
-                return Target(id: "preview-\(index)", frame: CGRect(x: x - 5, y: y - 5, width: 10, height: 10), source: index == 1 ? .text : .accessibility, label: ["ab", "ac", "ad", "ae", "af", "ag"][index])
+            // A small list with text and a toolbar of icons, laid out like a real scan reports them.
+            let font = NSFont.systemFont(ofSize: 12)
+            var rows: [Target] = [], texts: [CGRect] = [], symbols: [CGRect] = []
+            for (index, title) in ["Inbox", "Drafts", "Archive"].enumerated() {
+                let frame = CGRect(x: bounds.width * 0.08, y: bounds.height / 2 - 37 + CGFloat(index) * 26, width: 130, height: 22)
+                rows.append(Target(id: "preview-\(index)", frame: frame, source: .accessibility, title: title))
+                symbols.append(CGRect(x: frame.minX + 6, y: frame.minY + 5, width: 13, height: 12))
+                let size = (title as NSString).size(withAttributes: [.font: font])
+                texts.append(CGRect(x: frame.minX + 26, y: frame.midY - size.height / 2 + 2, width: size.width, height: size.height - 4))
             }
-            prefix = "a"
+            for index in 0..<4 {
+                let frame = CGRect(x: bounds.width * 0.58 + CGFloat(index) * 32, y: bounds.height / 2 - 12, width: 26, height: 24)
+                rows.append(Target(id: "preview-\(index + 3)", frame: frame, source: .accessibility, title: "Tool"))
+                symbols.append(frame.insetBy(dx: 7, dy: 6))
+            }
+            targets = zip(rows, ["as", "ad", "af", "ag", "ah", "aj", "ak"]).map { target, label in var target = target; target.label = label; return target }
+            previewTexts = texts; content = texts; icons = symbols
+            prefix = ""
         }
         let settings = Settings.shared
         let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
@@ -281,7 +296,7 @@ final class HintCanvas: NSView {
             placements = HintLayout.place(items, in: bounds, style: style, content: obstacles, icons: images)
             layoutTime = ProcessInfo.processInfo.systemUptime - started
             let fixed = Set(items.filter(\.fixed).map(\.id))
-            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) }, colors: Settings.palette.count)
+            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) })
         }
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
@@ -299,9 +314,14 @@ final class HintCanvas: NSView {
         let settings = Settings.shared
         if preview {
             for target in targets {
-                NSColor.secondaryLabelColor.withAlphaComponent(0.5).setStroke()
-                let control = NSBezierPath(roundedRect: local(target.frame), xRadius: 2, yRadius: 2)
+                NSColor.secondaryLabelColor.withAlphaComponent(0.4).setStroke()
+                let control = NSBezierPath(roundedRect: local(target.frame), xRadius: 5, yRadius: 5)
                 control.lineWidth = 1; control.stroke()
+            }
+            NSColor.secondaryLabelColor.setFill()
+            for icon in icons { NSBezierPath(roundedRect: local(icon), xRadius: 3, yRadius: 3).fill() }
+            for (text, title) in zip(previewTexts, ["Inbox", "Drafts", "Archive"]) {
+                (title as NSString).draw(at: CGPoint(x: local(text).minX, y: local(text).minY - 2), withAttributes: [.font: NSFont.systemFont(ofSize: 12), .foregroundColor: NSColor.labelColor])
             }
         }
         for target in targets where target.source == .grid && settings.showLines {
@@ -309,6 +329,16 @@ final class HintCanvas: NSView {
             let border = NSBezierPath(rect: local(target.frame)); border.lineWidth = 0.5; border.stroke()
         }
         let shown = Dictionary(placed.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        // Shade each element in its label's color, under its outline, connector, and badge.
+        let shade = settings.elementShading == .always || (settings.elementShading == .whileTyping && !prefix.isEmpty)
+        for hint in placed where shade {
+            guard let color = hint.color else { continue }
+            let frame = local(hint.target.frame)
+            // Large panes get a lighter tint so they don't wash out everything inside them.
+            let opacity = settings.shadingOpacity * (frame.width * frame.height > 40_000 ? 0.6 : 1)
+            color.withAlphaComponent(opacity).setFill()
+            NSBezierPath(roundedRect: frame.insetBy(dx: -2, dy: -2), xRadius: 4, yRadius: 4).fill()
+        }
         // While a label is being typed, outline the remaining elements in their label's color.
         for hint in placed where !prefix.isEmpty {
             guard let color = hint.color else { continue }

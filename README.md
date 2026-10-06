@@ -72,11 +72,13 @@ Labels follow your focus. When the target window changes — switching tabs, ope
 
 ## Clear labels, even in dense interfaces
 
-Labels sit **beside** their element by default, so they never hide what you are about to click. Choose left, right, above, below, or on the element in **Appearance**, and fine-tune the placement with horizontal and vertical offsets.
+Labels sit **right next to** their element — usually just after its text — and never cover the text or icon you are about to click. Each item gets one label, and a connector line appears only in the rare case a label cannot touch its element. Choose left, right, above, below, or on the element in **Appearance**, and fine-tune the placement with horizontal and vertical offsets.
 
-Crowded labels automatically shift around nearby controls instead of simply overlapping them. Connector lines show exactly which target each displaced label belongs to.
+**Color coding** gives nearby labels clearly different colors and shades each element in its label's color, so every label and its element pair up at a glance. Show the shading always, only while typing, or not at all, and adjust its opacity. Once you type a letter, only the matching elements remain, outlined in their colors.
 
-![Adaptive placement for vertical and horizontal clusters](docs/images/clustered-labels.png)
+![Color coding before and after typing a letter](docs/images/color-coding.png)
+
+![Labels beside text in a list and a toolbar](docs/images/clustered-labels.png)
 
 ## Drag, click, scroll
 
@@ -92,7 +94,9 @@ Spray Can supports:
 
 Example drag:
 
-`⇧⌘K` → type source label → `=` → type destination label → `Return`
+`⇧⌘K` → type source label → `Space` → type destination label → `Space`
+
+The held button glides to each destination, so apps that track the pointer — including the macOS screenshot tool (⇧⌘4) — follow the drag.
 
 ![Grid drag workflow](docs/images/drag-demo.gif)
 
@@ -111,6 +115,7 @@ You can customize:
 - OCR and its recognition languages
 - vi bindings
 - label position and offsets
+- color coding, element shading, and shading opacity
 - label size
 - grid spacing
 - background opacity

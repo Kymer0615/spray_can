@@ -128,15 +128,18 @@ final class NavigationTests: XCTestCase {
         XCTAssertEqual(last, .selected(second))
     }
     func testRowsWrappingOneControlAndNearDuplicateWrappersCollapse() {
-        func target(_ id: String, _ role: String, _ frame: CGRect) -> Target { Target(id: id, frame: frame, source: .accessibility, role: role) }
+        func target(_ id: String, _ role: String, _ frame: CGRect, title: String = "") -> Target { Target(id: id, frame: frame, source: .accessibility, title: title, role: role) }
         let row = target("row", "AXRow", CGRect(x: 0, y: 0, width: 215, height: 32))
-        let button = target("button", "AXButton", CGRect(x: 17, y: 4, width: 88, height: 24))
+        let button = target("button", "AXButton", CGRect(x: 17, y: 4, width: 88, height: 24), title: "Bluetooth")
+        let folder = target("folder", "AXRow", CGRect(x: 0, y: 70, width: 400, height: 20))
+        let opener = target("opener", "AXDisclosureTriangle", CGRect(x: 2, y: 72, width: 12, height: 16))
         let listRow = target("list", "AXRow", CGRect(x: 0, y: 40, width: 400, height: 20))
         let triangle = target("tri", "AXDisclosureTriangle", CGRect(x: 2, y: 42, width: 12, height: 16))
         let toggle = target("toggle", "AXCheckBox", CGRect(x: 360, y: 42, width: 30, height: 16))
         let wrapper = target("wrap", "AXGroup", CGRect(x: 500, y: 0, width: 42, height: 26))
         let inner = target("inner", "AXButton", CGRect(x: 501, y: 1, width: 40, height: 24))
-        let kept = TargetCollection.collapsed([row, button, listRow, triangle, toggle, wrapper, inner]).map(\.id)
-        XCTAssertEqual(kept, ["button", "list", "tri", "toggle", "inner"])
+        let kept = TargetCollection.collapsed([row, button, listRow, triangle, toggle, wrapper, inner, folder, opener]).map(\.id)
+        // A folder row holding only its untitled disclosure triangle keeps its own label.
+        XCTAssertEqual(kept, ["button", "list", "tri", "toggle", "inner", "folder", "opener"])
     }
 }

@@ -1,5 +1,23 @@
 # Changelog
 
+## Spray Can 0.1.5
+
+- Shade elements in their label's color, so each label and its element pair up at a glance. Choose Always (default), While typing, or Off in Appearance, and adjust the shading opacity.
+- Nearby labels now get clearly different colors: each label takes the palette color most different from its neighbors' colors, with the nearest neighbors counting most (no more red next to orange).
+- Color-coded badges are solid even with Liquid Glass, which washed their colors out.
+- Typed letters on color-coded badges are dimmed instead of drawn in the highlight color, which could vanish on yellow or green badges.
+- Folder rows keep their own label when they contain a disclosure triangle.
+- README: new images showing labels beside text, color coding, and shading, rendered from a synthetic example window with default settings.
+
+Validation: 44 core tests (including palette separation and nearest-neighbor contrast), a localization check, and a universal Release build passed. Shading was checked on a real Finder window and in the synthetic documentation scene, before and after typing. Glass rendering of solid color badges on macOS 14–15 remains to be validated; see docs/VALIDATION.md.
+
+This release is ad-hoc signed and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.4
 
 - Readable labels: each label now touches its element and sits right after the element's text, on the same line, instead of drifting away on a connector line. Labels may overlap an element's padding but never its text or icon. Text positions come from the accessibility tree and a fast on-device text pass over the target window; nothing is stored.

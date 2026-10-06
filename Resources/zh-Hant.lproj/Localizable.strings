@@ -10,6 +10,7 @@
 "Above the element" = "元素上方";
 "Accessibility" = "輔助使用";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "變更 macOS 權限後，可能需要重新啟動。其他使用相同快捷鍵的工具可能造成衝突；請結束 Scoot 或變更其按鍵設定。";
+"Always" = "永遠";
 "Appearance" = "外觀";
 "Below the element" = "元素下方";
 "Buy me a coffee" = "請我喝杯咖啡";
@@ -64,13 +65,14 @@
 "Move up" = "上移";
 "Move with arrows · Return to click" = "用方向鍵移動 · Return 點按";
 "Navigation unavailable. Check permissions or Secure Input." = "無法使用導覽。請檢查權限或「安全輸入」。";
-"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "相鄰的標籤使用不同顏色。輸入時，符合的元素會以其標籤的顏色加上外框。";
+"Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "相鄰的標籤使用明顯不同的顏色。輸入時，符合的元素會以其標籤的顏色加上外框。";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "沒有分析追蹤。沒有雲端推論。不儲存截圖。診斷資料只包含時間與次數，不包含輸入的標籤或擷取的螢幕內容。";
 "No matching label · Esc clears your input" = "沒有符合的標籤 · Esc 清除輸入";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "沒有捲動區域 · ⇧⌘L 使用指標捲動";
 "No targets found · ⇧⌘K opens the grid" = "找不到目標 · ⇧⌘K 開啟網格";
 "Not running" = "未執行";
 "OCR label tint" = "OCR 標籤色調";
+"Off" = "關閉";
 "On the element" = "元素上";
 "Only the access needed to navigate." = "只要求導覽所需的權限。";
 "Open System Settings → Privacy & Security to enable access." = "開啟「系統設定」→「隱私權與安全性」以啟用權限。";
@@ -89,6 +91,7 @@
 "Restore default colors" = "還原預設顏色";
 "Restore default shortcuts" = "還原預設快捷鍵";
 "Restore label placement" = "還原標籤位置";
+"Restore shading" = "回復著色設定";
 "Retry keyboard capture" = "重試鍵盤擷取";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return：左鍵點按 · [：中鍵點按 · ]：右鍵點按\n\\：按兩下 · =：按住左鍵 · Return：放下\n⇧ 方向鍵：捲動 · ⌘H：隱藏 · ⌘,：設定";
 "Right of the element" = "元素右側";
@@ -96,6 +99,9 @@
 "Scroll" = "捲動";
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "另一個 App 已啟用「安全輸入」。請在該 App 中停用以恢復導覽。";
 "Settings…" = "設定…";
+"Shade elements" = "元素著色";
+"Shading opacity · %lld%%" = "著色不透明度 · %lld%%";
+"Shading tints each element in its label’s color, so labels and elements pair up at a glance." = "以標籤的顏色為每個元素著色，一眼就能看出標籤與元素的對應關係。";
 "Shortcuts" = "快捷鍵";
 "Skip recognized text that an element label already marks, such as a button’s title." = "略過元素標籤已標示的辨識文字，例如按鈕標題。";
 "Source, releases & documentation ↗" = "原始碼、版本與文件 ↗";
@@ -123,6 +129,7 @@
 "Use vi cursor bindings" = "使用 vi 游標按鍵";
 "Vertical offset · %lld pt" = "垂直偏移 · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "vi 模式會保留 HJKL 用於移動，並從標籤中移除這些字母。標籤字母一律使用美式鍵盤的實體按鍵位置，即使 IME 啟用時亦然。";
+"While typing" = "輸入時";
 "Window changed · " = "視窗已變更 · ";
 "Your keyboard, everywhere." = "你的鍵盤，無所不及。";
 "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   顯示元素標籤\n輸入標籤   移動指標\nReturn   點按\nEsc   清除前綴，再次按下則結束";

@@ -308,25 +308,33 @@ public enum HintLayout {
         }
         return count
     }
-    /// Gives neighboring labels different palette indices, so each label and its element read as a pair.
-    /// Neighbors are labels whose element and label areas lie within two label sizes of each other.
-    public static func colorGroups(_ placements: [HintPlacement], colors: Int = 8) -> [String: Int] {
+    /// Gives each label a palette color that contrasts with its neighbors' colors, so each label and
+    /// its element read as a pair. Neighbors are labels whose element and label areas lie within two
+    /// label sizes; the nearer a neighbor, the more different its color must be.
+    public static func colorGroups(_ placements: [HintPlacement], palette: [LabColor] = LabColor.labelPalette.map(LabColor.init(hex:))) -> [String: Int] {
+        guard !palette.isEmpty else { return [:] }
         let hints = placements.sorted { $0.id < $1.id }
         let areas = hints.map { $0.frame.union($0.target) }
-        let neighbors = hints.indices.map { i in
-            let reach = 2 * max(hints[i].frame.width, hints[i].frame.height)
-            return hints.indices.filter { $0 != i && areas[i].insetBy(dx: -reach, dy: -reach).intersects(areas[$0]) }
+        let reaches = hints.map { 2 * max($0.frame.width, $0.frame.height) }
+        func gap(_ i: Int, _ j: Int) -> CGFloat {
+            let a = areas[i], b = areas[j]
+            return hypot(max(0, max(a.minX - b.maxX, b.minX - a.maxX)), max(0, max(a.minY - b.maxY, b.minY - a.maxY)))
         }
+        let neighbors = hints.indices.map { i in hints.indices.filter { $0 != i && gap(i, $0) <= reaches[i] } }
         let order = hints.indices.sorted { neighbors[$0].count != neighbors[$1].count ? neighbors[$0].count > neighbors[$1].count : hints[$0].id < hints[$1].id }
         var assigned: [Int: Int] = [:]
         for i in order {
-            let used = Set(neighbors[i].compactMap { assigned[$0] })
-            if let free = (0..<colors).first(where: { !used.contains($0) }) { assigned[i] = free; continue }
-            // Out of colors locally: reuse the color whose nearest use is farthest away.
-            func distance(_ color: Int) -> CGFloat {
-                assigned.filter { $0.value == color }.map { hypot(areas[$0.key].midX - areas[i].midX, areas[$0.key].midY - areas[i].midY) }.min() ?? .infinity
+            // A color's score is its smallest difference from a neighbor's color, where
+            // farther neighbors count as already partly different.
+            func score(_ color: Int) -> Double {
+                neighbors[i].compactMap { j in assigned[j].map { palette[color].distance(to: palette[$0]) + Double(gap(i, j) / reaches[i]) * 20 } }.min() ?? .infinity
             }
-            assigned[i] = (0..<colors).max { distance($0) < distance($1) }!
+            var best = 0, bestScore = -Double.infinity
+            for color in palette.indices {
+                let value = score(color)
+                if value > bestScore { best = color; bestScore = value }
+            }
+            assigned[i] = best
         }
         return Dictionary(uniqueKeysWithValues: assigned.map { (hints[$0.key].id, $0.value) })
     }

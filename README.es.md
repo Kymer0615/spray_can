@@ -76,11 +76,13 @@ Las etiquetas siguen a tu foco. Cuando cambia la ventana de destino —al cambia
 
 ## Etiquetas claras, incluso en interfaces densas
 
-De forma predeterminada, las etiquetas se colocan **junto a** su elemento, para que nunca oculten lo que vas a pulsar. Elige a la izquierda, a la derecha, encima, debajo o sobre el elemento en **Apariencia**, y ajusta la posición con desplazamientos horizontales y verticales.
+Las etiquetas se colocan **justo al lado** de su elemento —normalmente justo después de su texto— y nunca tapan el texto ni el icono en el que vas a hacer clic. Cada elemento tiene una sola etiqueta, y solo aparece una línea de conexión en el raro caso de que una etiqueta no pueda tocar su elemento. Elige izquierda, derecha, arriba, abajo o sobre el elemento en **Apariencia**, y ajusta la posición con desplazamientos horizontales y verticales.
 
-Las etiquetas apiñadas se reubican automáticamente alrededor de los controles cercanos en lugar de simplemente superponerse. Unas líneas de conexión indican exactamente a qué objetivo pertenece cada etiqueta desplazada.
+**Colorear etiquetas** da colores claramente distintos a las etiquetas cercanas y sombrea cada elemento con el color de su etiqueta, para que cada etiqueta y su elemento se emparejen de un vistazo. Muestra el sombreado siempre, solo al escribir o nunca, y ajusta su opacidad. Al escribir una letra, solo quedan los elementos que coinciden, resaltados con su color.
 
-![Colocación adaptativa para grupos verticales y horizontales](docs/images/clustered-labels.png)
+![Colores de etiquetas antes y después de escribir una letra](docs/images/color-coding.png)
+
+![Etiquetas junto al texto en una lista y una barra de herramientas](docs/images/clustered-labels.png)
 
 ## Arrastra, haz clic, desplázate
 
@@ -96,7 +98,9 @@ Spray Can admite:
 
 Ejemplo de arrastre:
 
-`⇧⌘K` → escribe la etiqueta de origen → `=` → escribe la etiqueta de destino → `Return`
+`⇧⌘K` → escribe la etiqueta de origen → `Espacio` → escribe la etiqueta de destino → `Espacio`
+
+El botón pulsado se desliza hasta cada destino, así que las apps que siguen el puntero —incluida la herramienta de capturas de macOS (⇧⌘4)— siguen el arrastre.
 
 ![Flujo de arrastre con la cuadrícula](docs/images/drag-demo.gif)
 
@@ -115,6 +119,7 @@ Puedes personalizar:
 - el OCR y sus idiomas de reconocimiento
 - las teclas de vi
 - la posición y los desplazamientos de las etiquetas
+- los colores de etiquetas, el sombreado de elementos y su opacidad
 - el tamaño de las etiquetas
 - el espaciado de la cuadrícula
 - la opacidad del fondo
