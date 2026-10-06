@@ -29,15 +29,20 @@ final class OverlayManager {
             panel.contentView = view; panels.append(panel); views.append(view)
         }
     }
-    func render(targets: [Target], prefix: String, mode: NavigationMode, status: String, selected: CGRect? = nil) {
+    func render(targets: [Target], prefix: String, mode: NavigationMode, status: String, selected: CGRect? = nil, pointer: CGPoint? = nil) {
         prepare()
+        var avoid: [CGRect] = []
         for (panel, view) in zip(panels, views) {
             view.targets = targets; view.prefix = prefix; view.selected = selected
+            view.layoutSubtreeIfNeeded(); avoid += view.occupied
             view.needsDisplay = true; panel.orderFrontRegardless()
         }
-        showHUD(mode: mode, status: status, prefix: prefix)
+        if let selected { avoid.append(Geometry.cocoa(selected, primaryHeight: primaryHeight)) }
+        let cursor = pointer.map { CGPoint(x: $0.x, y: primaryHeight - $0.y) }
+        showHUD(mode: mode, status: status, prefix: prefix, avoid: avoid, pointer: cursor)
     }
-    func showHUD(mode: NavigationMode, status: String, prefix: String = "") {
+    /// `avoid` and `pointer` use global Cocoa coordinates; the card moves to keep them visible.
+    func showHUD(mode: NavigationMode, status: String, prefix: String = "", avoid: [CGRect] = [], pointer: CGPoint? = nil) {
         if hud == nil {
             let panel = OverlayPanel(contentRect: CGRect(x: 0, y: 0, width: 440, height: 76), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
             panel.backgroundColor = .clear; panel.isOpaque = false; panel.hasShadow = false
@@ -46,9 +51,17 @@ final class OverlayManager {
             panel.hidesOnDeactivate = false; panel.isReleasedWhenClosed = false
             hud = panel
         }
-        guard let hud, let screen = NSScreen.screens.first(where: { $0.frame.contains(NSEvent.mouseLocation) }) ?? NSScreen.main else { return }
+        let location = pointer ?? NSEvent.mouseLocation
+        guard let hud, let screen = NSScreen.screens.first(where: { $0.frame.contains(location) }) ?? NSScreen.main else { return }
         hud.contentView = NSHostingView(rootView: NavigationHUD(mode: mode, status: status, prefix: prefix))
-        hud.setFrameOrigin(CGPoint(x: screen.visibleFrame.midX - 220, y: screen.visibleFrame.minY + 24))
+        let area = screen.visibleFrame, size = hud.frame.size
+        let left = area.minX + 24, center = area.midX - size.width / 2, right = area.maxX - size.width - 24
+        let bottom = area.minY + 24, top = area.maxY - size.height - 24
+        // Bottom center is preferred; corners and the top keep the card off labels and the pointer.
+        let spots = [(center, bottom), (center, top), (left, bottom), (right, bottom), (left, top), (right, top)]
+            .map { CGRect(origin: CGPoint(x: $0.0, y: $0.1), size: size) }
+        let frame = HUDPlacement.choose(spots, avoiding: avoid, pointer: pointer) ?? spots[0]
+        hud.setFrameOrigin(frame.origin)
         hud.orderFrontRegardless()
     }
     func hide() { panels.forEach { $0.orderOut(nil) }; hud?.orderOut(nil) }
@@ -126,6 +139,8 @@ private struct PlacedHint: Identifiable {
     let id: String
     let target: Target
     let frame: CGRect
+    /// Shared by the badge outline, connector, and element box when color coding is on.
+    var color: NSColor?
 }
 private struct HintLayer: View {
     let hints: [PlacedHint]
@@ -164,6 +179,11 @@ private final class HintTextCanvas: NSView {
             let matched = min((prefix.uppercased() as NSString).length, text.length)
             if matched > 0 { text.addAttribute(.foregroundColor, value: settings.nsColor(.highlight), range: NSRange(location: 0, length: matched)) }
             let size = text.size()
+            if let color = hint.color {
+                color.setStroke()
+                let outline = NSBezierPath(roundedRect: hint.frame.insetBy(dx: 0.75, dy: 0.75), xRadius: 5, yRadius: 5)
+                outline.lineWidth = 1.5; outline.stroke()
+            }
             text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
         }
     }
@@ -191,6 +211,11 @@ final class HintCanvas: NSView {
     private var layoutBounds = CGRect.zero
     private var layoutStyle = HintPlacementStyle.centered
     private var placements: [HintPlacement] = []
+    private var colorGroups: [String: Int] = [:]
+    /// Visible labels and their elements in global Cocoa coordinates, for keeping the HUD clear.
+    var occupied: [CGRect] {
+        placed.flatMap { [$0.frame, local($0.target.frame)] }.map { $0.offsetBy(dx: screenOrigin.x, dy: screenOrigin.y) }
+    }
     private var appearanceChanges: AnyCancellable?
     private var accessibilityChanges: NSObjectProtocol?
     private let letters = HintTextCanvas()
@@ -240,11 +265,14 @@ final class HintCanvas: NSView {
         if items != layoutItems || bounds != layoutBounds || style != layoutStyle {
             layoutItems = items; layoutBounds = bounds; layoutStyle = style
             placements = HintLayout.place(items, in: bounds, style: style)
+            let fixed = Set(items.filter(\.fixed).map(\.id))
+            colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) }, colors: Settings.palette.count)
         }
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
             guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
-            return PlacedHint(id: target.id, target: target, frame: frame)
+            let color = settings.colorCodeTargets ? colorGroups[target.id].map { Settings.palette[$0] } : nil
+            return PlacedHint(id: target.id, target: target, frame: frame, color: color)
         }
         letters.frame = bounds
         letters.hints = placed; letters.prefix = prefix; letters.needsDisplay = true
@@ -265,12 +293,21 @@ final class HintCanvas: NSView {
             settings.nsColor(.grid).withAlphaComponent(0.45).setStroke()
             let border = NSBezierPath(rect: local(target.frame)); border.lineWidth = 0.5; border.stroke()
         }
-        let shown = Set(placed.map(\.id))
-        for hint in placements where shown.contains(hint.id) && hint.displaced {
-            settings.nsColor(.grid).withAlphaComponent(0.8).setStroke()
+        let shown = Dictionary(placed.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        // Color-coded labels box their element, so each label and element read as a pair.
+        for hint in placed {
+            guard let color = hint.color else { continue }
+            color.setStroke()
+            let box = NSBezierPath(roundedRect: local(hint.target.frame).insetBy(dx: -2, dy: -2), xRadius: 4, yRadius: 4)
+            box.lineWidth = 1.5; box.stroke()
+        }
+        for hint in placements where hint.displaced {
+            guard let visible = shown[hint.id] else { continue }
+            let color = visible.color ?? settings.nsColor(.grid)
+            color.withAlphaComponent(visible.color == nil ? 0.8 : 1).setStroke()
             let line = NSBezierPath(); line.move(to: hint.connectorStart); line.line(to: hint.anchor)
-            line.lineWidth = 1; line.stroke()
-            settings.nsColor(.grid).setFill()
+            line.lineWidth = visible.color == nil ? 1 : 1.5; line.stroke()
+            color.setFill()
             NSBezierPath(ovalIn: CGRect(x: hint.anchor.x - 2, y: hint.anchor.y - 2, width: 4, height: 4)).fill()
         }
         if let selected {

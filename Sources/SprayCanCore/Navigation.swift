@@ -79,6 +79,25 @@ public enum Geometry {
         }
         return result
     }
+    /// OCR text is dropped where an accessibility target already labels it: text mostly inside
+    /// an element, centered on an element not much larger than the text, or next to an element
+    /// with the same title. A large element does not claim text that merely reaches into it.
+    public static func mergeText(_ elements: [Target], _ text: [Target]) -> [Target] {
+        func normalized(_ string: String) -> String { string.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() }
+        let unknown = text.filter { candidate in
+            let area = max(1, candidate.frame.width * candidate.frame.height)
+            let center = CGPoint(x: candidate.frame.midX, y: candidate.frame.midY)
+            let words = normalized(candidate.title)
+            return !elements.contains { element in
+                let frame = element.frame
+                if frame.insetBy(dx: -4, dy: -4).contains(center) && frame.width * frame.height <= area * 8 { return true }
+                guard !words.isEmpty, normalized(element.title) == words else { return false }
+                let reach = max(candidate.frame.height, 8)
+                return frame.insetBy(dx: -reach, dy: -reach).intersects(candidate.frame)
+            }
+        }
+        return merge(elements, unknown)
+    }
 }
 
 public enum HintLabels {

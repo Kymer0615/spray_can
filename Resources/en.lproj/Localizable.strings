@@ -16,7 +16,8 @@
 "Buy me a coffee — support Ziyang" = "Buy me a coffee — support Ziyang";
 "By default, labels move the pointer. Return clicks." = "By default, labels move the pointer. Return clicks.";
 "Click as soon as a label is complete" = "Click as soon as a label is complete";
-"Dragging · Choose destination · Return drops" = "Dragging · Choose destination · Return drops";
+"Color-code labels and target boxes" = "Color-code labels and target boxes";
+"Each label, its line, and a box around its element share a color that differs from nearby labels." = "Each label, its line, and a box around its element share a color that differs from nearby labels.";
 "Elements" = "Elements";
 "Enable" = "Enable";
 "Enable Screen Recording to use text targeting." = "Enable Screen Recording to use text targeting.";
@@ -33,7 +34,9 @@
 "Grid cell size · %lld pt" = "Grid cell size · %lld pt";
 "Grid lines" = "Grid lines";
 "Help & Shortcuts" = "Help & Shortcuts";
+"Hide text labels on known elements" = "Hide text labels on known elements";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL scroll · Tab changes area · Esc exits";
+"Holding · Type a label to drag · Space or Return drops" = "Holding · Type a label to drag · Space or Return drops";
 "Horizontal offset · %lld pt" = "Horizontal offset · %lld pt";
 "Include all visible windows" = "Include all visible windows";
 "Input cleared" = "Input cleared";
@@ -94,6 +97,7 @@
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "Secure Input is enabled by another app. Disable it there to resume navigation.";
 "Settings…" = "Settings…";
 "Shortcuts" = "Shortcuts";
+"Skip recognized text that an element label already marks, such as a button’s title." = "Skip recognized text that an element label already marks, such as a button’s title.";
 "Source, releases & documentation ↗" = "Source, releases & documentation ↗";
 "Spray Can" = "Spray Can";
 "Spray Can %@" = "Spray Can %@";

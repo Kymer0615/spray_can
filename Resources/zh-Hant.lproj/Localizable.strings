@@ -16,7 +16,8 @@
 "Buy me a coffee — support Ziyang" = "請我喝杯咖啡 — 支持 Ziyang";
 "By default, labels move the pointer. Return clicks." = "預設情況下，標籤會移動指標。按 Return 點按。";
 "Click as soon as a label is complete" = "標籤輸入完成時立即點按";
-"Dragging · Choose destination · Return drops" = "拖移中 · 選擇目的地 · Return 放下";
+"Color-code labels and target boxes" = "為標籤和目標框加上顏色";
+"Each label, its line, and a box around its element share a color that differs from nearby labels." = "每個標籤、其連線以及元素周圍的框使用同一種顏色，並與附近的標籤區分。";
 "Elements" = "元素";
 "Enable" = "啟用";
 "Enable Screen Recording to use text targeting." = "啟用「螢幕錄製」以使用文字定位。";
@@ -33,7 +34,9 @@
 "Grid cell size · %lld pt" = "網格儲存格大小 · %lld pt";
 "Grid lines" = "網格線";
 "Help & Shortcuts" = "說明與快捷鍵";
+"Hide text labels on known elements" = "隱藏已知元素上的文字標籤";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL 捲動 · Tab 切換區域 · Esc 結束";
+"Holding · Type a label to drag · Space or Return drops" = "正在按住 · 輸入標籤以拖移 · 空白鍵或 Return 放開";
 "Horizontal offset · %lld pt" = "水平偏移 · %lld pt";
 "Include all visible windows" = "包含所有可見視窗";
 "Input cleared" = "已清除輸入";
@@ -94,6 +97,7 @@
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "另一個 App 已啟用「安全輸入」。請在該 App 中停用以恢復導覽。";
 "Settings…" = "設定…";
 "Shortcuts" = "快捷鍵";
+"Skip recognized text that an element label already marks, such as a button’s title." = "略過元素標籤已標示的辨識文字，例如按鈕標題。";
 "Source, releases & documentation ↗" = "原始碼、版本與文件 ↗";
 "Spray Can" = "Spray Can";
 "Spray Can %@" = "Spray Can %@";

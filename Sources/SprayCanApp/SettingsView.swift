@@ -57,6 +57,8 @@ struct SettingsView: View {
                     Toggle("Include all visible windows", isOn: $settings.allWindows)
                     Toggle("Use on-device text recognition", isOn: $settings.vision)
                     Text("Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)
+                    Toggle("Hide text labels on known elements", isOn: $settings.dedupeOCR).disabled(!settings.vision)
+                    Text("Skip recognized text that an element label already marks, such as a button’s title.").font(.caption).foregroundStyle(.secondary)
                     ocrLanguages.disabled(!settings.vision)
                     Toggle("Launch at login", isOn: $loginEnabled).onChange(of: loginEnabled) { _, value in
                         do { if value { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }; loginError = "" }
@@ -101,6 +103,8 @@ struct SettingsView: View {
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
             AppearancePreview().frame(height: 100)
             Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
+            Toggle("Color-code labels and target boxes", isOn: $settings.colorCodeTargets)
+            Text("Each label, its line, and a box around its element share a color that differs from nearby labels.").font(.caption).foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
                 ForEach(AppearanceColor.allCases, id: \.self) { role in
                     ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)

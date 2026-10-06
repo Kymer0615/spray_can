@@ -46,6 +46,7 @@ These are unverified, not implied by a successful compile:
 | Safari / Chrome | Links, form controls, long pages, tabs | Pending |
 | System Settings | Nested panes, toggles, sheets | Pending |
 | VS Code | Editor/sidebar controls, Electron accessibility | Pending |
+| 0.1.3 overlay | Space drag across apps, OCR de-duplication on real pages, color-coded boxes legibility, HUD repositioning | Pending; core logic unit-tested |
 | Menus / Dock / Control Center | Open menus, status items, Dock targets | Pending |
 | Displays and Spaces | Mixed scaling, negative origins, fullscreen, hot-plug | Geometry tests pass; live acceptance pending |
 | OCR capture | Permission changes, screen capture, late-result behavior, warm latency | Core merge and offline recognition pass; capture acceptance pending |

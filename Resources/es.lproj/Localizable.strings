@@ -16,7 +16,8 @@
 "Buy me a coffee — support Ziyang" = "Invítame a un café — apoya a Ziyang";
 "By default, labels move the pointer. Return clicks." = "De forma predeterminada, las etiquetas mueven el puntero. Return hace clic.";
 "Click as soon as a label is complete" = "Hacer clic al completar una etiqueta";
-"Dragging · Choose destination · Return drops" = "Arrastrando · Elige el destino · Return suelta";
+"Color-code labels and target boxes" = "Colorear etiquetas y recuadros de destino";
+"Each label, its line, and a box around its element share a color that differs from nearby labels." = "Cada etiqueta, su línea y un recuadro alrededor de su elemento comparten un color distinto al de las etiquetas cercanas.";
 "Elements" = "Elementos";
 "Enable" = "Activar";
 "Enable Screen Recording to use text targeting." = "Activa Grabación de pantalla para buscar texto.";
@@ -33,7 +34,9 @@
 "Grid cell size · %lld pt" = "Tamaño de celda · %lld pt";
 "Grid lines" = "Líneas de cuadrícula";
 "Help & Shortcuts" = "Ayuda y atajos";
+"Hide text labels on known elements" = "Ocultar etiquetas de texto en elementos conocidos";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL desplaza · Tab cambia de área · Esc sale";
+"Holding · Type a label to drag · Space or Return drops" = "Manteniendo pulsado · Escribe una etiqueta para arrastrar · Espacio o Retorno suelta";
 "Horizontal offset · %lld pt" = "Desplazamiento horizontal · %lld pt";
 "Include all visible windows" = "Incluir todas las ventanas visibles";
 "Input cleared" = "Entrada borrada";
@@ -94,6 +97,7 @@
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "Otra app ha activado la Entrada segura. Desactívala allí para reanudar la navegación.";
 "Settings…" = "Ajustes…";
 "Shortcuts" = "Atajos";
+"Skip recognized text that an element label already marks, such as a button’s title." = "Omite el texto reconocido que ya marca la etiqueta de un elemento, como el título de un botón.";
 "Source, releases & documentation ↗" = "Código, versiones y documentación ↗";
 "Spray Can" = "Spray Can";
 "Spray Can %@" = "Spray Can %@";

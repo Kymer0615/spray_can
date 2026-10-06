@@ -51,6 +51,8 @@ public enum KeyMap {
             if m == [.command, .shift] { return .cellSize(-1) }
             if m == .command { return .contrast(-1) }
         }
+        // Space presses and holds the button, then drops it, keeping the same labels.
+        if code == 49 && m.isEmpty { return .hold }
         if code == 36 || code == 76 { return .click(0) }
         if c == "[" { return .click(2) }; if c == "]" { return .click(1) }
         if c == "\\" { return .doubleClick }

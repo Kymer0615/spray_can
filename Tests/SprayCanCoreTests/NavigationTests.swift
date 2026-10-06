@@ -98,4 +98,33 @@ final class NavigationTests: XCTestCase {
         XCTAssertEqual(KeyMap.action(code: 38, text: "j", modifiers: [], vi: true), .move(0, 1, false))
         XCTAssertEqual(KeyMap.action(code: 38, text: "j", modifiers: [], vi: false), .label("j"))
     }
+    func testOCRTextOnKnownElementsIsDropped() {
+        let button = Target(id: "button", frame: CGRect(x: 100, y: 100, width: 60, height: 24), source: .accessibility, title: "Save")
+        let icon = Target(id: "icon", frame: CGRect(x: 200, y: 100, width: 20, height: 20), source: .accessibility, title: "Share")
+        let toolbar = Target(id: "toolbar", frame: CGRect(x: 0, y: 0, width: 800, height: 40), source: .accessibility, title: "Toolbar")
+        func text(_ id: String, _ frame: CGRect, _ title: String) -> Target { Target(id: id, frame: frame, source: .text, title: title) }
+        let inside = text("inside", CGRect(x: 104, y: 98, width: 70, height: 28), "Save")
+        let beside = text("beside", CGRect(x: 224, y: 102, width: 40, height: 16), "share")
+        let body = text("body", CGRect(x: 300, y: 300, width: 120, height: 16), "Paragraph")
+        // Centered in a large element but mostly outside it: not that element's own text.
+        let edge = text("edge", CGRect(x: 400, y: 30, width: 60, height: 40), "Tools")
+        let far = text("far", CGRect(x: 600, y: 500, width: 40, height: 16), "Save")
+        let merged = Geometry.mergeText([button, icon, toolbar], [inside, beside, body, far, edge])
+        XCTAssertEqual(merged.map(\.id), ["button", "icon", "toolbar", "body", "far", "edge"])
+        // The plain merge keeps text beside an element.
+        XCTAssertTrue(Geometry.merge([button, icon], [beside]).contains { $0.id == "beside" })
+    }
+    func testSpaceHoldsAndLabelsStillMatchWhileHolding() {
+        XCTAssertEqual(KeyMap.action(code: 49, text: "", modifiers: [], vi: false), .hold)
+        XCTAssertEqual(KeyMap.action(code: 49, text: "", modifiers: [], vi: true), .hold)
+        XCTAssertEqual(KeyMap.action(code: 49, text: "", modifiers: .command, vi: false), .none)
+        var session = NavigationSession()
+        let generation = session.begin(.grid)
+        _ = session.publish(targets(30), generation: generation)
+        let first = session.targets[3], second = session.targets[20]
+        for character in first.label { _ = session.type(character) }
+        var last: NavigationSession.Outcome = .ignored
+        for character in second.label { last = session.type(character) }
+        XCTAssertEqual(last, .selected(second))
+    }
 }

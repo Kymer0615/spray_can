@@ -16,7 +16,8 @@
 "Buy me a coffee — support Ziyang" = "コーヒーをおごる — Ziyang を支援";
 "By default, labels move the pointer. Return clicks." = "デフォルトでは、ラベルでポインタを移動し、Return でクリックします。";
 "Click as soon as a label is complete" = "ラベルの入力が完了したらすぐにクリック";
-"Dragging · Choose destination · Return drops" = "ドラッグ中 · 移動先を選択 · Return でドロップ";
+"Color-code labels and target boxes" = "ラベルと対象の枠を色分け";
+"Each label, its line, and a box around its element share a color that differs from nearby labels." = "各ラベル、その線、要素を囲む枠は同じ色になり、近くのラベルとは異なる色になります。";
 "Elements" = "要素";
 "Enable" = "有効にする";
 "Enable Screen Recording to use text targeting." = "テキストターゲットを使うには画面収録を有効にしてください。";
@@ -33,7 +34,9 @@
 "Grid cell size · %lld pt" = "グリッドのセルサイズ · %lld pt";
 "Grid lines" = "グリッド線";
 "Help & Shortcuts" = "ヘルプとショートカット";
+"Hide text labels on known elements" = "既知の要素上のテキストラベルを隠す";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL でスクロール · Tab で領域切替 · Esc で終了";
+"Holding · Type a label to drag · Space or Return drops" = "押したまま · ラベルを入力してドラッグ · スペースまたは Return で離す";
 "Horizontal offset · %lld pt" = "水平オフセット · %lld pt";
 "Include all visible windows" = "表示中のすべてのウインドウを含める";
 "Input cleared" = "入力をクリアしました";
@@ -94,6 +97,7 @@
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "別のアプリがセキュア入力を有効にしています。ナビゲーションを再開するには、そのアプリで無効にしてください。";
 "Settings…" = "設定…";
 "Shortcuts" = "ショートカット";
+"Skip recognized text that an element label already marks, such as a button’s title." = "ボタンのタイトルなど、要素ラベルがすでに示しているテキストを除外します。";
 "Source, releases & documentation ↗" = "ソース、リリース、ドキュメント ↗";
 "Spray Can" = "Spray Can";
 "Spray Can %@" = "Spray Can %@";

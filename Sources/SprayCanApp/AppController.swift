@@ -132,7 +132,7 @@ final class AppController: ObservableObject {
                     guard let self, self.active, self.session.generation == generation else { return }
                     if let error { self.status = error; self.render(); return }
                     guard !self.session.hasTyped else { return }
-                    let merged = Geometry.merge(discovered.targets, text)
+                    let merged = self.settings.dedupeOCR ? Geometry.mergeText(discovered.targets, text) : Geometry.merge(discovered.targets, text)
                     _ = self.session.publish(merged, generation: generation, vi: self.settings.vi)
                     self.updateReadyStatus(); self.render()
                 }
@@ -154,7 +154,7 @@ final class AppController: ObservableObject {
     }
     private func render() {
         guard active else { return }
-        overlay.render(targets: session.mode == .scroll ? [] : session.targets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame)
+        overlay.render(targets: session.mode == .scroll ? [] : session.targets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame, pointer: mouse.point)
     }
     func handle(_ key: CapturedKey) {
         guard active else { return }
@@ -180,7 +180,10 @@ final class AppController: ObservableObject {
         switch action {
         case .click(let button): performClick(button, modifiers: key.modifiers)
         case .doubleClick: performClick(0, modifiers: key.modifiers, count: 2)
-        case .hold: mouse.hold(); status = String(localized: "Dragging · Choose destination · Return drops"); render()
+        case .hold:
+            // Space or = presses and holds; labels stay, so the next label drags. Pressing again drops.
+            if mouse.holding { performClick(0, modifiers: []) }
+            else { mouse.hold(); status = String(localized: "Holding · Type a label to drag · Space or Return drops"); render() }
         case .backspace: session.backspace(); render()
         case .move(let x, let y, let full):
             let step = settings.cellSize / (full ? 1 : 6)
@@ -234,7 +237,8 @@ final class AppController: ObservableObject {
             guard let frame, frame.width > 1, frame.height > 1 else { self.deferred = []; self.status = String(localized: "Target changed · Activate again to refresh"); self.render(); return }
             self.selectedTarget = target; self.selectedFrame = frame
             self.mouse.move(to: CGPoint(x: frame.midX, y: frame.midY))
-            self.status = target.source == .text ? String(localized: "Text location · Return clicks here") : String(localized: "Target selected · Return clicks · = starts dragging")
+            if self.mouse.holding { self.status = String(localized: "Holding · Type a label to drag · Space or Return drops") }
+            else { self.status = target.source == .text ? String(localized: "Text location · Return clicks here") : String(localized: "Target selected · Return clicks · = starts dragging") }
             self.render()
             if self.settings.instantClick && !self.mouse.holding { self.performClick(0, modifiers: []) }
             else { self.drain() }

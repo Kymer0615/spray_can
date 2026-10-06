@@ -103,4 +103,51 @@ final class HintLayoutTests: XCTestCase {
         let hint = HintLayout.place([cell], in: bounds, style: HintPlacementStyle(position: .leading, offset: CGSize(width: 9, height: 9)))[0]
         XCTAssertEqual(hint.frame.midX, cell.target.midX); XCTAssertEqual(hint.frame.midY, cell.target.midY)
     }
+    private func crossings(_ placements: [HintPlacement]) -> Int {
+        placements.reduce(0) { $0 + HintLayout.conflicts($1, placements) }
+    }
+    func testConnectorsDoNotCrossInClusters() {
+        let clusters: [[HintLayoutItem]] = [
+            (0..<6).map { item("v\($0)", 200, 150 + Double($0) * 10) },
+            (0..<6).map { item("h\($0)", 150 + Double($0) * 12, 200) },
+            (0..<9).map { item("g\($0)", 200 + Double($0 % 3) * 12, 180 + Double($0 / 3) * 12) },
+        ]
+        for items in clusters {
+            for style in [HintPlacementStyle.centered, HintPlacementStyle(position: .leading)] {
+                let result = HintLayout.place(items, in: bounds, style: style)
+                assertClear(result, in: bounds)
+                XCTAssertEqual(crossings(result), 0, "\(items.map(\.id)) \(style.position)")
+                XCTAssertEqual(result, HintLayout.place(items.reversed(), in: bounds, style: style))
+            }
+        }
+    }
+    func testDisplacedLabelsStayCloseToTheirElements() {
+        let row = (0..<8).map { HintLayoutItem(id: "\($0)", target: CGRect(x: 100 + Double($0) * 30, y: 200, width: 24, height: 24), size: CGSize(width: 28, height: 20)) }
+        let result = HintLayout.place(row, in: bounds, style: HintPlacementStyle(position: .leading))
+        assertClear(result, in: bounds)
+        for hint in result {
+            XCTAssertLessThanOrEqual(hypot(hint.frame.midX - hint.anchor.x, hint.frame.midY - hint.anchor.y), 3 * 24 + 30, hint.id)
+        }
+    }
+    func testNeighborsGetDistinctColors() {
+        let cluster = (0..<8).map { item("c\($0)", 200 + Double($0 % 4) * 14, 200 + Double($0 / 4) * 14) }
+        let spread = (0..<4).map { item("s\($0)", 40 + Double($0) * 150, 360) }
+        let placements = HintLayout.place(cluster + spread, in: bounds, style: HintPlacementStyle(position: .leading))
+        let colors = HintLayout.colorGroups(placements)
+        XCTAssertEqual(Set(cluster.compactMap { colors[$0.id] }).count, 8)
+        XCTAssertEqual(colors.count, placements.count)
+        XCTAssertTrue(colors.values.allSatisfy { (0..<8).contains($0) })
+        XCTAssertEqual(colors, HintLayout.colorGroups(placements.reversed()))
+        // Adjacent buttons in a row differ even when no label moved.
+        let row = (0..<4).map { HintLayoutItem(id: "\($0)", target: CGRect(x: 200 + Double($0) * 70, y: 180, width: 40, height: 24), size: CGSize(width: 28, height: 20)) }
+        let rowColors = HintLayout.colorGroups(HintLayout.place(row, in: bounds, style: HintPlacementStyle(position: .leading)))
+        for index in 1..<4 { XCTAssertNotEqual(rowColors["\(index)"], rowColors["\(index - 1)"]) }
+    }
+    func testHUDMovesAwayFromLabelsAndPointer() {
+        let bottom = CGRect(x: 280, y: 24, width: 440, height: 76), top = CGRect(x: 280, y: 900, width: 440, height: 76)
+        XCTAssertEqual(HUDPlacement.choose([bottom, top], avoiding: [CGRect(x: 0, y: 400, width: 50, height: 50)], pointer: CGPoint(x: 500, y: 500)), bottom)
+        XCTAssertEqual(HUDPlacement.choose([bottom, top], avoiding: [CGRect(x: 300, y: 40, width: 30, height: 20)], pointer: nil), top)
+        XCTAssertEqual(HUDPlacement.choose([bottom, top], avoiding: [], pointer: CGPoint(x: 500, y: 60)), top)
+        XCTAssertNil(HUDPlacement.choose([], avoiding: [], pointer: nil))
+    }
 }

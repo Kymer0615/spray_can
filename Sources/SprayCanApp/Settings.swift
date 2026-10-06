@@ -33,6 +33,15 @@ final class Settings: ObservableObject {
         HintPlacementStyle(position: hintPosition, offset: CGSize(width: hintOffsetX, height: hintOffsetY), yAxisUp: true)
     }
     func restoreHintPlacement() { hintPosition = .leading; hintOffsetX = 0; hintOffsetY = 0 }
+    /// Skip OCR text that an element label already covers.
+    @Published var dedupeOCR = UserDefaults.standard.object(forKey: "dedupeOCR") as? Bool ?? true { didSet { save("dedupeOCR", dedupeOCR) } }
+    /// Draw each element label, its connector, and a box around its element in a shared color.
+    @Published var colorCodeTargets = UserDefaults.standard.object(forKey: "colorCodeTargets") as? Bool ?? true { didSet { save("colorCodeTargets", colorCodeTargets) } }
+    /// Distinct hues for color-coded labels: red, orange, yellow, green, cyan, blue, purple, pink.
+    static let palette: [NSColor] = ["E5484D", "F76B15", "FFC53D", "30A46C", "05A2C2", "0090FF", "8E4EC6", "D6409F"].map { hex in
+        let rgb = UInt32(hex, radix: 16)!
+        return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
+    }
     @Published var showLines = true
     @Published var showLabels = true
     @Published var shortcuts: [NavigationMode: Shortcut] = {

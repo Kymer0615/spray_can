@@ -27,7 +27,7 @@ Global bindings take precedence over local bindings. In vi mode, the default ⌃
 
 ## Pointer actions
 
-Return clicks left; `[` clicks middle; `]` clicks right; `\` double-clicks left. Modifiers pass through to click events. **⇧Return is Shift-click, not double-click**. `=` holds left, and Return releases it. Escape after clearing any prefix, ⌘H, mode reactivation, and session interruptions release a held button.
+Return clicks left; `[` clicks middle; `]` clicks right; `\` double-clicks left. Modifiers pass through to click events. **⇧Return is Shift-click, not double-click**. Space or `=` holds left; the labels stay, so typing another label drags there, and Space, `=`, or Return releases it. Escape after clearing any prefix, ⌘H, mode reactivation, and session interruptions release a held button.
 
 Esc / ⌘. / ⌃G clear a partial label or queued input; with no prefix they exit. Delete removes a prefix character. ⌘, opens Settings. ⌃= toggles grid lines; ⌃⇧= toggles labels; ⇧⌘= / ⇧⌘− change cell size; ⌘= / ⌘− change background opacity when glass and Reduce Transparency are both off.
 

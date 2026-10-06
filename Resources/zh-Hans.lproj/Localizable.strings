@@ -16,7 +16,8 @@
 "Buy me a coffee — support Ziyang" = "请我喝杯咖啡 — 支持 Ziyang";
 "By default, labels move the pointer. Return clicks." = "默认情况下，输入标签会移动指针，按 Return 点按。";
 "Click as soon as a label is complete" = "输入完整标签后立即点按";
-"Dragging · Choose destination · Return drops" = "正在拖移 · 选择目标位置 · Return 放下";
+"Color-code labels and target boxes" = "为标签和目标框着色";
+"Each label, its line, and a box around its element share a color that differs from nearby labels." = "每个标签、其连线以及元素周围的框使用同一种颜色，并与附近的标签区分开。";
 "Elements" = "元素";
 "Enable" = "启用";
 "Enable Screen Recording to use text targeting." = "启用屏幕录制以使用文本定位。";
@@ -33,7 +34,9 @@
 "Grid cell size · %lld pt" = "网格单元大小 · %lld pt";
 "Grid lines" = "网格线";
 "Help & Shortcuts" = "帮助与快捷键";
+"Hide text labels on known elements" = "隐藏已知元素上的文本标签";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL 滚动 · Tab 切换区域 · Esc 退出";
+"Holding · Type a label to drag · Space or Return drops" = "正在按住 · 输入标签以拖移 · 空格键或 Return 放下";
 "Horizontal offset · %lld pt" = "水平偏移 · %lld pt";
 "Include all visible windows" = "包括所有可见窗口";
 "Input cleared" = "已清除输入";
@@ -94,6 +97,7 @@
 "Secure Input is enabled by another app. Disable it there to resume navigation." = "另一个应用启用了安全输入。请在该应用中停用以恢复导航。";
 "Settings…" = "设置…";
 "Shortcuts" = "快捷键";
+"Skip recognized text that an element label already marks, such as a button’s title." = "跳过元素标签已标记的识别文本，例如按钮标题。";
 "Source, releases & documentation ↗" = "源代码、版本发布与文档 ↗";
 "Spray Can" = "Spray Can";
 "Spray Can %@" = "Spray Can %@";

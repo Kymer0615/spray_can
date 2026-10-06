@@ -1,5 +1,22 @@
 # Changelog
 
+## Spray Can 0.1.3
+
+- Stop labelling the same element twice: OCR text that an element label already marks (text inside a button, or a title right next to its icon) is skipped. Turn it off with General → Hide text labels on known elements.
+- Keep connector lines from crossing each other or running through other labels, and keep moved labels close to their element: labels now try spots flush against every side of the element first, and briefly overlapping a neighboring element beats jumping far away.
+- Color-code labels: each element label, its connector, and a box around its element share a color, and nearby labels always get different colors. Toggle it in Appearance → Color-code labels and target boxes.
+- Space drags: after a label moves the pointer in Elements or Grid mode, press Space to hold the button, type another label to drag there, and press Space or Return to drop. Useful for screenshot selections.
+- Move the status card out of the way: it picks the bottom center, top, or a corner, whichever does not cover labels, their elements, the selection, or the pointer.
+
+Validation: 37 core tests (including OCR de-duplication, connector crossings in dense clusters, label distance, neighbor colors, HUD placement, and the Space binding), a localization consistency check, and a universal Release build with bundle verification passed. On an 800-target page fixture, layout takes about 0.55 s in a Release build with no connector conflicts (previously about 1 s and 942 conflicts). Live dragging with Space, OCR de-duplication, and HUD movement in third-party apps remain to be validated; see docs/VALIDATION.md.
+
+This release is ad-hoc signed and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.2
 
 - Follow the target window: switching tabs or windows, opening, moving, resizing, or closing a window, and switching apps (including ⌘Tab) re-scans and shows fresh labels instead of ending navigation. Partial labels are cleared; an in-progress drag is still cancelled.
