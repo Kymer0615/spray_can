@@ -50,6 +50,8 @@ jobs:
           security unlock-keychain -p "$password" "$keychain"
           security import "$RUNNER_TEMP/selfsigned.p12" -k "$keychain" -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple: -s -k "$password" "$keychain" > /dev/null
+          # codesign finds the private key through the user search list.
+          security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
           rm -f "$RUNNER_TEMP/selfsigned.p12"
           identity="$(security find-certificate -c 'Spray Can Release Signing' -Z "$keychain" | awk '/SHA-1/ {print $3}')"
           : "${identity:?Certificate not found in the imported keychain}"
