@@ -20,7 +20,6 @@ final class HintLayoutTests: XCTestCase {
             let items = (0..<5).map { item("\($0)", vertical ? 200 : 160 + Double($0) * 15, vertical ? 160 + Double($0) * 12 : 200) }
             let result = HintLayout.place(items, in: bounds)
             assertClear(result, in: bounds)
-            XCTAssertTrue(result.contains(where: \.displaced))
             XCTAssertEqual(result, HintLayout.place(items.reversed(), in: bounds))
             for hint in result {
                 let original = items.first { $0.id == hint.id }!
@@ -61,19 +60,57 @@ final class HintLayoutTests: XCTestCase {
         XCTAssertEqual(result, HintLayout.place(items, in: small))
         XCTAssertTrue(result.allSatisfy { small.insetBy(dx: 4, dy: 4).contains($0.frame) })
     }
-    func testLabelsBesideElementsDoNotCoverThem() {
+    private func covered(_ frame: CGRect, _ content: CGRect) -> Bool {
+        let shared = frame.intersection(content.insetBy(dx: 1, dy: 1))
+        return !shared.isNull && shared.width * shared.height > 0
+    }
+    func testLabelsTouchElementsWithoutCoveringTheirContent() {
         let buttons = (0..<4).map { HintLayoutItem(id: "\($0)", target: CGRect(x: 200 + Double($0) * 70, y: 180, width: 40, height: 24), size: CGSize(width: 28, height: 20)) }
         for position in HintPosition.allCases where position != .center {
             for yAxisUp in [true, false] {
                 let result = HintLayout.place(buttons, in: bounds, style: HintPlacementStyle(position: position, yAxisUp: yAxisUp))
                 assertClear(result, in: bounds)
                 for hint in result {
-                    let target = buttons.first { $0.id == hint.id }!.target
-                    XCTAssertTrue(hint.frame.intersection(target).isNull || hint.frame.intersection(target).width * hint.frame.intersection(target).height == 0, "\(position) covers its element")
-                    XCTAssertFalse(hint.displaced, "Uncrowded labels stay at their preferred spot")
+                    let button = buttons.first { $0.id == hint.id }!
+                    XCTAssertFalse(covered(hint.frame, button.estimatedContent), "\(position) covers its element's content")
+                    XCTAssertFalse(hint.displaced, "Uncrowded labels touch their element")
                 }
             }
         }
+    }
+    func testLabelSitsBesideTheElementsTextNotOnIt() {
+        // A wide row with an icon and a short title; text and icon are known.
+        let row = HintLayoutItem(id: "row", target: CGRect(x: 100, y: 100, width: 300, height: 24), size: CGSize(width: 28, height: 20))
+        let icon = CGRect(x: 104, y: 104, width: 16, height: 16), title = CGRect(x: 126, y: 106, width: 60, height: 12)
+        let hint = HintLayout.place([row], in: bounds, style: HintPlacementStyle(position: .leading), content: [title], icons: [icon])[0]
+        XCTAssertFalse(covered(hint.frame, title)); XCTAssertFalse(covered(hint.frame, icon))
+        XCTAssertFalse(hint.displaced)
+        // Right after the title, on the same line.
+        XCTAssertEqual(hint.frame.minX, title.maxX + HintPlacementStyle.gap + 1, accuracy: 1)
+        XCTAssertLessThan(abs(hint.frame.midY - title.midY), 6)
+    }
+    func testLeadingIconIsKeptClearWhenOnlyTextIsKnown() {
+        let button = HintLayoutItem(id: "b", target: CGRect(x: 100, y: 100, width: 120, height: 24), size: CGSize(width: 28, height: 20))
+        let title = CGRect(x: 130, y: 106, width: 60, height: 12)
+        let hint = HintLayout.place([button], in: bounds, style: HintPlacementStyle(position: .leading), content: [title])[0]
+        XCTAssertFalse(covered(hint.frame, CGRect(x: 102, y: 102, width: 24, height: 20)), "the icon before the title stays visible")
+        XCTAssertFalse(covered(hint.frame, title))
+    }
+    func testTitledControlsWithoutKnownTextKeepTheirFrameClear() {
+        let items = [HintLayoutItem(id: "a", target: CGRect(x: 100, y: 100, width: 70, height: 24), size: CGSize(width: 28, height: 20), titled: true),
+                     HintLayoutItem(id: "b", target: CGRect(x: 100, y: 140, width: 70, height: 24), size: CGSize(width: 28, height: 20), titled: true)]
+        // Text is known elsewhere on screen, but not inside these controls.
+        let result = HintLayout.place(items, in: bounds, style: HintPlacementStyle(position: .leading), content: [CGRect(x: 400, y: 300, width: 50, height: 12)])
+        for hint in result {
+            let target = items.first { $0.id == hint.id }!.target
+            XCTAssertFalse(covered(hint.frame, target.insetBy(dx: 1, dy: 1)))
+            XCTAssertFalse(hint.displaced)
+        }
+    }
+    func testTextContentPrefersTightDetectedBoxes() {
+        let padded = CGRect(x: 74, y: 124, width: 156, height: 18), tight = CGRect(x: 76, y: 126, width: 65, height: 12)
+        let missed = CGRect(x: 74, y: 160, width: 156, height: 18)
+        XCTAssertEqual(HintLayout.textContent(detected: [tight], exposed: [padded, missed]), [tight, missed])
     }
     func testPositionsAndOffsetsUseScreenDirections() {
         let target = CGRect(x: 100, y: 100, width: 40, height: 20), size = CGSize(width: 20, height: 10)
@@ -95,8 +132,7 @@ final class HintLayoutTests: XCTestCase {
         let edge = HintLayoutItem(id: "edge", target: CGRect(x: 4, y: 180, width: 60, height: 24), size: CGSize(width: 28, height: 20))
         let hint = HintLayout.place([edge], in: bounds, style: HintPlacementStyle(position: .leading))[0]
         XCTAssertTrue(bounds.insetBy(dx: 4, dy: 4).contains(hint.frame))
-        let cover = hint.frame.intersection(edge.target.insetBy(dx: 2, dy: 2))
-        XCTAssertTrue(cover.isNull || cover.width * cover.height == 0)
+        XCTAssertFalse(covered(hint.frame, edge.estimatedContent))
     }
     func testGridLabelsStayCenteredInTheirCells() {
         let cell = HintLayoutItem(id: "cell", target: CGRect(x: 100, y: 100, width: 80, height: 80), size: CGSize(width: 28, height: 20), fixed: true)

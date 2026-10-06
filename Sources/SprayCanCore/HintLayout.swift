@@ -6,12 +6,23 @@ public struct HintLayoutItem: Equatable {
     public let target: CGRect
     public let size: CGSize
     public let fixed: Bool
-    public init(id: String, target: CGRect, size: CGSize, fixed: Bool = false) {
-        self.id = id; self.target = target; self.size = size; self.fixed = fixed
+    /// The element has a visible title (a button or sidebar item), so its frame is mostly icon and text.
+    public let titled: Bool
+    public init(id: String, target: CGRect, size: CGSize, fixed: Bool = false, titled: Bool = false) {
+        self.id = id; self.target = target; self.size = size; self.fixed = fixed; self.titled = titled
+    }
+    /// Where an element's own text or icon probably is, when nothing better is known:
+    /// a left-aligned band for wide rows, menu items, and links, otherwise its middle.
+    public var estimatedContent: CGRect {
+        let t = target
+        if t.width > t.height * 2.5 {
+            return CGRect(x: t.minX + 6, y: t.minY + t.height * 0.2, width: max(0, t.width * 0.6 - 6), height: t.height * 0.6)
+        }
+        return t.insetBy(dx: t.width * 0.25, dy: t.height * 0.25)
     }
 }
 
-/// Where a label sits relative to its element. Only `.center` covers the element.
+/// The preferred side of the element for its label. Only `.center` may cover the element's text.
 public enum HintPosition: String, CaseIterable, Codable {
     case leading, trailing, above, below, center
 }
@@ -58,7 +69,11 @@ public struct HintPlacement: Equatable {
         self.home = home ?? anchor
         self.target = target ?? CGRect(origin: anchor, size: .zero)
     }
-    public var displaced: Bool { hypot(frame.midX - home.x, frame.midY - home.y) > 1 }
+    /// A label that doesn't touch its element is displaced and gets a connector.
+    public var displaced: Bool {
+        guard target.width > 0 || target.height > 0 else { return hypot(frame.midX - home.x, frame.midY - home.y) > 1 }
+        return !frame.insetBy(dx: -HintPlacementStyle.gap - 1, dy: -HintPlacementStyle.gap - 1).intersects(target)
+    }
     public var connectorStart: CGPoint {
         let center = CGPoint(x: frame.midX, y: frame.midY)
         let dx = anchor.x - center.x, dy = anchor.y - center.y
@@ -72,14 +87,17 @@ public struct HintPlacement: Equatable {
 public enum HintLayout {
     /// Displaced labels farther than this many label heights are strongly discouraged.
     static let reach: CGFloat = 3
-    public static func place(_ items: [HintLayoutItem], in bounds: CGRect, style: HintPlacementStyle = .centered) -> [HintPlacement] {
+    /// Places labels touching their elements without covering `content` (text and icons that must stay
+    /// readable). With no content known, each element's `estimatedContent` is kept clear instead.
+    /// `icons` are kept clear like text but never treated as an element's main text.
+    public static func place(_ items: [HintLayoutItem], in bounds: CGRect, style: HintPlacementStyle = .centered, content: [CGRect] = [], icons: [CGRect] = []) -> [HintPlacement] {
         let ordered = items.sorted { $0.id < $1.id }
         let safe = bounds.insetBy(dx: 4, dy: 4)
         // Grid labels always stay centered in their cells.
         func centered(_ item: HintLayoutItem) -> CGRect {
             (item.fixed ? HintPlacementStyle.centered : style).frame(for: item.target, size: item.size)
         }
-        // Covering elements is avoided unless labels are meant to sit on them.
+        // Element frames: covering another element's padding is only lightly discouraged.
         let elements = ordered.filter { !$0.fixed }.map { ($0.id, $0.target.insetBy(dx: 2, dy: 2)) }
         func area(_ a: CGRect, _ b: CGRect) -> Double {
             let rect = a.intersection(b)
@@ -90,6 +108,38 @@ public enum HintLayout {
                    y: min(max(frame.minY, safe.minY), max(safe.minY, safe.maxY - frame.height)), width: frame.width, height: frame.height)
         }
         func overlap(_ a: CGRect, _ b: CGRect) -> Double { area(a.insetBy(dx: -2, dy: -2), b.insetBy(dx: -2, dy: -2)) }
+        // Text and icons that labels must not cover.
+        // Detected text boxes include padding; trimming them lets labels fit beside text in tight rows.
+        let text: [CGRect] = (content.isEmpty ? ordered.filter { !$0.fixed }.map(\.estimatedContent) : content)
+            .filter { $0.width > 2 && $0.height > 5 }.map { $0.insetBy(dx: 1, dy: content.isEmpty ? 1 : 2.5) }
+        var obstacles = text + icons.filter { $0.width > 2 && $0.height > 2 }.map { $0.insetBy(dx: 1, dy: 1) }
+        /// The element's text pieces, first (leftmost on its top line) first.
+        func pieces(of t: CGRect, in rects: [CGRect]) -> [CGRect] {
+            let inside = t.insetBy(dx: 1, dy: 1)
+            return rects.filter { inside.intersects($0) && area(inside, $0) >= Double($0.width * $0.height) / 2 }
+                .sorted { abs($0.midY - $1.midY) > min($0.height, $1.height) / 2 ? $0.midY < $1.midY : $0.minX < $1.minX }
+        }
+        // Detected text misses icons; a control's leading space before its first text usually holds one.
+        // An element with no detected text falls back to its estimated content.
+        var fallback: [String: CGRect] = [:]
+        if !content.isEmpty {
+            for item in ordered where !item.fixed {
+                let t = item.target
+                guard let first = pieces(of: t, in: text).min(by: { $0.minX < $1.minX }) else {
+                    // Compact titled controls (sidebar items, buttons) are mostly icon and text: keep all of it clear.
+                    let estimate = item.titled && t.height <= 32 && t.width <= 400 ? t : item.estimatedContent
+                    if estimate.width > 2 && estimate.height > 2 { fallback[item.id] = estimate; obstacles.append(estimate.insetBy(dx: 1, dy: 1)) }
+                    continue
+                }
+                let lead = first.minX - t.minX
+                guard lead >= 12, lead <= max(48, t.height * 2) else { continue }
+                let side = min(t.height - 2, max(first.height, 16))
+                obstacles.append(CGRect(x: t.minX + 1, y: first.midY - side / 2, width: lead - 3, height: side))
+            }
+        }
+        func gapBetween(_ a: CGRect, _ b: CGRect) -> CGFloat {
+            hypot(max(0, max(a.minX - b.maxX, b.minX - a.maxX)), max(0, max(a.minY - b.maxY, b.minY - a.maxY)))
+        }
         /// The best spot for one label given the labels placed so far and spots reserved for later ones.
         func search(_ item: HintLayoutItem, placed: [HintPlacement], reserved: [CGRect]) -> (HintPlacement, [Double]) {
             let original = centered(item)
@@ -97,57 +147,79 @@ public enum HintLayout {
             let home = CGPoint(x: original.midX, y: original.midY)
             let w = item.size.width, h = item.size.height, gap = HintPlacementStyle.gap
             let t = item.target
-            // Nearest spots first: flush against each side of the element, then slid along it,
-            // then outward rings around the preferred spot in half-label steps.
+            // The element's own text and icons, so its label can sit right next to them.
+            let mine = pieces(of: t, in: text)
+            // The element's main text: its first piece of text (or its estimate).
+            let ownContent = mine.first ?? fallback[item.id] ?? (content.isEmpty && !item.fixed ? item.estimatedContent : nil)
             var frames: [CGRect] = [original]
             if style.position != .center {
-                let sides = [CGPoint(x: t.minX - gap - w, y: t.midY - h / 2), CGPoint(x: t.maxX + gap, y: t.midY - h / 2),
-                             CGPoint(x: t.midX - w / 2, y: t.maxY + gap), CGPoint(x: t.midX - w / 2, y: t.minY - gap - h)]
-                for (side, origin) in sides.enumerated() {
-                    let base = CGRect(origin: origin, size: item.size)
-                    frames.append(base)
-                    let slide = side < 2 ? CGVector(dx: 0, dy: h / 2 + 2) : CGVector(dx: w / 2 + 2, dy: 0)
-                    for k in [1.0, -1.0, 2.0, -2.0] { frames.append(base.offsetBy(dx: slide.dx * k, dy: slide.dy * k)) }
+                func at(_ x: CGFloat, _ y: CGFloat) -> CGRect { CGRect(x: x, y: y, width: w, height: h) }
+                if let c = ownContent {
+                    for y in [c.midY - h / 2, t.midY - h / 2] { frames += [at(c.maxX + gap + 1, y), at(c.minX - gap - 1 - w, y)] }
+                    for x in [c.minX, c.maxX - w] { frames += [at(x, c.maxY + gap + 1), at(x, c.minY - gap - 1 - h)] }
                 }
+                let xs = [t.minX + 1, t.midX - w / 2, t.maxX - w - 1], ys = [t.minY + 1, t.midY - h / 2, t.maxY - h - 1]
+                // On the element's padding: inner corners and edge midpoints.
+                if w + 2 <= t.width && h + 2 <= t.height {
+                    for x in xs { for y in ys where !(x == xs[1] && y == ys[1]) { frames.append(at(x, y)) } }
+                }
+                // Straddling each edge and corner.
+                for x in [t.minX - w / 2, t.midX - w / 2, t.maxX - w / 2] { for y in [t.minY - h / 2, t.midY - h / 2, t.maxY - h / 2] where !(x == t.midX - w / 2 && y == t.midY - h / 2) {
+                    frames.append(at(x, y))
+                } }
+                // Flush outside each side, slid along it, and outside the corners.
+                for x in [t.minX - gap - w, t.maxX + gap] { for y in ys + [t.minY - h - gap, t.maxY + gap] { frames.append(at(x, y)) } }
+                for y in [t.minY - gap - h, t.maxY + gap] { for x in xs { frames.append(at(x, y)) } }
             }
-            for step in 1...6 {
-                for x in -step...step { for y in -step...step where abs(x) == step || abs(y) == step {
+            // Last resort: rings around the preferred spot, in half-label steps; these get a connector.
+            for step in [1, 2, 3, 4, 6] {
+                for x in -step...step { for y in -step...step where (abs(x) == step || abs(y) == step) && (step < 6 || (x % 2 == 0 && y % 2 == 0)) {
                     frames.append(original.offsetBy(dx: CGFloat(x) / 2 * (w + 4), dy: CGFloat(y) / 2 * (h + 4)))
                 } }
             }
-            // Try candidates nearest first, and only compare against labels that can interact:
-            // a connector never leaves the box spanning its label and element.
-            var candidates: [(rank: Int, frame: CGRect, distance: CGFloat)] = []
+            // Nearest to the element first; among touching spots, nearest to the preferred side.
+            // Preference: close to the element's own text, then the preferred side.
+            var candidates: [(rank: Int, frame: CGRect, distance: CGFloat, preference: CGFloat)] = []
             var region = t
             for (rank, raw) in frames.enumerated() {
                 let frame = constrain(raw)
-                candidates.append((rank, frame, hypot(frame.midX - home.x, frame.midY - home.y)))
+                // Beside the main text on the same line reads best; above or below it is a fallback.
+                let near = ownContent.map { c in
+                    gapBetween(frame, c) * 4 + (min(frame.maxY, c.maxY) - max(frame.minY, c.minY) >= min(frame.height, c.height) / 2 ? 0 : 40)
+                } ?? 0
+                // Anything within the standard gap counts as touching.
+                let touching = max(0, gapBetween(frame, t) - gap - 1)
+                // With the element's text known, the preferred side only breaks ties.
+                let side = hypot(frame.midX - home.x, frame.midY - home.y) * (ownContent == nil ? 1 : 0.2)
+                candidates.append((rank, frame, touching, near + side))
                 region = region.union(frame)
             }
-            candidates.sort { a, b in a.distance != b.distance ? a.distance < b.distance : a.rank < b.rank }
+            candidates.sort { a, b in a.distance != b.distance ? a.distance < b.distance : (a.preference != b.preference ? a.preference < b.preference : a.rank < b.rank) }
             region = region.insetBy(dx: -4, dy: -4)
+            // Only labels whose label-plus-element box reaches this area can interact.
             let placed = placed.filter { $0.id != item.id && $0.frame.union($0.target).intersects(region) }
             let reserved = reserved.filter { $0.intersects(region) }
             let others = elements.filter { $0.0 != item.id && $0.1.intersects(region) }.map(\.1)
-            let own = t.insetBy(dx: 2, dy: 2)
+            let own = item.fixed ? t : t.insetBy(dx: 1, dy: 1)
+            // "On the element" keeps the label on its own element even over its text.
+            let blocked = obstacles.filter { $0.intersects(region) && !(style.position == .center && own.contains($0)) }
             var best: HintPlacement?
             var bestScore: [Double] = []
-            for (rank, frame, distance) in candidates {
+            for (rank, frame, distance, preference) in candidates {
                 // Cost is at least the distance, so no farther candidate can beat a clear best.
-                if let first = bestScore.first, first == 0, bestScore[1] == 0, bestScore[2] < Double(distance) { break }
+                if let first = bestScore.first, first == 0, bestScore[1] == 0, bestScore[2] == 0, bestScore[3] < Double(distance) { break }
                 let candidate = HintPlacement(id: item.id, frame: frame, anchor: anchor, home: home, target: t)
                 let labelCollisions: Double = placed.reduce(0.0) { $0 + overlap(frame, $1.frame) }
-                let collisions: Double = labelCollisions + reserved.reduce(0.0) { $0 + overlap(frame, $1) }
+                let collisions: Double = labelCollisions
+                let covered: Double = blocked.reduce(0.0) { $0 + area(frame, $1) }
                 let crossings = Double(conflicts(candidate, placed))
-                var cost = 0.0
-                if style.position != .center {
-                    let covered: Double = others.reduce(0.0) { $0 + area(frame, $1) }
-                    cost += area(frame, own) * 2 + covered * 0.3
-                }
-                // Short displacements are cheap; beyond a few label heights they are strongly discouraged.
+                let neighbors: Double = others.reduce(0.0) { $0 + area(frame, $1) }
+                // Touching the element is free; beyond a few label heights distance is strongly discouraged.
                 let travel = Double(distance), limit = Double(reach * (h + 4))
-                cost += travel + max(0, travel - limit) * 6
-                let score = [collisions, crossings, cost, Double(rank)]
+                // Spots later labels prefer are only mildly discouraged; they have alternatives too.
+                let claimed: Double = reserved.reduce(0.0) { $0 + overlap(frame, $1) }
+                let cost: Double = travel + max(0, travel - limit) * 6 + neighbors * 0.05 + claimed * 0.02 + Double(preference) * 0.01
+                let score = [collisions, covered, crossings, cost, Double(rank)]
                 if best == nil || score.lexicographicallyPrecedes(bestScore) { best = candidate; bestScore = score }
             }
             return (best!, bestScore)
@@ -165,7 +237,9 @@ public enum HintLayout {
         }
         result = uncross(result)
         // Labels placed early could not see later connectors; re-place any that still conflict.
-        for _ in 0..<2 {
+        // Bounded: on pathologically dense screens, where most labels conflict, it would not converge anyway.
+        let conflicting = result.indices.filter { conflicts(result[$0], result, skip: $0) > 0 }.count
+        for _ in 0..<(conflicting <= 150 ? 2 : 0) {
             var changed = false
             for (index, item) in ordered.enumerated() where !item.fixed {
                 let hint = result[index]
@@ -173,13 +247,26 @@ public enum HintLayout {
                 let placed = result.filter { $0.id != hint.id && near.intersects($0.frame.union($0.target)) }
                 let crossings = conflicts(hint, placed)
                 guard crossings > 0 else { continue }
-                let current = [placed.reduce(0.0) { $0 + overlap(hint.frame, $1.frame) }, Double(crossings)]
+                let own = item.target.insetBy(dx: 1, dy: 1)
+                let covered: Double = obstacles.filter { !(style.position == .center && own.contains($0)) }.reduce(0.0) { $0 + area(hint.frame, $1) }
+                let current = [placed.reduce(0.0) { $0 + overlap(hint.frame, $1.frame) }, covered, Double(crossings)]
                 let (candidate, score) = search(item, placed: result, reserved: [])
-                if Array(score.prefix(2)).lexicographicallyPrecedes(current) { result[index] = candidate; changed = true }
+                if Array(score.prefix(3)).lexicographicallyPrecedes(current) { result[index] = candidate; changed = true }
             }
             if !changed { break }
         }
         return result
+    }
+    /// Text to keep clear: tight visually detected boxes, plus accessibility text frames where
+    /// detection found nothing. Accessibility frames are exact in extent but often padded to a
+    /// column's width; detection is tight but misses dim or small text.
+    public static func textContent(detected: [CGRect], exposed: [CGRect]) -> [CGRect] {
+        detected + exposed.filter { frame in
+            !detected.contains { box in
+                let shared = box.intersection(frame)
+                return !shared.isNull && shared.width * shared.height >= box.width * box.height / 2
+            }
+        }
     }
     /// Swaps same-sized labels whose connectors cross or pass through another label, while that helps.
     static func uncross(_ placements: [HintPlacement]) -> [HintPlacement] {

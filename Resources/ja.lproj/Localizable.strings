@@ -16,8 +16,7 @@
 "Buy me a coffee — support Ziyang" = "コーヒーをおごる — Ziyang を支援";
 "By default, labels move the pointer. Return clicks." = "デフォルトでは、ラベルでポインタを移動し、Return でクリックします。";
 "Click as soon as a label is complete" = "ラベルの入力が完了したらすぐにクリック";
-"Color-code labels and target boxes" = "ラベルと対象の枠を色分け";
-"Each label, its line, and a box around its element share a color that differs from nearby labels." = "各ラベル、その線、要素を囲む枠は同じ色になり、近くのラベルとは異なる色になります。";
+"Color-code labels" = "ラベルを色分け";
 "Elements" = "要素";
 "Enable" = "有効にする";
 "Enable Screen Recording to use text targeting." = "テキストターゲットを使うには画面収録を有効にしてください。";
@@ -65,6 +64,7 @@
 "Move up" = "上へ移動";
 "Move with arrows · Return to click" = "矢印キーで移動 · Return でクリック";
 "Navigation unavailable. Check permissions or Secure Input." = "ナビゲーションを利用できません。権限またはセキュア入力を確認してください。";
+"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "近くのラベルは異なる色になります。入力中は、一致する要素がラベルと同じ色で囲まれます。";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "分析なし。クラウド推論なし。スクリーンショットの保存なし。診断情報には時間と回数のみが含まれ、入力したラベルやキャプチャした画面の内容は含まれません。";
 "No matching label · Esc clears your input" = "一致するラベルがありません · Esc で入力をクリア";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "スクロール領域がありません · ⇧⌘L でポインタスクロール";

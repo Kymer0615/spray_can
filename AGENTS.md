@@ -20,6 +20,7 @@ Put new logic in the core with tests whenever it can be expressed without AppKit
 - **Coordinates:** core types and targets use global Quartz points (top-left origin). Overlays draw in each display's Cocoa coordinates (bottom-left origin); convert with `Geometry.cocoa` only at the drawing edge. `HintLayout` works in whatever display-local space the caller passes (`HintPlacementStyle.yAxisUp` says which).
 - **Sessions:** every activation increments `NavigationSession.generation`; all async completions (discovery, OCR, validation, clicks) must check the generation before touching state. Labels never change after the user types the first character.
 - **Determinism:** label placement and color groups must be deterministic for the same input (tests compare against reversed input). Break ties by ID, never by iteration order of a dictionary or set.
+- **Readability:** label placement changes must be checked by eye, not only by tests. Run `scripts/snapshot-labels.sh` on System Settings, Finder (list view), and a busy web page before and after, open the PNGs, and compare label counts and connectors. Labels should touch their element, sit beside its text, and never cover text or icons.
 - **Performance:** `HintLayout.place` runs on the main thread for every new target set (hundreds of targets in browsers). Keep per-label work local (filter by nearby boxes) and bounded.
 - **Settings:** add a `@Published` property in `Settings` that persists via `UserDefaults` with an explicit default, and expose it in `SettingsView`.
 - **Localization:** every user-visible string is an English key. Add it to **all** `Resources/*.lproj/Localizable.strings` (keep entries sorted) and run `python3 scripts/check-localizations.py`. CI also runs it with `--stringsdata build` after a build to catch strings missing from English.
@@ -29,6 +30,7 @@ Put new logic in the core with tests whenever it can be expressed without AppKit
 
 ```sh
 scripts/test.sh                 # core XCTest suite + localization check
+scripts/snapshot-labels.sh com.apple.finder /tmp/finder.png   # real labels over a capture; add --prefix ab, --dump
 scripts/build.sh                # universal (arm64 + x86_64) Release app in build/, ad-hoc signed
 python3 scripts/verify-bundle.py 'build/Build/Products/Release/Spray Can.app'
 scripts/integration-test.sh     # live event-tap/click fixture; needs an interactive desktop and Accessibility

@@ -16,8 +16,7 @@
 "Buy me a coffee — support Ziyang" = "請我喝杯咖啡 — 支持 Ziyang";
 "By default, labels move the pointer. Return clicks." = "預設情況下，標籤會移動指標。按 Return 點按。";
 "Click as soon as a label is complete" = "標籤輸入完成時立即點按";
-"Color-code labels and target boxes" = "為標籤和目標框加上顏色";
-"Each label, its line, and a box around its element share a color that differs from nearby labels." = "每個標籤、其連線以及元素周圍的框使用同一種顏色，並與附近的標籤區分。";
+"Color-code labels" = "為標籤加上顏色";
 "Elements" = "元素";
 "Enable" = "啟用";
 "Enable Screen Recording to use text targeting." = "啟用「螢幕錄製」以使用文字定位。";
@@ -65,6 +64,7 @@
 "Move up" = "上移";
 "Move with arrows · Return to click" = "用方向鍵移動 · Return 點按";
 "Navigation unavailable. Check permissions or Secure Input." = "無法使用導覽。請檢查權限或「安全輸入」。";
+"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "相鄰的標籤使用不同顏色。輸入時，符合的元素會以其標籤的顏色加上外框。";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "沒有分析追蹤。沒有雲端推論。不儲存截圖。診斷資料只包含時間與次數，不包含輸入的標籤或擷取的螢幕內容。";
 "No matching label · Esc clears your input" = "沒有符合的標籤 · Esc 清除輸入";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "沒有捲動區域 · ⇧⌘L 使用指標捲動";

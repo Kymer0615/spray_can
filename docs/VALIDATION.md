@@ -46,7 +46,9 @@ These are unverified, not implied by a successful compile:
 | Safari / Chrome | Links, form controls, long pages, tabs | Pending |
 | System Settings | Nested panes, toggles, sheets | Pending |
 | VS Code | Editor/sidebar controls, Electron accessibility | Pending |
-| 0.1.3 overlay | Space drag across apps, OCR de-duplication on real pages, color-coded boxes legibility, HUD repositioning | Pending; core logic unit-tested |
+| 0.1.3 overlay | Space drag across apps, OCR de-duplication on real pages, HUD repositioning | Pending; core logic unit-tested |
+| 0.1.4 labels | Snapshots of System Settings, Finder (list view), and Safari on github.com: labels touch their elements and sit beside their text; connectors 108→0, 245→2, and 11→8 (of 112 labels) against 0.1.3; layout 2–8 ms per window in a release build | Passed on macOS 27; CJK-only text falls back to accessibility frames (fast recognition is Latin-only) |
+| 0.1.4 drag | Synthetic Space-drag glide against the macOS screenshot tool (`screencapture -i`) produced the dragged region; a single-jump drag did not | Passed; live keyboard path with ⇧⌘4 pending |
 | Menus / Dock / Control Center | Open menus, status items, Dock targets | Pending |
 | Displays and Spaces | Mixed scaling, negative origins, fullscreen, hot-plug | Geometry tests pass; live acceptance pending |
 | OCR capture | Permission changes, screen capture, late-result behavior, warm latency | Core merge and offline recognition pass; capture acceptance pending |

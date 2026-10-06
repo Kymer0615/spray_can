@@ -29,11 +29,11 @@ final class OverlayManager {
             panel.contentView = view; panels.append(panel); views.append(view)
         }
     }
-    func render(targets: [Target], prefix: String, mode: NavigationMode, status: String, selected: CGRect? = nil, pointer: CGPoint? = nil) {
+    func render(targets: [Target], prefix: String, mode: NavigationMode, status: String, selected: CGRect? = nil, pointer: CGPoint? = nil, content: [CGRect] = [], icons: [CGRect] = []) {
         prepare()
         var avoid: [CGRect] = []
         for (panel, view) in zip(panels, views) {
-            view.targets = targets; view.prefix = prefix; view.selected = selected
+            view.targets = targets; view.prefix = prefix; view.selected = selected; view.content = content; view.icons = icons
             view.layoutSubtreeIfNeeded(); avoid += view.occupied
             view.needsDisplay = true; panel.orderFrontRegardless()
         }
@@ -117,9 +117,11 @@ struct HintBackground: View {
     @ObservedObject private var settings = Settings.shared
     @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
     let ocr: Bool
+    /// The label's color group when color coding is on.
+    var group: NSColor? = nil
     private var shape: RoundedRectangle { RoundedRectangle(cornerRadius: 5) }
     var body: some View {
-        let tint = settings.color(ocr ? .ocr : .label)
+        let tint = group.map { Color(nsColor: $0) } ?? settings.color(ocr ? .ocr : .label)
         if reduceTransparency { shape.fill(tint) }
         else { surface(tint: tint).opacity(settings.glassEnabled ? 1 : settings.contrast) }
     }
@@ -149,7 +151,7 @@ private struct HintLayer: View {
     private var badges: some View {
         ZStack(alignment: .topLeading) {
             ForEach(hints) { hint in
-                HintBackground(ocr: hint.target.source == .text)
+                HintBackground(ocr: hint.target.source == .text, group: hint.color)
                     .frame(width: hint.frame.width, height: hint.frame.height)
                     .position(x: hint.frame.midX, y: height - hint.frame.midY)
             }
@@ -175,15 +177,11 @@ private final class HintTextCanvas: NSView {
         let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
         for hint in hints {
             let string = hint.target.label.uppercased()
-            let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: settings.nsColor(.text)])
+            let ink = hint.color.map(Settings.textColor(on:)) ?? settings.nsColor(.text)
+            let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: ink])
             let matched = min((prefix.uppercased() as NSString).length, text.length)
             if matched > 0 { text.addAttribute(.foregroundColor, value: settings.nsColor(.highlight), range: NSRange(location: 0, length: matched)) }
             let size = text.size()
-            if let color = hint.color {
-                color.setStroke()
-                let outline = NSBezierPath(roundedRect: hint.frame.insetBy(dx: 0.75, dy: 0.75), xRadius: 5, yRadius: 5)
-                outline.lineWidth = 1.5; outline.stroke()
-            }
             text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
         }
     }
@@ -202,6 +200,9 @@ final class HintCanvas: NSView {
     var targets: [Target] = [] { didSet { if !preparingPreview { needsLayout = true; needsDisplay = true } } }
     var prefix = "" { didSet { if !preparingPreview { needsLayout = true } } }
     var selected: CGRect? { didSet { needsDisplay = true } }
+    /// Detected text and icon rects (global Quartz) that labels must not cover.
+    var content: [CGRect] = [] { didSet { if content != oldValue { needsLayout = true } } }
+    var icons: [CGRect] = [] { didSet { if icons != oldValue { needsLayout = true } } }
     var screenOrigin = CGPoint.zero
     var primaryHeight: CGFloat = 0
     var preview = false
@@ -210,8 +211,17 @@ final class HintCanvas: NSView {
     private var layoutItems: [HintLayoutItem] = []
     private var layoutBounds = CGRect.zero
     private var layoutStyle = HintPlacementStyle.centered
+    private var layoutContent: [CGRect] = []
+    private var layoutIcons: [CGRect] = []
     private var placements: [HintPlacement] = []
     private var colorGroups: [String: Int] = [:]
+    private var layoutTime: TimeInterval = 0
+    /// Counts for the readability snapshot harness.
+    var snapshotSummary: String {
+        let shown = Set(placed.map(\.id))
+        let connectors = placements.filter { shown.contains($0.id) && $0.displaced }.count
+        return "Labels: \(placed.count); connectors: \(connectors); layout: \(Int(layoutTime * 1000)) ms"
+    }
     /// Visible labels and their elements in global Cocoa coordinates, for keeping the HUD clear.
     var occupied: [CGRect] {
         placed.flatMap { [$0.frame, local($0.target.frame)] }.map { $0.offsetBy(dx: screenOrigin.x, dy: screenOrigin.y) }
@@ -259,19 +269,24 @@ final class HintCanvas: NSView {
         let visible = TargetCollection.unique(targets).filter { bounds.contains(CGPoint(x: local($0.frame).midX, y: local($0.frame).midY)) }
         let items = visible.map { target in
             let size = (target.label.uppercased() as NSString).size(withAttributes: [.font: font])
-            return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6), fixed: target.source == .grid)
+            return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6),
+                                  fixed: target.source == .grid, titled: !target.title.isEmpty)
         }
         let style = settings.hintStyle
-        if items != layoutItems || bounds != layoutBounds || style != layoutStyle {
-            layoutItems = items; layoutBounds = bounds; layoutStyle = style
-            placements = HintLayout.place(items, in: bounds, style: style)
+        let obstacles = content.map(local).filter { bounds.intersects($0) }
+        let images = obstacles.isEmpty ? [] : icons.map(local).filter { bounds.intersects($0) }
+        if items != layoutItems || bounds != layoutBounds || style != layoutStyle || obstacles != layoutContent || images != layoutIcons {
+            layoutItems = items; layoutBounds = bounds; layoutStyle = style; layoutContent = obstacles; layoutIcons = images
+            let started = ProcessInfo.processInfo.systemUptime
+            placements = HintLayout.place(items, in: bounds, style: style, content: obstacles, icons: images)
+            layoutTime = ProcessInfo.processInfo.systemUptime - started
             let fixed = Set(items.filter(\.fixed).map(\.id))
             colorGroups = HintLayout.colorGroups(placements.filter { !fixed.contains($0.id) }, colors: Settings.palette.count)
         }
         let frames = Dictionary(placements.map { ($0.id, $0.frame) }, uniquingKeysWith: { first, _ in first })
         placed = visible.compactMap { target in
             guard settings.showLabels, target.label.hasPrefix(prefix), let frame = frames[target.id] else { return nil }
-            let color = settings.colorCodeTargets ? colorGroups[target.id].map { Settings.palette[$0] } : nil
+            let color = settings.colorCodeTargets && target.source != .text ? colorGroups[target.id].map { Settings.palette[$0] } : nil
             return PlacedHint(id: target.id, target: target, frame: frame, color: color)
         }
         letters.frame = bounds
@@ -294,8 +309,8 @@ final class HintCanvas: NSView {
             let border = NSBezierPath(rect: local(target.frame)); border.lineWidth = 0.5; border.stroke()
         }
         let shown = Dictionary(placed.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
-        // Color-coded labels box their element, so each label and element read as a pair.
-        for hint in placed {
+        // While a label is being typed, outline the remaining elements in their label's color.
+        for hint in placed where !prefix.isEmpty {
             guard let color = hint.color else { continue }
             color.setStroke()
             let box = NSBezierPath(roundedRect: local(hint.target.frame).insetBy(dx: -2, dy: -2), xRadius: 4, yRadius: 4)

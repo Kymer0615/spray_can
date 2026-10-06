@@ -16,8 +16,7 @@
 "Buy me a coffee — support Ziyang" = "Invítame a un café — apoya a Ziyang";
 "By default, labels move the pointer. Return clicks." = "De forma predeterminada, las etiquetas mueven el puntero. Return hace clic.";
 "Click as soon as a label is complete" = "Hacer clic al completar una etiqueta";
-"Color-code labels and target boxes" = "Colorear etiquetas y recuadros de destino";
-"Each label, its line, and a box around its element share a color that differs from nearby labels." = "Cada etiqueta, su línea y un recuadro alrededor de su elemento comparten un color distinto al de las etiquetas cercanas.";
+"Color-code labels" = "Colorear etiquetas";
 "Elements" = "Elementos";
 "Enable" = "Activar";
 "Enable Screen Recording to use text targeting." = "Activa Grabación de pantalla para buscar texto.";
@@ -65,6 +64,7 @@
 "Move up" = "Subir";
 "Move with arrows · Return to click" = "Mueve con las flechas · Return para hacer clic";
 "Navigation unavailable. Check permissions or Secure Input." = "Navegación no disponible. Revisa los permisos o la Entrada segura.";
+"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "Las etiquetas cercanas tienen colores distintos. Mientras escribes, los elementos que coinciden se resaltan con el color de su etiqueta.";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "Sin analíticas. Sin inferencia en la nube. Sin capturas guardadas. Los diagnósticos contienen tiempos y recuentos, no etiquetas escritas ni contenido de pantalla capturado.";
 "No matching label · Esc clears your input" = "Ninguna etiqueta coincide · Esc borra la entrada";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No hay áreas desplazables · ⇧⌘L para desplazar con el puntero";

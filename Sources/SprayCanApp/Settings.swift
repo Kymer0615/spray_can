@@ -42,6 +42,12 @@ final class Settings: ObservableObject {
         let rgb = UInt32(hex, radix: 16)!
         return NSColor(srgbRed: Double((rgb >> 16) & 255) / 255, green: Double((rgb >> 8) & 255) / 255, blue: Double(rgb & 255) / 255, alpha: 1)
     }
+    /// Black or white label text, whichever reads better on a color-coded badge.
+    static func textColor(on color: NSColor) -> NSColor {
+        guard let rgb = color.usingColorSpace(.sRGB) else { return .white }
+        let luminance = 0.2126 * rgb.redComponent + 0.7152 * rgb.greenComponent + 0.0722 * rgb.blueComponent
+        return luminance > 0.55 ? NSColor(white: 0.08, alpha: 1) : .white
+    }
     @Published var showLines = true
     @Published var showLabels = true
     @Published var shortcuts: [NavigationMode: Shortcut] = {

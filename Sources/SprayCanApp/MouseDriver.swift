@@ -7,23 +7,67 @@ final class MouseDriver {
     private var postedPoint: CGPoint?
     private var pendingRelease: (() -> Void)?
     private var clickGeneration = 0
+    /// Remaining points of a held-button glide, and work waiting for it to finish.
+    private var dragSteps: [CGPoint] = []
+    private var dragTimer: Timer?
+    private var afterDrag: [() -> Void] = []
     // Quartz delivery is asynchronous. Return must use the just-posted destination.
     var point: CGPoint { postedPoint ?? CGEvent(source: nil)?.location ?? .zero }
     func resetPosition() { postedPoint = nil }
     func move(to point: CGPoint) {
+        let start = dragSteps.last ?? lastDragPoint ?? self.point
         postedPoint = point
-        CGEvent(mouseEventSource: source, mouseType: holding ? .leftMouseDragged : .mouseMoved,
-                mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+        guard holding else {
+            CGEvent(mouseEventSource: source, mouseType: .mouseMoved, mouseCursorPosition: point, mouseButton: .left)?.post(tap: .cghidEventTap)
+            return
+        }
+        // Some apps, including the macOS screenshot tool, ignore a drag that jumps in one event.
+        // Glide to the destination in small steps instead.
+        let count = max(4, min(24, Int(hypot(point.x - start.x, point.y - start.y) / 20)))
+        dragSteps = (1...count).map { index in
+            let f = CGFloat(index) / CGFloat(count)
+            return CGPoint(x: start.x + (point.x - start.x) * f, y: start.y + (point.y - start.y) * f)
+        }
+        guard dragTimer == nil else { return }
+        dragTimer = Timer.scheduledTimer(withTimeInterval: 0.012, repeats: true) { [weak self] _ in self?.stepDrag() }
     }
-    func hold() { guard !holding else { return }; holding = true; post(.leftMouseDown, button: .left, modifiers: []) }
+    private var lastDragPoint: CGPoint?
+    private func stepDrag() {
+        guard !dragSteps.isEmpty else {
+            dragTimer?.invalidate(); dragTimer = nil
+            let waiting = afterDrag; afterDrag = []
+            waiting.forEach { $0() }
+            return
+        }
+        let next = dragSteps.removeFirst()
+        lastDragPoint = next
+        CGEvent(mouseEventSource: source, mouseType: .leftMouseDragged, mouseCursorPosition: next, mouseButton: .left)?.post(tap: .cghidEventTap)
+    }
+    /// Runs once any held-button glide has reached its destination.
+    private func whenSettled(_ action: @escaping () -> Void) {
+        if dragTimer == nil { action() } else { afterDrag.append(action) }
+    }
+    func hold() {
+        guard !holding else { return }
+        holding = true; lastDragPoint = point
+        post(.leftMouseDown, button: .left, modifiers: [])
+    }
+    /// Releases immediately (cancellation); a glide in progress jumps to its end first.
     func release() {
         clickGeneration += 1
         pendingRelease?(); pendingRelease = nil
+        dragTimer?.invalidate(); dragTimer = nil
+        if let end = dragSteps.last { CGEvent(mouseEventSource: source, mouseType: .leftMouseDragged, mouseCursorPosition: end, mouseButton: .left)?.post(tap: .cghidEventTap) }
+        dragSteps = []; afterDrag = []; lastDragPoint = nil
         guard holding else { return }
         post(.leftMouseUp, button: .left, modifiers: []); holding = false
     }
     func click(button number: Int, modifiers: KeyModifiers, count: Int = 1, completion: @escaping () -> Void) {
-        if holding { release(); completion(); return }
+        // Drop where the glide ends, after a short pause so the target app registers the final position.
+        if holding {
+            whenSettled { DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.release(); completion() } }
+            return
+        }
         let button: CGMouseButton = number == 1 ? .right : number == 2 ? .center : .left
         let down: CGEventType = number == 1 ? .rightMouseDown : number == 2 ? .otherMouseDown : .leftMouseDown
         let up: CGEventType = number == 1 ? .rightMouseUp : number == 2 ? .otherMouseUp : .leftMouseUp

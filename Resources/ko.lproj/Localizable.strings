@@ -16,8 +16,7 @@
 "Buy me a coffee — support Ziyang" = "커피 한 잔 사 주기 — Ziyang 후원";
 "By default, labels move the pointer. Return clicks." = "기본적으로 레이블은 포인터를 이동합니다. Return을 누르면 클릭합니다.";
 "Click as soon as a label is complete" = "레이블 입력이 끝나면 바로 클릭";
-"Color-code labels and target boxes" = "레이블과 대상 상자 색상 구분";
-"Each label, its line, and a box around its element share a color that differs from nearby labels." = "각 레이블, 연결선, 요소를 둘러싼 상자가 같은 색을 사용하며 주변 레이블과 다른 색으로 표시됩니다.";
+"Color-code labels" = "레이블 색상 구분";
 "Elements" = "요소";
 "Enable" = "활성화";
 "Enable Screen Recording to use text targeting." = "텍스트 타기팅을 사용하려면 화면 기록을 허용하십시오.";
@@ -65,6 +64,7 @@
 "Move up" = "위로 이동";
 "Move with arrows · Return to click" = "화살표로 이동 · Return으로 클릭";
 "Navigation unavailable. Check permissions or Secure Input." = "탐색을 사용할 수 없습니다. 권한 또는 보안 입력을 확인하십시오.";
+"Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color." = "주변 레이블은 서로 다른 색을 사용합니다. 입력하는 동안 일치하는 요소가 레이블 색으로 테두리 표시됩니다.";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "분석 없음. 클라우드 추론 없음. 저장되는 스크린샷 없음. 진단 정보에는 시간과 횟수만 포함되며, 입력한 레이블이나 캡처한 화면 내용은 포함되지 않습니다.";
 "No matching label · Esc clears your input" = "일치하는 레이블 없음 · Esc로 입력 지우기";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "스크롤 영역 없음 · ⇧⌘L로 포인터 스크롤";

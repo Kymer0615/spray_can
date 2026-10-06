@@ -15,6 +15,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     let controller = AppController()
     private var item: NSStatusItem!
     private var integrationHarness: IntegrationHarness?
+    private var snapshot: OverlaySnapshot?
     private var settingsWindow: NSWindow?
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
@@ -24,6 +25,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         controller.openSettings = { [weak self] in self?.showSettings() }
         updateIcon(); rebuildMenu()
         if ProcessInfo.processInfo.arguments.contains("--render-docs") { DocumentationRenderer.render(); NSApp.terminate(nil); return }
+        if ProcessInfo.processInfo.arguments.contains("--render-overlay") { snapshot = OverlaySnapshot(); snapshot?.run(); return }
         if ProcessInfo.processInfo.arguments.contains("--diagnose") {
             print("Accessibility: \(controller.accessibilityGranted); Keyboard capture running: \(controller.keyboardReady); Screen Recording: \(controller.screenGranted)")
             NSApp.terminate(nil); return

@@ -20,6 +20,8 @@ final class AppController: ObservableObject {
     private var session = NavigationSession()
     var integrationTargets: [Target] { session.phase == .ready ? session.targets : [] }
     private var result = DiscoveryResult()
+    /// Text detected in the target window; nil until known, so labels fall back to estimates.
+    private var detectedText: [CGRect]?
     private var targetPID: pid_t = 0
     private var deferred: [CapturedKey] = []
     private var selecting = false
@@ -107,6 +109,14 @@ final class AppController: ObservableObject {
         lastScan = ProcessInfo.processInfo.systemUptime
         // Watch from the start, so changes during a scan are not missed.
         if mode == .elements || mode == .scroll { accessibilityChanges.start(pid: targetPID) }
+        detectedText = nil
+        if mode == .elements, let window = frontWindow(of: targetPID) {
+            // Runs alongside the accessibility scan, so labels usually avoid real text from the start.
+            ocr.detectText(in: window) { [weak self] rects in
+                guard let self, self.active, self.session.generation == generation, let rects else { return }
+                self.detectedText = rects; self.render()
+            }
+        }
         status = mode == .freestyle ? String(localized: "Move with arrows · Return to click") : String(localized: "Finding targets…")
         render()
         let started = ProcessInfo.processInfo.systemUptime
@@ -145,6 +155,11 @@ final class AppController: ObservableObject {
         deferred = []; selecting = false; active = false; selectedTarget = nil; selectedFrame = nil
         mouse.release(); mouse.resetPosition(); keyboard.setActive(false); overlay.hide(); stateChanged?()
     }
+    private func frontWindow(of pid: pid_t) -> CGRect? {
+        let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
+        return windows.first { ($0[kCGWindowOwnerPID as String] as? pid_t) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }
+            .flatMap { ($0[kCGWindowBounds as String] as? NSDictionary).flatMap { CGRect(dictionaryRepresentation: $0) } }
+    }
     private func updateReadyStatus() {
         if session.mode == .freestyle { status = String(localized: "Move with arrows · Return to click") }
         else if session.mode == .scroll { status = result.scrollAreas.isEmpty ? String(localized: "No scroll areas · ⇧⌘L for pointer scrolling") : String(localized: "HJKL scroll · Tab changes area · Esc exits") }
@@ -154,7 +169,8 @@ final class AppController: ObservableObject {
     }
     private func render() {
         guard active else { return }
-        overlay.render(targets: session.mode == .scroll ? [] : session.targets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame, pointer: mouse.point)
+        overlay.render(targets: session.mode == .scroll ? [] : session.targets, prefix: session.prefix, mode: session.mode, status: status, selected: selectedFrame, pointer: mouse.point,
+                       content: HintLayout.textContent(detected: detectedText ?? [], exposed: result.texts), icons: result.icons)
     }
     func handle(_ key: CapturedKey) {
         guard active else { return }

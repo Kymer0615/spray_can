@@ -103,8 +103,8 @@ struct SettingsView: View {
             Text("Quiet visuals. Clear destinations.").foregroundStyle(.secondary)
             AppearancePreview().frame(height: 100)
             Toggle("Use Liquid Glass", isOn: $settings.glassEnabled)
-            Toggle("Color-code labels and target boxes", isOn: $settings.colorCodeTargets)
-            Text("Each label, its line, and a box around its element share a color that differs from nearby labels.").font(.caption).foregroundStyle(.secondary)
+            Toggle("Color-code labels", isOn: $settings.colorCodeTargets)
+            Text("Nearby labels get different colors. While you type, the matching elements are outlined in their label’s color.").font(.caption).foregroundStyle(.secondary)
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 18), GridItem(.flexible(), spacing: 18)], alignment: .leading, spacing: 10) {
                 ForEach(AppearanceColor.allCases, id: \.self) { role in
                     ColorPicker(colorTitle(role), selection: Binding(get: { settings.color(role) }, set: { settings.setColor($0, for: role) }), supportsOpacity: false)

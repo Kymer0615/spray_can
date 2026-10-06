@@ -39,6 +39,26 @@ public enum TargetCollection {
         var seen = Set<String>()
         return targets.filter { seen.insert($0.id).inserted && $0.frame.minX.isFinite && $0.frame.minY.isFinite && $0.frame.width.isFinite && $0.frame.height.isFinite }
     }
+    /// Drops a target that is visually the same control as a smaller one inside it
+    /// (a wrapper whose area is at most a quarter larger), keeping the innermost.
+    public static func collapsed(_ targets: [Target]) -> [Target] {
+        let bySize = unique(targets).sorted { ($0.frame.width * $0.frame.height, $0.id) < ($1.frame.width * $1.frame.height, $1.id) }
+        var kept: [Target] = []
+        for target in bySize {
+            let area = target.frame.width * target.frame.height
+            let wraps = kept.contains { inner in
+                target.frame.insetBy(dx: -2, dy: -2).contains(inner.frame) && inner.frame.width * inner.frame.height * 1.25 >= area
+            }
+            if !wraps { kept.append(target) }
+        }
+        // A row that only wraps one control (a sidebar item's button) is that control.
+        let rows = kept.filter { $0.role == "AXRow" }
+        let redundant = Set(rows.filter { row in
+            kept.filter { $0.id != row.id && row.frame.insetBy(dx: -2, dy: -2).contains($0.frame) }.count == 1
+        }.map(\.id))
+        let ids = Set(kept.map(\.id)).subtracting(redundant)
+        return targets.filter { ids.contains($0.id) }
+    }
     public static func ordered(_ targets: [Target]) -> [Target] {
         unique(targets).sorted {
             if $0.frame.minY != $1.frame.minY { return $0.frame.minY < $1.frame.minY }

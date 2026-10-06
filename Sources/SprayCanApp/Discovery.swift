@@ -15,6 +15,10 @@ struct DiscoveryResult {
     var scrollAreas: [Target] = []
     var elements: [String: AXUIElement] = [:]
     var captureRects: [CGRect] = []
+    /// Visible images, kept clear of labels along with text.
+    var icons: [CGRect] = []
+    /// Visible static text frames: exact where apps expose them, unlike visual text detection.
+    var texts: [CGRect] = []
     var timedOut = false
     var needsRetry = false
 }
@@ -175,7 +179,9 @@ final class AccessibilityProvider: TargetProvider {
         var identities = DiscoveryIdentity<AXUIElement>(namespace: "ax-\(context.generation)")
         var count = 0
         let actionable: Set<String> = [kAXButtonRole, kAXCheckBoxRole, kAXRadioButtonRole, kAXPopUpButtonRole, kAXMenuButtonRole, kAXMenuItemRole, kAXTextFieldRole, kAXTextAreaRole, kAXSliderRole, kAXIncrementorRole, "AXLink", kAXCellRole, kAXRowRole, "AXTab", "AXDockItem", "AXDisclosureTriangle", "AXHandle"]
-        func traverse(_ root: AXUIElement, pid: pid_t, clip: CGRect?, system: Bool, depth: Int = 0) {
+        // Inside a labelled row, only real controls get their own label; the row covers its cells and text.
+        let rowControls: Set<String> = [kAXButtonRole, kAXCheckBoxRole, kAXRadioButtonRole, kAXPopUpButtonRole, kAXMenuButtonRole, kAXSliderRole, kAXIncrementorRole, "AXLink", "AXDisclosureTriangle"]
+        func traverse(_ root: AXUIElement, pid: pid_t, clip: CGRect?, system: Bool, inRow: Bool = false, depth: Int = 0) {
             guard self.current(context.generation), ProcessInfo.processInfo.systemUptime < deadline, count < 6000 else { result.timedOut = true; return }
             guard depth < 80, seen.insert(root).inserted else { return }
             count += 1
@@ -203,6 +209,7 @@ final class AccessibilityProvider: TargetProvider {
             // Their zero-sized root is not a frame-less layout wrapper.
             if role == kAXMenuRole, frame == nil || frame!.isEmpty { return }
             var childClip = clip
+            var childInRow = inRow
             if let frame, frame.width > 1, frame.height > 1 {
                 let clipped = clip.map { frame.intersection($0) } ?? frame
                 // Frame-less/zero-sized wrappers still have useful children.
@@ -219,14 +226,16 @@ final class AccessibilityProvider: TargetProvider {
                     let id = identities.id(for: root)
                     let target = Target(id: id, frame: clipped, source: .accessibility, title: title, role: role)
                     if role == kAXScrollAreaRole { result.scrollAreas.append(target) }
-                    if actionable.contains(role) || names.contains(kAXPressAction) || names.contains(kAXPickAction) {
-                        // Don't drop overlapping parent/child controls solely to make labels prettier.
+                    if role == kAXImageRole && clipped.width < 200 && clipped.height < 200 { result.icons.append(clipped) }
+                    if role == kAXStaticTextRole { result.texts.append(clipped) }
+                    if (actionable.contains(role) || names.contains(kAXPressAction) || names.contains(kAXPickAction)) && (!inRow || rowControls.contains(role)) {
                         result.targets.append(target); result.elements[id] = root
+                        if role == kAXRowRole { childInRow = true }
                     }
                 }
             }
             let children: [AXUIElement] = ((role == kAXTableRole || role == kAXOutlineRole) ? values[8] as? [AXUIElement] : nil) ?? values[7] as? [AXUIElement] ?? []
-            for child in children { traverse(child, pid: pid, clip: childClip, system: system, depth: depth + 1) }
+            for child in children { traverse(child, pid: pid, clip: childClip, system: system, inRow: childInRow, depth: depth + 1) }
         }
         let activeApp = AXUIElementCreateApplication(context.pid)
         AXUIElementSetMessagingTimeout(activeApp, 0.20)
@@ -263,7 +272,7 @@ final class AccessibilityProvider: TargetProvider {
                 }
             }
         }
-        result.targets = TargetCollection.ordered(result.targets)
+        result.targets = TargetCollection.ordered(TargetCollection.collapsed(result.targets))
         return result
     }
 }
@@ -301,7 +310,49 @@ final class OCRProvider {
         }
         return OCRLanguages.merge(passes)
     }
-    func cancel() { task?.cancel(); task = nil }
+    private var detection: Task<Void, Never>?
+    func cancel() { task?.cancel(); task = nil; detection?.cancel(); detection = nil }
+    /// Where text is in a window, without reading it: fast enough for every scan.
+    /// Calls back with nil when Screen Recording is unavailable or capture fails.
+    func detectText(in region: CGRect, completion: @escaping ([CGRect]?) -> Void) {
+        detection?.cancel()
+        guard CGPreflightScreenCaptureAccess(), region.width > 1, region.height > 1 else { completion(nil); return }
+        detection = Task {
+            let rects = try? await Self.textRects(in: region)
+            guard !Task.isCancelled else { return }
+            await MainActor.run { completion(rects) }
+        }
+    }
+    /// The display showing most of a window that may span several.
+    static func mainDisplay(for region: CGRect, in displays: [SCDisplay]) -> SCDisplay? {
+        func shown(_ display: SCDisplay) -> CGFloat {
+            let part = CGDisplayBounds(display.displayID).intersection(region)
+            return part.isNull ? 0 : part.width * part.height
+        }
+        return displays.filter { shown($0) > 0 }.max { shown($0) < shown($1) }
+    }
+    static func textRects(in region: CGRect) async throws -> [CGRect] {
+        let content = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
+        guard let display = mainDisplay(for: region, in: content.displays) else { return [] }
+        let bounds = CGDisplayBounds(display.displayID)
+        let area = region.intersection(bounds)
+        let config = SCStreamConfiguration()
+        config.sourceRect = area.offsetBy(dx: -bounds.minX, dy: -bounds.minY)
+        config.width = Int(area.width * 2); config.height = Int(area.height * 2); config.showsCursor = false
+        let filter = SCContentFilter(display: display, excludingApplications: content.applications.filter { $0.processID == getpid() }, exceptingWindows: [])
+        let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
+        try Task.checkCancellation()
+        // Fast recognition finds dim and small text more reliably than rectangle detection.
+        let request = VNRecognizeTextRequest()
+        request.recognitionLevel = .fast; request.usesLanguageCorrection = false
+        let started = ProcessInfo.processInfo.systemUptime
+        try VNImageRequestHandler(cgImage: image).perform([request])
+        if ProcessInfo.processInfo.arguments.contains("--dump") { print("Text detection: \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms") }
+        return (request.results ?? []).map { observation in
+            let b = observation.boundingBox
+            return CGRect(x: area.minX + b.minX * area.width, y: area.minY + (1 - b.maxY) * area.height, width: b.width * area.width, height: b.height * area.height)
+        }
+    }
     func discover(screens: [CGRect], regions: [CGRect], languages: [String], completion: @escaping ([Target], String?) -> Void) {
         cancel()
         guard CGPreflightScreenCaptureAccess() else { completion([], String(localized: "Enable Screen Recording to use text targeting.")); return }

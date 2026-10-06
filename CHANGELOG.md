@@ -1,5 +1,22 @@
 # Changelog
 
+## Spray Can 0.1.4
+
+- Readable labels: each label now touches its element and sits right after the element's text, on the same line, instead of drifting away on a connector line. Labels may overlap an element's padding but never its text or icon. Text positions come from the accessibility tree and a fast on-device text pass over the target window; nothing is stored.
+- One label per item: a row no longer gets separate labels for its cells, name field, and date column, and a sidebar row that only wraps a button shares that button's label.
+- Color coding fills each badge with a color that differs from its neighbors. Outlines appear only while you type, around the elements that still match. OCR labels keep their own tint.
+- Fix Space and = drags in the macOS screenshot tool and other apps that ignore a drag that jumps: held moves now glide to the destination, and Return or Space drops once the glide arrives.
+- Fix text targeting on windows that span several displays.
+
+Validation: 42 core tests and a localization check passed, along with a universal Release build. Real-window snapshots of System Settings, Finder, and Safari compared before and after: connectors dropped from 108 to 0, 245 to 2, and 11 to 8 (out of 112 labels), and layout takes 2–8 ms per window. A synthetic gliding drag captured a region with the macOS screenshot tool, where a single-jump drag did not. Pressing Space in a live ⇧⌘4 session and non-Latin text positions remain to be validated; see docs/VALIDATION.md.
+
+This release is ad-hoc signed and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.3
 
 - Stop labelling the same element twice: OCR text that an element label already marks (text inside a button, or a title right next to its icon) is skipped. Turn it off with General → Hide text labels on known elements.
