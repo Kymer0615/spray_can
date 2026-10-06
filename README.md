@@ -100,6 +100,14 @@ The held button glides to each destination, so apps that track the pointer — i
 
 ![Grid drag workflow](docs/images/drag-demo.gif)
 
+## Screenshots without the mouse
+
+Spray Can drives the macOS screenshot tool from the keyboard. Press **⇧⌘4**, then **⇧⌘K** for the grid. Type a label to put the crosshair on one corner, press **Space** to start the selection, type a second label for the opposite corner, and press **Space** again. macOS takes the screenshot exactly as if you had dragged with the mouse.
+
+Element labels (**⇧⌘J**) work the same way when you want the selection to start at a button or a row. The held button glides to each label, so the selection grows smoothly and the screenshot tool always follows it.
+
+![Taking a screenshot with grid labels and Space](docs/images/screenshot-demo.gif)
+
 ## Native macOS experience
 
 ![Settings](docs/images/settings.png)

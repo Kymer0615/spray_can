@@ -28,7 +28,9 @@ enum DocumentationRenderer {
                 }
                 let filter = SCContentFilter(desktopIndependentWindow: target)
                 let configuration = SCStreamConfiguration()
-                configuration.width = Int(size.width); configuration.height = Int(size.height)
+                // Native display scale (2× on Retina), so README images stay sharp.
+                let scale = window.backingScaleFactor
+                configuration.width = Int(size.width * scale); configuration.height = Int(size.height * scale)
                 configuration.showsCursor = false
                 configuration.ignoreShadowsSingleWindow = true
                 SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration) { image, error in
@@ -123,12 +125,84 @@ enum DocumentationRenderer {
                 hud.rootView = NavigationHUD(mode: grid ? .grid : .elements, status: message, prefix: prefix)
                 if let frame = save(container, name: "", size: container.bounds.size) { frames.append(frame) }
             }
-            let url = URL(fileURLWithPath: directory).appendingPathComponent(grid ? "drag-demo.gif" : "element-demo.gif")
-            if let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames.count, nil) {
-                CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
-                for frame in frames { CGImageDestinationAddImage(destination, frame, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 1.4]] as CFDictionary) }
-                CGImageDestinationFinalize(destination)
-            }
+            writeGIF(frames, name: grid ? "drag-demo.gif" : "element-demo.gif")
+        }
+        // Keyboard screenshots: ⇧⌘4, then grid labels and Space to drag the selection.
+        let container = NSView(frame: CGRect(x: 0, y: 0, width: 1100, height: 700))
+        let scene = DemoWindow(frame: container.bounds); container.addSubview(scene)
+        let canvas = HintCanvas(frame: container.bounds); canvas.primaryHeight = 700
+        container.addSubview(canvas)
+        let screenshot = ScreenshotOverlay(frame: container.bounds); container.addSubview(screenshot)
+        let hud = NSHostingView(rootView: NavigationHUD(mode: .grid, status: "", prefix: ""))
+        hud.frame = CGRect(x: 330, y: 0, width: 440, height: 76); container.addSubview(hud)
+        let cells = HintLabels.assign(Geometry.grid(screens: [container.bounds], cellSize: 100))
+        let start = cells.first { $0.frame.contains(CGPoint(x: 210, y: 120)) }!, end = cells.first { $0.frame.contains(CGPoint(x: 1010, y: 430)) }!
+        let selection = CGRect(x: start.point.x, y: start.point.y, width: end.point.x - start.point.x, height: end.point.y - start.point.y)
+        screenshot.snapshot = { rect in
+            guard let rep = scene.bitmapImageRepForCachingDisplay(in: rect) else { return nil }
+            scene.cacheDisplay(in: rect, to: rep); let image = NSImage(size: rect.size); image.addRepresentation(rep); return image
+        }
+        let steps: [(String, [Target], CGRect?, CGPoint?, CGRect?, Bool)] = [
+            ("⇧⌘4 · Start a screenshot", [], nil, CGPoint(x: 550, y: 330), nil, false),
+            ("⇧⌘K · Type " + start.label.uppercased() + " · Move to one corner", cells, start.frame, start.point, nil, false),
+            ("Space · Hold to start the selection", cells, start.frame, start.point, CGRect(origin: start.point, size: .zero), false),
+            ("Type " + end.label.uppercased() + " · Drag to the other corner", cells, end.frame, end.point, selection, false),
+            ("Space · Release · Screenshot taken", [], nil, nil, nil, true),
+        ]
+        var frames: [CGImage] = []
+        for (message, targets, selected, crosshair, region, taken) in steps {
+            canvas.targets = targets; canvas.selected = selected; canvas.needsLayout = true
+            screenshot.crosshair = crosshair; screenshot.selection = region; screenshot.thumbnail = taken ? selection : nil
+            screenshot.needsDisplay = true
+            hud.rootView = NavigationHUD(mode: .grid, status: message, prefix: "")
+            if let frame = save(container, name: "", size: container.bounds.size) { frames.append(frame) }
+        }
+        writeGIF(frames, name: "screenshot-demo.gif")
+        func writeGIF(_ frames: [CGImage], name: String) {
+            let url = URL(fileURLWithPath: directory).appendingPathComponent(name)
+            guard let destination = CGImageDestinationCreateWithURL(url as CFURL, UTType.gif.identifier as CFString, frames.count, nil) else { return }
+            CGImageDestinationSetProperties(destination, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFLoopCount: 0]] as CFDictionary)
+            for frame in frames { CGImageDestinationAddImage(destination, frame, [kCGImagePropertyGIFDictionary: [kCGImagePropertyGIFDelayTime: 1.6]] as CFDictionary) }
+            CGImageDestinationFinalize(destination)
+        }
+    }
+}
+
+/// An illustration of the macOS screenshot selection (⇧⌘4) for documentation: crosshair, dimmed
+/// surroundings, the selected region with its size, and the thumbnail shown after capture.
+final class ScreenshotOverlay: NSView {
+    var crosshair: CGPoint?
+    var selection: CGRect?
+    var thumbnail: CGRect?
+    var snapshot: ((CGRect) -> NSImage?)?
+    override var isFlipped: Bool { true }
+    override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    override func draw(_ dirtyRect: NSRect) {
+        if let selection, selection.width > 0 {
+            let dim = NSBezierPath(rect: bounds); dim.append(NSBezierPath(rect: selection)); dim.windingRule = .evenOdd
+            NSColor.black.withAlphaComponent(0.28).setFill(); dim.fill()
+            NSColor.white.setStroke(); let border = NSBezierPath(rect: selection.insetBy(dx: 0.5, dy: 0.5)); border.lineWidth = 1; border.stroke()
+        }
+        if let point = crosshair {
+            NSColor.black.withAlphaComponent(0.75).setStroke()
+            let cross = NSBezierPath(); cross.lineWidth = 1.5
+            cross.move(to: CGPoint(x: point.x - 11, y: point.y)); cross.line(to: CGPoint(x: point.x + 11, y: point.y))
+            cross.move(to: CGPoint(x: point.x, y: point.y - 11)); cross.line(to: CGPoint(x: point.x, y: point.y + 11)); cross.stroke()
+            let size = selection.map { "\(Int($0.width)) × \(Int($0.height))" } ?? "\(Int(point.x)) \(Int(point.y))"
+            let attributes: [NSAttributedString.Key: Any] = [.font: NSFont.monospacedDigitSystemFont(ofSize: 11, weight: .medium), .foregroundColor: NSColor.white]
+            let text = NSAttributedString(string: size, attributes: attributes), box = text.size()
+            var label = CGRect(x: point.x + 10, y: point.y + 10, width: box.width + 10, height: box.height + 4)
+            if label.maxX > bounds.maxX - 6 { label.origin.x = point.x - 10 - label.width }
+            NSColor.black.withAlphaComponent(0.6).setFill(); NSBezierPath(roundedRect: label, xRadius: 4, yRadius: 4).fill()
+            text.draw(at: CGPoint(x: label.minX + 5, y: label.minY + 2))
+        }
+        if let thumbnail, let image = snapshot?(thumbnail) {
+            let width: CGFloat = 220, frame = CGRect(x: bounds.maxX - width - 28, y: bounds.maxY - width * thumbnail.height / thumbnail.width - 110, width: width, height: width * thumbnail.height / thumbnail.width)
+            NSGraphicsContext.saveGraphicsState()
+            let shadow = NSShadow(); shadow.shadowBlurRadius = 14; shadow.shadowColor = NSColor.black.withAlphaComponent(0.35); shadow.set()
+            NSColor.white.setFill(); NSBezierPath(roundedRect: frame.insetBy(dx: -4, dy: -4), xRadius: 8, yRadius: 8).fill()
+            NSGraphicsContext.restoreGraphicsState()
+            image.draw(in: frame, from: .zero, operation: .sourceOver, fraction: 1, respectFlipped: true, hints: nil)
         }
     }
 }

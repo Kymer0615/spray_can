@@ -104,6 +104,14 @@ El botón pulsado se desliza hasta cada destino, así que las apps que siguen el
 
 ![Flujo de arrastre con la cuadrícula](docs/images/drag-demo.gif)
 
+## Capturas de pantalla sin ratón
+
+Spray Can maneja la herramienta de capturas de macOS desde el teclado. Pulsa **⇧⌘4** y luego **⇧⌘K** para la cuadrícula. Escribe una etiqueta para llevar la cruz a una esquina, pulsa **Espacio** para empezar la selección, escribe otra etiqueta para la esquina opuesta y pulsa **Espacio** de nuevo. macOS hace la captura igual que si hubieras arrastrado con el ratón.
+
+Las etiquetas de elementos (**⇧⌘J**) funcionan igual cuando quieres que la selección empiece en un botón o una fila. El botón pulsado se desliza hasta cada etiqueta, así que la selección crece de forma continua y la herramienta de capturas siempre la sigue.
+
+![Hacer una captura con etiquetas de cuadrícula y Espacio](docs/images/screenshot-demo.gif)
+
 ## Experiencia nativa de macOS
 
 ![Ajustes](docs/images/settings.png)
