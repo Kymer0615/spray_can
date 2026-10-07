@@ -148,6 +148,8 @@ final class AppController: ObservableObject {
                 self.result.scrollAreas = (areas.isEmpty ? [window] : areas).enumerated().map { Target(id: "scroll-\($0.offset)", frame: $0.element, source: .accessibility, role: kAXScrollAreaRole) }
                 self.scrollUnderPointer = window.contains(self.mouse.point)
             }
+            // "Don't move" scrolls wherever the pointer already is; Tab still moves it into an area.
+            if mode == .scroll && self.settings.scrollPointer == .stay && !self.result.scrollAreas.isEmpty { self.scrollUnderPointer = true }
             let targets = mode == .scroll ? self.result.scrollAreas : discovered.targets
             _ = self.session.publish(targets, generation: generation, vi: self.settings.vi)
             self.scrollIndex = 0
@@ -373,12 +375,12 @@ final class AppController: ObservableObject {
         guard !result.scrollAreas.isEmpty else { return }
         if scrollUnderPointer { selectedFrame = nil; render(); return }
         let target = result.scrollAreas[scrollIndex % result.scrollAreas.count]
-        // Wheel events go wherever the pointer is, so it must be inside the area; a corner
-        // near the scroll bar keeps it off the content being read.
+        // Wheel events go wherever the pointer is, so it must be inside the area to scroll it.
         let frame = target.frame
         selectedFrame = frame
-        // "Don't move" leaves the pointer where it is; scrolling then follows it.
-        if let point = settings.scrollPointer.point(in: frame) {
+        // Reached through Tab when the pointer otherwise stays put: move it to the right edge.
+        let placement = settings.scrollPointer == .stay ? ScrollPointerPlacement.rightEdge : settings.scrollPointer
+        if let point = placement.point(in: frame) {
             if pointerBeforeScroll == nil { pointerBeforeScroll = mouse.point }
             mouse.move(to: point)
         }

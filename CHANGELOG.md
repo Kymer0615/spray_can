@@ -1,5 +1,16 @@
 # Changelog
 
+## Spray Can 0.1.12
+
+- Scroll mode no longer moves the pointer by default: it scrolls whatever is under the pointer, and Tab moves the pointer into a scroll area when you want one. Choose another placement in General → Scrolling → Pointer in scroll mode.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.11
 
 - Adjustable scroll smoothness (General → Scrolling): from Off (instant) to very smooth. The default matches 0.1.10 (about 150 ms per step); the smoothest setting glides for about 300 ms.

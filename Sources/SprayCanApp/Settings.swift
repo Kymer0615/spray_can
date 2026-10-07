@@ -35,8 +35,8 @@ final class Settings: ObservableObject {
     func restoreHintPlacement() { hintPosition = .leading; hintOffsetX = 0; hintOffsetY = 0 }
     /// 0 scrolls instantly; higher glides longer. 0.75 is about 150 ms per step.
     @Published var scrollSmoothness = Settings.number("scrollSmoothness", 0.75) { didSet { save("scrollSmoothness", scrollSmoothness) } }
-    /// Where scroll mode keeps the pointer inside the active area.
-    @Published var scrollPointer = ScrollPointerPlacement(rawValue: UserDefaults.standard.string(forKey: "scrollPointer") ?? "") ?? .rightEdge {
+    /// Where scroll mode keeps the pointer inside the active area; by default it doesn't move.
+    @Published var scrollPointer = ScrollPointerPlacement(rawValue: UserDefaults.standard.string(forKey: "scrollPointer") ?? "") ?? .stay {
         didSet { save("scrollPointer", scrollPointer.rawValue) }
     }
     /// Let ⌘ and ⌃ shortcuts Spray Can doesn't use reach macOS and apps during navigation.
