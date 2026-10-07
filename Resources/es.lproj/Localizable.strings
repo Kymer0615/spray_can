@@ -45,6 +45,7 @@
 "Help & Shortcuts" = "Ayuda y atajos";
 "Hide text labels on known elements" = "Ocultar etiquetas de texto en elementos conocidos";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL desplaza · Tab cambia de área · Esc sale";
+"Hold Return to right-click" = "Mantén pulsado Retorno para hacer clic derecho";
 "Holding · Type a label to drag · Space or Return drops" = "Manteniendo pulsado · Escribe una etiqueta para arrastrar · Espacio o Retorno suelta";
 "Horizontal offset · %lld pt" = "Desplazamiento horizontal · %lld pt";
 "Include all visible windows" = "Incluir todas las ventanas visibles";
@@ -111,6 +112,7 @@
 "Restore default shortcuts" = "Restaurar atajos predeterminados";
 "Restore label placement" = "Restaurar posición de etiquetas";
 "Retry keyboard capture" = "Reintentar captura de teclado";
+"Return then clicks when released; holding it about half a second right-clicks." = "Retorno hace clic al soltarlo; mantenerlo pulsado medio segundo hace clic derecho.";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: clic izquierdo · [: clic central · ]: clic derecho\n\\: doble clic · =: mantener botón izquierdo · Return: soltar\n⇧ flechas: desplazar · ⌘H: ocultar · ⌘,: ajustes";
 "Right edge" = "Borde derecho";
 "Right of the element" = "A la derecha del elemento";

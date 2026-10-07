@@ -45,6 +45,7 @@
 "Help & Shortcuts" = "ヘルプとショートカット";
 "Hide text labels on known elements" = "既知の要素上のテキストラベルを隠す";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL でスクロール · Tab で領域切替 · Esc で終了";
+"Hold Return to right-click" = "Return を長押しして右クリック";
 "Holding · Type a label to drag · Space or Return drops" = "押したまま · ラベルを入力してドラッグ · スペースまたは Return で離す";
 "Horizontal offset · %lld pt" = "水平オフセット · %lld pt";
 "Include all visible windows" = "表示中のすべてのウインドウを含める";
@@ -111,6 +112,7 @@
 "Restore default shortcuts" = "デフォルトのショートカットに戻す";
 "Restore label placement" = "ラベルの配置を元に戻す";
 "Retry keyboard capture" = "キーボードキャプチャを再試行";
+"Return then clicks when released; holding it about half a second right-clicks." = "Return は離したときにクリックし、約 0.5 秒長押しすると右クリックします。";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: 左クリック · [: 中クリック · ]: 右クリック\n\\: ダブルクリック · =: 左ボタンを押したまま · Return: ドロップ\n⇧ 矢印: スクロール · ⌘H: 隠す · ⌘,: 設定";
 "Right edge" = "右端";
 "Right of the element" = "要素の右";

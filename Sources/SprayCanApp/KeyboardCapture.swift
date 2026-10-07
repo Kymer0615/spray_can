@@ -8,6 +8,8 @@ struct CapturedKey {
     let modifiers: KeyModifiers
     let labelModifiers: KeyModifiers
     let repeatKey: Bool
+    /// When the key went down (system uptime), for telling a tap from a long press.
+    var time: TimeInterval = ProcessInfo.processInfo.systemUptime
 }
 
 /// No discovery, rendering, logging of text, or synchronous main-thread work in the callback.
@@ -40,6 +42,7 @@ final class KeyboardCapture {
     func setKeyRules(passThrough: Bool, vi: Bool) { lock.lock(); self.passThrough = passThrough; self.vi = vi; lock.unlock() }
     /// After a Return click: a second Return within `interval` double-clicks; any other key ends the window.
     var onDoubleClick: (() -> Void)?
+    var onReturnUp: ((TimeInterval) -> Void)?
     private var doubleClickArmedAt: TimeInterval?
     private var doubleClickInterval: TimeInterval = 0.5
     func armDoubleClick(interval: TimeInterval) {
@@ -120,10 +123,20 @@ final class KeyboardCapture {
             return Unmanaged.passUnretained(event)
         }
         if type == .keyUp {
-            if consumed.remove(code) != nil { return nil }
+            if consumed.remove(code) != nil {
+                // Return clicks on release (holding it right-clicks), so its release matters.
+                if code == 36 || code == 76 {
+                    let time = ProcessInfo.processInfo.systemUptime
+                    DispatchQueue.main.async { self.onReturnUp?(time) }
+                }
+                return nil
+            }
             return Unmanaged.passUnretained(event)
         }
         let repeated = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
+        // A key still held from a finished session (a long Return that right-clicked) must not
+        // auto-repeat into the app, where it could pick a context-menu item.
+        if repeated && !active && consumed.contains(code) { return nil }
         if let armedAt = doubleClickArmedAt {
             doubleClickArmedAt = nil
             if !repeated && DoubleClickWindow.accepts(code: code, modifiers: modifiers, elapsed: ProcessInfo.processInfo.systemUptime - armedAt, interval: doubleClickInterval) {

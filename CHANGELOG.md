@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.14
+
+- Hold Return to right-click: after typing a label, holding Return for about half a second right-clicks. A normal press still left-clicks, now on release. Turn it off in General → Clicking → Hold Return to right-click (Return then clicks on press again).
+- A Return still held after a right-click no longer auto-repeats into the app, so it can't pick a context-menu item.
+
+Validation: 51 core tests (including the long-press rule) and a localization check passed. The live keyboard path was not exercised while the installed copy was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.13
 
 - Press Return twice to double-click: after a Return click, a second Return within your Mac's double-click speed turns it into a double-click. Any other key ends the window and goes to the app. Turn it off in General → Clicking.

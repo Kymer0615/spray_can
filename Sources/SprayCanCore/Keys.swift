@@ -172,3 +172,16 @@ public enum DoubleClickWindow {
         (code == 36 || code == 76) && modifiers.isEmpty && elapsed >= 0 && elapsed <= interval
     }
 }
+
+/// Return clicks on release; held past the threshold it right-clicks instead.
+public enum ReturnPress {
+    public static let threshold: TimeInterval = 0.45
+    /// The button for a Return held this long: 0 = left, 1 = right.
+    public static func button(heldFor duration: TimeInterval, threshold: TimeInterval = ReturnPress.threshold) -> Int {
+        duration >= threshold ? 1 : 0
+    }
+    /// Whether an unmodified Return should wait to see if it becomes a long press.
+    public static func defers(code: UInt16, modifiers: KeyModifiers, holding: Bool, enabled: Bool) -> Bool {
+        enabled && !holding && modifiers.isEmpty && (code == 36 || code == 76)
+    }
+}

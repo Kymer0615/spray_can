@@ -39,6 +39,8 @@ final class Settings: ObservableObject {
     @Published var scrollPointer = ScrollPointerPlacement(rawValue: UserDefaults.standard.string(forKey: "scrollPointer") ?? "") ?? .stay {
         didSet { save("scrollPointer", scrollPointer.rawValue) }
     }
+    /// Holding Return past a short threshold right-clicks instead of clicking.
+    @Published var holdReturnRightClicks = Settings.flag("holdReturnRightClicks", true) { didSet { save("holdReturnRightClicks", holdReturnRightClicks) } }
     /// A second Return right after a Return click turns it into a double-click.
     @Published var returnTwiceDoubleClicks = Settings.flag("returnTwiceDoubleClicks", true) { didSet { save("returnTwiceDoubleClicks", returnTwiceDoubleClicks) } }
     /// Let ⌘ and ⌃ shortcuts Spray Can doesn't use reach macOS and apps during navigation.

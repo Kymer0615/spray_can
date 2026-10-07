@@ -45,6 +45,7 @@
 "Help & Shortcuts" = "說明與快捷鍵";
 "Hide text labels on known elements" = "隱藏已知元素上的文字標籤";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL 捲動 · Tab 切換區域 · Esc 結束";
+"Hold Return to right-click" = "按住 Return 進行右鍵點按";
 "Holding · Type a label to drag · Space or Return drops" = "正在按住 · 輸入標籤以拖移 · 空白鍵或 Return 放開";
 "Horizontal offset · %lld pt" = "水平偏移 · %lld pt";
 "Include all visible windows" = "包含所有可見視窗";
@@ -111,6 +112,7 @@
 "Restore default shortcuts" = "還原預設快捷鍵";
 "Restore label placement" = "還原標籤位置";
 "Retry keyboard capture" = "重試鍵盤擷取";
+"Return then clicks when released; holding it about half a second right-clicks." = "此時 Return 會在放開時點按；按住約半秒則進行右鍵點按。";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return：左鍵點按 · [：中鍵點按 · ]：右鍵點按\n\\：按兩下 · =：按住左鍵 · Return：放下\n⇧ 方向鍵：捲動 · ⌘H：隱藏 · ⌘,：設定";
 "Right edge" = "右邊緣";
 "Right of the element" = "元素右側";

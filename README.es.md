@@ -27,7 +27,7 @@ brew install --cask kymer0615/tap/spray-can
 
 1. Pulsa **⇧⌘J**. Cada botón, enlace, fila y campo recibe una etiqueta corta justo al lado de su texto.
 2. Escribe la etiqueta. El puntero salta hasta allí.
-3. Pulsa **Return** para hacer clic; púlsalo **dos veces** para hacer doble clic.
+3. Pulsa **Return** para hacer clic; púlsalo **dos veces** para hacer doble clic o **mantenlo** para hacer clic derecho.
 
 Sin ratón, sin trackpad y sin buscar el cursor por la pantalla.
 
@@ -96,7 +96,7 @@ Todos los atajos globales se pueden cambiar en Ajustes.
 | Tecla | Acción |
 | --- | --- |
 | Escribe una etiqueta | Lleva el puntero hasta ella |
-| **Return** | Clic (dos veces rápido: doble clic) |
+| **Return** | Clic · dos veces rápido: doble clic · mantener: clic derecho |
 | `]` / `[` / `\` | Clic derecho / clic central / doble clic |
 | **Space** o `=` | Mantener pulsado el botón para arrastrar; otra vez para soltar |
 | Flechas · ⌥ flechas | Mover el puntero un poco · una celda completa |
@@ -156,7 +156,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.13 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.14 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

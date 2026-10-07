@@ -56,6 +56,8 @@ struct SettingsView: View {
                 Text("By default, labels move the pointer. Return clicks.").font(.caption).foregroundStyle(.secondary)
                 Toggle("Press Return twice to double-click", isOn: $settings.returnTwiceDoubleClicks)
                 Text("Within your Mac’s double-click speed after a click. Any other key goes to the app as usual.").font(.caption).foregroundStyle(.secondary)
+                Toggle("Hold Return to right-click", isOn: $settings.holdReturnRightClicks)
+                Text("Return then clicks when released; holding it about half a second right-clicks.").font(.caption).foregroundStyle(.secondary)
             }
             section("Keyboard") {
                 Toggle("Let macOS shortcuts work during navigation", isOn: $settings.passSystemShortcuts)

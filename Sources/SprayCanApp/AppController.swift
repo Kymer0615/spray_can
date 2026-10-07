@@ -33,6 +33,9 @@ final class AppController: ObservableObject {
     private var scrollUnderPointer = false
     /// Where the last Return click landed, for a second Return that double-clicks.
     private var lastClickPoint: CGPoint?
+    /// A Return waiting to learn whether it is a tap (click) or a long press (right-click).
+    private var pendingReturn: (down: TimeInterval, work: DispatchWorkItem)?
+    private var lastReturnUp: TimeInterval = 0
     private var scrollFraction: Double? { ScrollAnimation.fraction(smoothness: settings.scrollSmoothness) }
     /// Where the pointer was before scroll mode moved it; put back when the session ends.
     private var pointerBeforeScroll: CGPoint?
@@ -54,6 +57,7 @@ final class AppController: ObservableObject {
         keyboard.onReady = { [weak self] in self?.status = String(localized: "Ready when you are") }
         keyboard.onActivate = { [weak self] mode in self?.activate(mode) }
         keyboard.onKey = { [weak self] key in self?.handle(key) }
+        keyboard.onReturnUp = { [weak self] time in self?.returnReleased(at: time) }
         keyboard.onDoubleClick = { [weak self] in
             guard let self, let point = self.lastClickPoint, !self.active else { return }
             self.lastClickPoint = nil; self.mouse.clickAgain(at: point)
@@ -178,6 +182,7 @@ final class AppController: ObservableObject {
     }
     func cancel() {
         clearFollow(); windowChanged = false
+        pendingReturn?.work.cancel(); pendingReturn = nil
         refreshWork?.cancel(); ocr.cancel(); accessibilityChanges.stop(); session.cancel(); accessibility.invalidate(session.generation)
         deferred = []; selecting = false; active = false; selectedTarget = nil; selectedFrame = nil
         mouse.release(); mouse.resetPosition(); keyboard.setActive(false); overlay.hide(); stateChanged?()
@@ -226,7 +231,10 @@ final class AppController: ObservableObject {
             render(); return
         }
         switch action {
-        case .click(let button): performClick(button, modifiers: key.modifiers)
+        case .click(let button):
+            if ReturnPress.defers(code: key.code, modifiers: key.modifiers, holding: mouse.holding, enabled: settings.holdReturnRightClicks) {
+                pressReturn(key)
+            } else { performClick(button, modifiers: key.modifiers) }
         case .doubleClick: performClick(0, modifiers: key.modifiers, count: 2)
         case .hold:
             // Space or = presses and holds; labels stay, so the next label drags. Pressing again drops.
@@ -294,6 +302,26 @@ final class AppController: ObservableObject {
         if let element = result.elements[target.id], target.source == .accessibility {
             selecting = true; accessibility.validate(element, within: target.frame, hitTest: false, completion: finish)
         } else { finish(target.frame) }
+    }
+    /// Return clicks on release; held past the threshold it right-clicks without waiting for release.
+    private func pressReturn(_ key: CapturedKey) {
+        guard !key.repeatKey, pendingReturn == nil else { return }
+        // Already released (the press was queued during discovery): decide from the measured hold.
+        if lastReturnUp >= key.time { performClick(ReturnPress.button(heldFor: lastReturnUp - key.time), modifiers: []); return }
+        let work = DispatchWorkItem { [weak self] in
+            guard let self, self.pendingReturn != nil else { return }
+            self.pendingReturn = nil
+            self.performClick(1, modifiers: [])
+        }
+        pendingReturn = (key.time, work)
+        let remaining = max(0, ReturnPress.threshold - (ProcessInfo.processInfo.systemUptime - key.time))
+        DispatchQueue.main.asyncAfter(deadline: .now() + remaining, execute: work)
+    }
+    private func returnReleased(at time: TimeInterval) {
+        lastReturnUp = time
+        guard let pending = pendingReturn else { return }
+        pending.work.cancel(); pendingReturn = nil
+        performClick(ReturnPress.button(heldFor: time - pending.down), modifiers: [])
     }
     private func performClick(_ button: Int, modifiers: KeyModifiers, count: Int = 1) {
         let generation = session.generation

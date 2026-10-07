@@ -45,6 +45,7 @@
 "Help & Shortcuts" = "도움말 및 단축키";
 "Hide text labels on known elements" = "알려진 요소의 텍스트 레이블 숨기기";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL 스크롤 · Tab으로 영역 전환 · Esc로 종료";
+"Hold Return to right-click" = "Return을 길게 눌러 오른쪽 클릭";
 "Holding · Type a label to drag · Space or Return drops" = "누르고 있음 · 레이블을 입력해 드래그 · Space 또는 Return으로 놓기";
 "Horizontal offset · %lld pt" = "가로 오프셋 · %lld pt";
 "Include all visible windows" = "보이는 모든 윈도우 포함";
@@ -111,6 +112,7 @@
 "Restore default shortcuts" = "기본 단축키로 복원";
 "Restore label placement" = "레이블 배치 복원";
 "Retry keyboard capture" = "키보드 캡처 재시도";
+"Return then clicks when released; holding it about half a second right-clicks." = "이때 Return은 손을 뗄 때 클릭하며, 약 0.5초 길게 누르면 오른쪽 클릭합니다.";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: 왼쪽 클릭 · [: 가운데 클릭 · ]: 오른쪽 클릭\n\\: 이중 클릭 · =: 왼쪽 버튼 누르고 있기 · Return: 놓기\n⇧ 화살표: 스크롤 · ⌘H: 숨기기 · ⌘,: 설정";
 "Right edge" = "오른쪽 가장자리";
 "Right of the element" = "요소 오른쪽";

@@ -211,4 +211,16 @@ final class NavigationTests: XCTestCase {
         XCTAssertFalse(DoubleClickWindow.accepts(code: 36, modifiers: .shift, elapsed: 0.2, interval: 0.5))
         XCTAssertFalse(DoubleClickWindow.accepts(code: 38, modifiers: [], elapsed: 0.2, interval: 0.5))  // another key
     }
+    func testLongReturnRightClicks() {
+        XCTAssertEqual(ReturnPress.button(heldFor: 0.08), 0)
+        XCTAssertEqual(ReturnPress.button(heldFor: 0.44), 0)
+        XCTAssertEqual(ReturnPress.button(heldFor: 0.45), 1)
+        XCTAssertEqual(ReturnPress.button(heldFor: 2), 1)
+        XCTAssertTrue(ReturnPress.defers(code: 36, modifiers: [], holding: false, enabled: true))
+        XCTAssertTrue(ReturnPress.defers(code: 76, modifiers: [], holding: false, enabled: true))
+        XCTAssertFalse(ReturnPress.defers(code: 36, modifiers: .shift, holding: false, enabled: true))   // ⇧Return stays a shift-click
+        XCTAssertFalse(ReturnPress.defers(code: 36, modifiers: [], holding: true, enabled: true))        // drops a drag at once
+        XCTAssertFalse(ReturnPress.defers(code: 36, modifiers: [], holding: false, enabled: false))
+        XCTAssertFalse(ReturnPress.defers(code: 30, modifiers: [], holding: false, enabled: true))       // ] right-clicks directly
+    }
 }

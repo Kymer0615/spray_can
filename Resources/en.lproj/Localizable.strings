@@ -45,6 +45,7 @@
 "Help & Shortcuts" = "Help & Shortcuts";
 "Hide text labels on known elements" = "Hide text labels on known elements";
 "HJKL scroll · Tab changes area · Esc exits" = "HJKL scroll · Tab changes area · Esc exits";
+"Hold Return to right-click" = "Hold Return to right-click";
 "Holding · Type a label to drag · Space or Return drops" = "Holding · Type a label to drag · Space or Return drops";
 "Horizontal offset · %lld pt" = "Horizontal offset · %lld pt";
 "Include all visible windows" = "Include all visible windows";
@@ -111,6 +112,7 @@
 "Restore default shortcuts" = "Restore default shortcuts";
 "Restore label placement" = "Restore label placement";
 "Retry keyboard capture" = "Retry keyboard capture";
+"Return then clicks when released; holding it about half a second right-clicks." = "Return then clicks when released; holding it about half a second right-clicks.";
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings";
 "Right edge" = "Right edge";
 "Right of the element" = "Right of the element";

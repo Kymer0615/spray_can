@@ -27,7 +27,7 @@ brew install --cask kymer0615/tap/spray-can
 
 1. Press **⇧⌘J**. Every button, link, row, and field gets a short label right next to its text.
 2. Type the label. The pointer jumps there.
-3. Press **Return** to click — press it **twice** to double-click.
+3. Press **Return** to click — press it **twice** to double-click, or **hold** it to right-click.
 
 No mouse, no trackpad, no hunting for the cursor.
 
@@ -96,7 +96,7 @@ All global shortcuts can be changed in Settings.
 | Key | Action |
 | --- | --- |
 | Type a label | Move the pointer to it |
-| **Return** | Click (twice quickly: double-click) |
+| **Return** | Click · twice quickly: double-click · hold: right-click |
 | `]` / `[` / `\` | Right click / middle click / double-click |
 | **Space** or `=` | Hold the button to drag; again to drop |
 | Arrows · ⌥ arrows | Move the pointer a little · a full cell |
@@ -112,7 +112,7 @@ The full list, including Emacs and vi bindings, is in [SHORTCUTS.md](docs/SHORTC
 - Label position, size, offsets, and Liquid Glass or plain backgrounds
 - Color coding with five schemes, element shading, and shading opacity
 - Scroll smoothness and where the pointer waits in scroll mode
-- Click as soon as a label is complete, and Return twice to double-click
+- Click as soon as a label is complete, Return twice to double-click, and hold Return to right-click
 - OCR on or off, and its recognition languages
 - Every global shortcut, plus optional vi bindings
 
@@ -156,7 +156,7 @@ More tools: `scripts/render-docs.sh` (README images), `scripts/snapshot-labels.s
 
 ## Status
 
-Spray Can 0.1.13 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.14 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
 
 ## Community
 
