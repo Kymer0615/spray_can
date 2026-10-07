@@ -92,6 +92,13 @@ final class MouseDriver {
     /// natural-scrolling setting; it is read on every scroll so a change applies immediately.
     /// Scrolls smoothly: the distance is added to what is still pending and sent in eased steps at
     /// 120 Hz, so held keys glide continuously. `instant` sends it as one event (top and bottom jumps).
+    /// The second click of a double-click, at the first click's point.
+    func clickAgain(at location: CGPoint) {
+        post(.leftMouseDown, button: .left, modifiers: [], count: 2, at: location)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.02) { [weak self] in
+            self?.post(.leftMouseUp, button: .left, modifiers: [], count: 2, at: location)
+        }
+    }
     func scroll(x: Int, y: Int, instant: Bool = false, fraction: Double? = ScrollAnimation.fraction) {
         guard let fraction, !instant else { cancelScroll(); postScroll(x: x, y: y); return }
         scrollFraction = fraction

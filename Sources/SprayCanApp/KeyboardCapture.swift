@@ -38,6 +38,13 @@ final class KeyboardCapture {
     private var passThrough = true
     private var vi = false
     func setKeyRules(passThrough: Bool, vi: Bool) { lock.lock(); self.passThrough = passThrough; self.vi = vi; lock.unlock() }
+    /// After a Return click: a second Return within `interval` double-clicks; any other key ends the window.
+    var onDoubleClick: (() -> Void)?
+    private var doubleClickArmedAt: TimeInterval?
+    private var doubleClickInterval: TimeInterval = 0.5
+    func armDoubleClick(interval: TimeInterval) {
+        lock.lock(); doubleClickArmedAt = ProcessInfo.processInfo.systemUptime; doubleClickInterval = interval; lock.unlock()
+    }
     private var started = false
     private var watchdog: Timer?
     private(set) var conflicts: [String] = []
@@ -117,6 +124,14 @@ final class KeyboardCapture {
             return Unmanaged.passUnretained(event)
         }
         let repeated = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
+        if let armedAt = doubleClickArmedAt {
+            doubleClickArmedAt = nil
+            if !repeated && DoubleClickWindow.accepts(code: code, modifiers: modifiers, elapsed: ProcessInfo.processInfo.systemUptime - armedAt, interval: doubleClickInterval) {
+                consumed.insert(code)
+                DispatchQueue.main.async { self.onDoubleClick?() }
+                return nil
+            }
+        }
         // A label can itself be J/K/L. Residual activation modifiers must not
         // reinterpret that letter as another global activation.
         let inheritedLabel = active && !modifiers.isEmpty && activationModifiers.labelModifiers(modifiers).isEmpty

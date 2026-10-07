@@ -5,12 +5,12 @@
 "%@: %@ is already registered" = "%@: %@ is already registered";
 "%@: duplicate shortcut" = "%@: duplicate shortcut";
 "%lld targets · Type a label · Return clicks" = "%lld targets · Type a label · Return clicks";
-"A familiar flow" = "A familiar flow";
 "About" = "About";
 "Above the element" = "Above the element";
 "Accessibility" = "Accessibility";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings.";
 "Always" = "Always";
+"App" = "App";
 "Appearance" = "Appearance";
 "Below the element" = "Below the element";
 "Bold" = "Bold";
@@ -21,12 +21,14 @@
 "By default, labels move the pointer. Return clicks." = "By default, labels move the pointer. Return clicks.";
 "Center" = "Center";
 "Click as soon as a label is complete" = "Click as soon as a label is complete";
+"Clicking" = "Clicking";
 "Color coding" = "Color coding";
 "Color scheme" = "Color scheme";
 "Color-blind safe" = "Color-blind safe";
 "Color-code labels" = "Color-code labels";
 "Colors" = "Colors";
 "Don’t move" = "Don’t move";
+"Edit shortcuts…" = "Edit shortcuts…";
 "Elements" = "Elements";
 "Enable" = "Enable";
 "Enable Screen Recording to use text targeting." = "Enable Screen Recording to use text targeting.";
@@ -49,6 +51,7 @@
 "Input cleared" = "Input cleared";
 "Input queue full · Esc clears" = "Input queue full · Esc clears";
 "Key %u" = "Key %u";
+"Keyboard" = "Keyboard";
 "Keyboard capture" = "Keyboard capture";
 "Keyboard capture recovered. Start navigation again." = "Keyboard capture recovered. Start navigation again.";
 "Keyboard capture unavailable. Grant Accessibility, then retry." = "Keyboard capture unavailable. Grant Accessibility, then retry.";
@@ -94,6 +97,7 @@
 "Plain label colors (grid mode)" = "Plain label colors (grid mode)";
 "Point. Type. Click." = "Point. Type. Click.";
 "Pointer in scroll mode" = "Pointer in scroll mode";
+"Press Return twice to double-click" = "Press Return twice to double-click";
 "Quiet visuals. Clear destinations." = "Quiet visuals. Clear destinations.";
 "Quit Spray Can" = "Quit Spray Can";
 "Reach your Mac without reaching for the mouse." = "Reach your Mac without reaching for the mouse.";
@@ -112,7 +116,7 @@
 "Right of the element" = "Right of the element";
 "Screen Recording" = "Screen Recording";
 "Scroll" = "Scroll";
-"Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends." = "Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends.";
+"Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends.";
 "Scroll smoothness · %lld%%" = "Scroll smoothness · %lld%%";
 "Scroll smoothness · Off" = "Scroll smoothness · Off";
 "Scrolling" = "Scrolling";
@@ -135,6 +139,7 @@
 "Target changed · Activate again to refresh" = "Target changed · Activate again to refresh";
 "Target disappeared · Activate again to refresh" = "Target disappeared · Activate again to refresh";
 "Target selected · Return clicks · = starts dragging" = "Target selected · Return clicks · = starts dragging";
+"Targets" = "Targets";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer.";
 "Text location · Return clicks here" = "Text location · Return clicks here";
 "Text recognition languages" = "Text recognition languages";
@@ -151,6 +156,6 @@
 "Vivid" = "Vivid";
 "While typing" = "While typing";
 "Window changed · " = "Window changed · ";
+"Within your Mac’s double-click speed after a click. Any other key goes to the app as usual." = "Within your Mac’s double-click speed after a click. Any other key goes to the app as usual.";
 "Your keyboard, everywhere." = "Your keyboard, everywhere.";
-"⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit";
 "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps.";

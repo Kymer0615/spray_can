@@ -5,12 +5,12 @@
 "%@: %@ is already registered" = "%@：%@ 已被占用";
 "%@: duplicate shortcut" = "%@：快捷键重复";
 "%lld targets · Type a label · Return clicks" = "%lld 个目标 · 输入标签 · Return 点按";
-"A familiar flow" = "熟悉的操作方式";
 "About" = "关于";
 "Above the element" = "元素上方";
 "Accessibility" = "辅助功能";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "更改 macOS 权限后可能需要重新启动。其他工具使用相同快捷键可能导致冲突；请退出 Scoot 或更改其按键绑定。";
 "Always" = "始终";
+"App" = "应用";
 "Appearance" = "外观";
 "Below the element" = "元素下方";
 "Bold" = "浓烈";
@@ -21,12 +21,14 @@
 "By default, labels move the pointer. Return clicks." = "默认情况下，输入标签会移动指针，按 Return 点按。";
 "Center" = "中央";
 "Click as soon as a label is complete" = "输入完整标签后立即点按";
+"Clicking" = "点按";
 "Color coding" = "颜色区分";
 "Color scheme" = "配色方案";
 "Color-blind safe" = "色盲友好";
 "Color-code labels" = "为标签着色";
 "Colors" = "颜色";
 "Don’t move" = "不移动";
+"Edit shortcuts…" = "编辑快捷键…";
 "Elements" = "元素";
 "Enable" = "启用";
 "Enable Screen Recording to use text targeting." = "启用屏幕录制以使用文本定位。";
@@ -49,6 +51,7 @@
 "Input cleared" = "已清除输入";
 "Input queue full · Esc clears" = "输入队列已满 · Esc 清除";
 "Key %u" = "按键 %u";
+"Keyboard" = "键盘";
 "Keyboard capture" = "键盘捕获";
 "Keyboard capture recovered. Start navigation again." = "键盘捕获已恢复。请重新开始导航。";
 "Keyboard capture unavailable. Grant Accessibility, then retry." = "键盘捕获不可用。请授予辅助功能权限后重试。";
@@ -94,6 +97,7 @@
 "Plain label colors (grid mode)" = "普通标签颜色（网格模式）";
 "Point. Type. Click." = "指向。输入。点按。";
 "Pointer in scroll mode" = "滚动模式下的指针";
+"Press Return twice to double-click" = "按两次 Return 进行连按";
 "Quiet visuals. Clear destinations." = "界面安静，目标清晰。";
 "Quit Spray Can" = "退出 Spray Can";
 "Reach your Mac without reaching for the mouse." = "无需伸手拿鼠标，也能掌控 Mac。";
@@ -112,7 +116,7 @@
 "Right of the element" = "元素右侧";
 "Screen Recording" = "屏幕录制";
 "Scroll" = "滚动";
-"Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends." = "滚动事件会发送到指针所在位置，因此指针会停在区域内，并在退出滚动模式时回到原位。";
+"Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "滚动事件会发送到指针所在位置。“不移动”会滚动指针下方的内容；其他选项会把指针移入区域，直到退出滚动模式。";
 "Scroll smoothness · %lld%%" = "滚动平滑度 · %lld%%";
 "Scroll smoothness · Off" = "滚动平滑度 · 关闭";
 "Scrolling" = "滚动";
@@ -135,6 +139,7 @@
 "Target changed · Activate again to refresh" = "目标已变化 · 再次激活以刷新";
 "Target disappeared · Activate again to refresh" = "目标已消失 · 再次激活以刷新";
 "Target selected · Return clicks · = starts dragging" = "已选中目标 · Return 点按 · = 开始拖移";
+"Targets" = "目标";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "所有选中语言的文本会在同一次扫描中识别。每增加一种书写系统就会多一轮识别，扫描时间会略微增加。";
 "Text location · Return clicks here" = "文本位置 · Return 点按此处";
 "Text recognition languages" = "文本识别语言";
@@ -151,6 +156,6 @@
 "Vivid" = "鲜明";
 "While typing" = "输入时";
 "Window changed · " = "窗口已变化 · ";
+"Within your Mac’s double-click speed after a click. Any other key goes to the app as usual." = "须在点按后、Mac 的连按速度内再按一次。其他按键照常发送给应用。";
 "Your keyboard, everywhere." = "键盘，无处不达。";
-"⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   显示元素标签\n输入标签   移动指针\nReturn   点按\nEsc   先清除前缀，再退出";
 "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can 未使用的 ⌘ 和 ⌃ 快捷键（拷贝、粘贴、关闭窗口、聚焦搜索等）会交给 macOS 和应用。";

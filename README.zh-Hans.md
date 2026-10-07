@@ -5,259 +5,168 @@
 <h1 align="center">Spray Can</h1>
 
 <p align="center">
-  <strong>能看见辅助功能遗漏之处的键盘导航。</strong><br>
-  借助标签、网格和私密的设备端 OCR 操控你的 Mac。
+  <strong>不碰鼠标，也能点按 Mac 上的任何东西。</strong><br>
+  每个控件都有标签，其余位置交给网格，二者之间的文字则由私密的设备端 OCR 识别。
 </p>
 
 <p align="center">
-  macOS 14+ · Apple 芯片与 Intel · Swift + AppKit · 100% 本地处理
+  macOS 14+ · Apple 芯片与 Intel · 免费开源（MIT）· 100% 本地处理
 </p>
 
 <p align="center">
   🌐 <a href="README.md">English</a> · <strong>简体中文</strong> · <a href="README.zh-Hant.md">繁體中文</a> · <a href="README.ja.md">日本語</a> · <a href="README.ko.md">한국어</a> · <a href="README.es.md">Español</a>
 </p>
 
-*本文为译文；如与英文版 README 有出入，以英文版为准。*
+```sh
+brew install --cask kymer0615/tap/spray-can
+```
 
-<p align="center">
-  <a href="https://buymeacoffee.com/ziyang">
-    <img src="docs/images/buymeacoffee.png" width="36" alt="请我喝杯咖啡"><br>
-    支持 Spray Can
-  </a>
-</p>
+![Spray Can 为窗口添加标签并点按文件](docs/images/element-demo.gif)
 
-**基于 [MIT License](LICENSE) 免费开源。**
-无订阅、无付费版本、无数据分析，也无云端 OCR。
+## 使用方法
 
-![元素导航](docs/images/elements.png)
+1. 按下 **⇧⌘J**。每个按钮、链接、列表行和输入框的文字旁边都会出现一个简短的标签。
+2. 输入标签，指针随即跳到那里。
+3. 按 **Return** 点按；按**两次**即可连按两次。
 
-Spray Can 让你**无需伸手拿鼠标，即可点按、拖移、滚动和导航**。
+无需鼠标，无需触控板，也不必四处寻找光标。
 
-按下 **⇧⌘J**，输入标签，然后按 **Return**。
+## 亮点
 
-与只依赖 macOS 辅助功能的工具不同，Spray Can 还能**完全在设备端使用 Apple Vision OCR**，为应用未通过辅助功能树公开的可见文本添加标签。
+<table>
+<tr>
+<td width="50%" valign="top">
 
-截屏绝不会离开你的 Mac。
+### 标签不碍事
+每个标签都位于元素文字的旁边，绝不会遮住你将要点按的文字或图标。即使在密集的列表和工具栏中，每个项目也只有一个标签。
 
-## 看得更多，触手可及
+<img src="docs/images/elements.png" alt="文件窗口中每个项目旁边的标签">
 
-Spray Can 结合了三层定位方式：
+</td>
+<td width="50%" valign="top">
 
-- **辅助功能** — 精确定位控件、按钮、输入框、列表行、菜单和系统界面。
-- **设备端 OCR** — 在辅助功能未公开时识别可见文本。
-- **网格** — 覆盖其余一切，包括自定义画布和无标签区域。
+### 颜色区分
+相邻的标签使用明显不同的颜色，元素也会以对应的颜色着色，让每个标签与其元素一眼就能对上。输入一个字母后，只会保留匹配的项目。提供五种配色方案，其中包括色盲友好方案。
 
-OCR 使用 **ScreenCaptureKit + Apple Vision**，完全在本地运行。捕获的画面在内存中处理后即被丢弃 — 无云端推理、无截屏日志、无数据分析。
+<img src="docs/images/color-coding.png" alt="输入字母前后的颜色区分标签">
 
-![元素导航流程](docs/images/element-demo.gif)
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
 
-## 四种导航方式
+### 其余一切交给网格
+画布、游戏、远程桌面、没有标签的图标：按下 **⇧⌘K**，即可触达任意显示器上的任意位置。
+
+<img src="docs/images/grid.png" alt="覆盖整个屏幕的网格标签">
+
+</td>
+<td width="50%" valign="top">
+
+### 拖移与截屏
+按 **Space**（空格键）按住按钮，输入第二个标签拖移到那里，再按一次 **Space** 放下。它甚至可以操作 macOS 截屏工具（⇧⌘4）。
+
+<img src="docs/images/screenshot-demo.gif" alt="用网格标签和空格键截屏">
+
+</td>
+</tr>
+</table>
+
+此外还有：
+
+- **看见辅助功能遗漏之处。** 可选的 Apple Vision OCR 会为未公开控件的应用中的可见文本添加标签，并可同时识别多种语言。
+- **平滑滚动模式。** 按 **⌃J**，再用 **HJKL** 滚动，平滑度可调。在 VS Code 和其他 Electron 应用中同样适用。
+- **保留你的快捷键。** 标签显示期间，⌘C、⌘V、⌘W、聚焦搜索以及其他 Spray Can 未占用的快捷键依然有效。
+- **随你而动。** 切换标签页、窗口或应用（包括使用 ⌘Tab）时，会显示新的标签。
+- **原生体验。** 使用 Swift 和 AppKit 构建，在 macOS 26 上采用 Liquid Glass，界面提供六种语言。
+
+## 四种模式
 
 | 模式 | 快捷键 | 用途 |
 | --- | --- | --- |
-| **元素** | ⇧⌘J | 可访问的控件 + OCR 文本 |
-| **网格** | ⇧⌘K | 任意已连接显示器上的任意位置 |
-| **自由移动** | ⇧⌘L | 用键盘精确移动指针 |
-| **滚动** | ⌃J | Vim 风格的 HJKL 滚动 |
+| **元素** | ⇧⌘J | 按钮、链接、列表行、输入框和 OCR 文本 |
+| **网格** | ⇧⌘K | 任意显示器上的任意位置 |
+| **自由移动** | ⇧⌘L | 以小步或整格移动指针 |
+| **滚动** | ⌃J | HJKL 滚动、半页滚动、跳到顶部和底部 |
 
-全局快捷键可完全自定义。
+所有全局快捷键都可以在设置中更改。
 
-## 专注于你的工作
+## 速查表
 
-导航时，Spray Can 会让目标应用保持焦点。
+| 按键 | 操作 |
+| --- | --- |
+| 输入标签 | 将指针移到该处 |
+| **Return** | 点按（快速按两次：连按两次） |
+| `]` / `[` / `\` | 右键点按 / 中键点按 / 连按两次 |
+| **Space** 或 `=` | 按住按钮开始拖移；再按一次放下 |
+| 箭头键 · ⌥ 箭头键 | 少量移动指针 · 移动一整格 |
+| ⇧ 箭头键 | 滚动 |
+| **Esc** | 清除已输入的字母，然后退出 |
 
-键盘输入的捕获独立于叠加层，因此你可以立即开始输入，同时元素查找和 OCR 在后台继续进行。开始输入后，迟到的 OCR 结果不会再改变标签。
+完整列表（包括 Emacs 和 vi 按键绑定）请参阅 [SHORTCUTS.md](docs/SHORTCUTS.md)。
 
-点按之前，Spray Can 会重新验证可访问目标，以减少因目标过时导致的错误。
+## 随心定制
 
-标签会跟随你的焦点。当目标窗口发生变化时 — 切换标签页、打开窗口、移动窗口或调整其大小，或者通过 ⌘Tab 或点按切换到其他应用 — Spray Can 会重新查找并显示新的标签。已输入一半的标签会被清除，进行中的拖移会被取消，而不会在意外的位置放下。网格和自由移动模式覆盖整个屏幕，因此不受影响。
+![外观设置](docs/images/appearance.png)
 
-## 界面再密集，标签也清晰
-
-标签紧贴在元素**旁边**——通常就在其文字之后——绝不会遮挡你将要点按的文字或图标。每个项目只有一个标签，只有在标签无法贴近元素的少数情况下才会出现连接线。你可以在**外观**中选择元素的左侧、右侧、上方、下方或元素之上，并通过水平和垂直偏移微调位置。
-
-**颜色区分**会为相邻的标签使用明显不同的颜色，并以标签的颜色为元素着色，让每个标签与其元素一眼就能对应起来。着色可以始终显示、仅在输入时显示或关闭，不透明度也可以调整。还可以选择配色方案——鲜明、柔和、色盲友好、浓烈或霓虹——以适合你的屏幕。输入一个字母后，只会保留匹配的元素，并以各自的颜色描边。
-
-![输入字母前后的颜色区分](docs/images/color-coding.png)
-
-![列表和工具栏中位于文字旁的标签](docs/images/clustered-labels.png)
-
-## 拖移、点按、滚动
-
-Spray Can 支持：
-
-- 左键、中键、右键点按和连按两次
-- 按住修饰键点按
-- 拖放
-- 精细移动和整格移动指针
-- 跳转到屏幕边缘
-- Vim 风格滚动
-- 多显示器
-
-拖移示例：
-
-`⇧⌘K` → 输入起点标签 → `空格` → 输入终点标签 → `空格`
-
-按住的按钮会平滑移动到每个目标位置，因此跟踪指针的应用——包括 macOS 截屏工具（⇧⌘4）——都能跟随拖移。
-
-![网格拖移流程](docs/images/drag-demo.gif)
-
-## 无需鼠标即可截屏
-
-Spray Can 可以用键盘操作 macOS 截屏工具。按 **⇧⌘4**，再按 **⇧⌘K** 打开网格。输入一个标签把十字光标移到一个角，按**空格**开始选择，再输入另一个标签移到对角，然后再按一次**空格**。macOS 会像你用鼠标拖移一样完成截屏。
-
-想让选区从某个按钮或某一行开始时，元素标签（**⇧⌘J**）也可以这样用。按住的按钮会平滑移动到每个标签，因此选区会平滑扩大，截屏工具始终能跟上。
-
-![用网格标签和空格键截屏](docs/images/screenshot-demo.gif)
-
-## 原生 macOS 体验
-
-![设置](docs/images/settings.png)
-
-Spray Can 使用 Swift 和 AppKit 构建。
-
-它在 **macOS 26+ 上使用 Liquid Glass**，在 macOS 14–15 上使用原生材质，并遵循“降低透明度”设置。在“外观”中关闭**使用 Liquid Glass**，即可让标签和状态面板使用纯色背景。关闭玻璃效果后，可以调整标签背景的不透明度，而文字不会变淡。启用玻璃效果或“降低透明度”时，该滑块不可用。
-
-你可以自定义：
-
-- 导航快捷键
-- 目标范围
-- OCR 及其识别语言
-- vi 按键绑定
-- 标签位置和偏移
-- 颜色区分、元素着色及着色不透明度
-- 标签大小
-- 网格间距
-- 背景不透明度
-- 标签、OCR、网格、文字和选中颜色
-- 界面语言
-
-Spray Can 的界面提供 English、简体中文、繁體中文、日本語、한국어 和 Español 版本。默认跟随 Mac 的语言；也可以在**通用 → 语言**中选择其他语言，并在提示时重新启动 Spray Can。
-
-![外观自定义](docs/images/appearance.png)
+- 标签位置、大小、偏移，以及 Liquid Glass 或纯色背景
+- 颜色区分（五种配色方案）、元素着色及着色不透明度
+- 滚动平滑度，以及滚动模式下指针停留的位置
+- 输入完整标签后立即点按，以及按两次 Return 进行连按
+- 开启或关闭 OCR，并设置其识别语言
+- 所有全局快捷键，以及可选的 vi 按键绑定
 
 ## 安装
-
-从[我的 Homebrew tap](https://github.com/Kymer0615/homebrew-tap) 安装：
 
 ```sh
 brew install --cask kymer0615/tap/spray-can
 open "/Applications/Spray Can.app"
 ```
 
-更新或卸载：
+使用 `brew update && brew upgrade --cask kymer0615/tap/spray-can` 更新；使用 `brew uninstall --cask spray-can` 卸载（偏好设置会保留）。你也可以从 [Releases](https://github.com/Kymer0615/spray_can/releases) 下载通用 ZIP 包，并将 **Spray Can.app** 移到“应用程序”文件夹。
 
-```sh
-brew update
-brew upgrade --cask kymer0615/tap/spray-can
-brew uninstall --cask spray-can
-```
+Spray Can 会请求以下权限：
 
-普通卸载会保留偏好设置。如果你之前是手动安装的，请在改用 Homebrew 之前退出 Spray Can，并将该副本移出“应用程序”文件夹，以免同时运行两个副本。
+1. **辅助功能**：用于查找控件、捕获导航按键，以及移动、点按、拖移和滚动。
+2. **屏幕录制**（可选）：仅用于设备端 OCR，以及查找标签旁的文字。
 
-你也可以从 [Releases](https://github.com/Kymer0615/spray_can/releases) 下载通用 ZIP 包，解压后将 **Spray Can.app** 移到“应用程序”文件夹。
-
-各版本均**使用项目自有证书签名，未经公证**。所有版本都使用同一证书签名，因此更新后 macOS 会保留 Spray Can 的权限（自 0.1.7 起；从更早版本更新时需再授予一次）。如果 macOS 阻止了你信任的版本：
-
-**系统设置 → 隐私与安全性 → 仍要打开**
-
-Spray Can 可能会请求：
-
-1. **辅助功能** — 查找控件、捕获导航按键并执行指针操作。
-2. **屏幕录制** — 可选，仅用于设备端 OCR。
-
-键盘捕获使用辅助功能权限，无需另外设置输入监控。“权限”页面会显示捕获是否真正在运行。
-
-发布的压缩包及其 SHA-256 校验和均带有版本号。请参阅[发布说明](docs/RELEASING.md)。
+各版本均**使用项目自有证书签名，未经公证**。所有版本都使用同一证书签名，因此更新后 macOS 会保留 Spray Can 的权限（自 0.1.7 起）。如果 macOS 阻止了首次打开，请前往**系统设置 → 隐私与安全性 → 仍要打开**。发布的压缩包及其 SHA-256 校验和均带有版本号；请参阅[发布说明](docs/RELEASING.md)。
 
 ## 隐私
 
-Spray Can 设计为在本地运行。
+一切都在你的 Mac 上运行。OCR 使用设备端 Apple Vision；截屏在内存中处理后即被丢弃。无截屏日志、无数据分析、无云端推理，也无需帐户。
 
-- OCR 通过**设备端 Apple Vision** 运行
-- 截屏在内存中处理后即被丢弃
-- 无截屏日志
-- 无数据分析
-- 无云端推理
-- 无需帐户或订阅
+## OCR
 
-## OCR 语言
+OCR 可以**同时识别多种语言**。在**通用 → 文本识别语言**中选择语言并排好顺序。使用相同书写系统的语言（英语、法语、西班牙语……）会一起识别；每增加一种书写系统（中文、日文、韩文……），就会在同一张截屏上多进行一轮识别，因此扫描耗时会稍长一些。默认情况下，Spray Can 会选择 Mac 的偏好语言以及英语。
 
-OCR 可以**同时识别多种语言**。在**通用 → 文本识别语言**中，选择 Apple Vision 在你的 Mac 上支持的任意语言并排好顺序。所有选中语言的文本会在同一次扫描中添加标签，因此英文工具栏、中文文档和日文菜单都能一并触达。
+OCR 识别的是文本的位置，而不是它能否点按，因此文本标签可能会指向标题。对于没有标签的图标和自定义画布，请使用网格。有关兼容性和测试状态，请参阅 [VALIDATION.md](docs/VALIDATION.md)。
 
-使用相同书写系统的语言（例如英语、法语和西班牙语）会一起识别。每增加一种书写系统（例如中文、日文或韩文），就会在同一张截屏上多进行一轮识别，因此扫描耗时会稍长一些。默认情况下，Spray Can 会选择 Mac 的偏好语言以及英语。
-
-## OCR 的局限
-
-OCR 识别的是**文本位置**，而不是该文本是否可点按。
-
-因此，识别出的标签可能指向标题或其他不可交互的文本。它也无法检测所有无标签的图标或任意视觉控件。
-
-对于这些情况，请使用**网格模式**。
-
-有关当前兼容性和测试状态，请参阅 [VALIDATION.md](docs/VALIDATION.md)。
-
-## 构建
+## 从源代码构建
 
 需要 **Xcode 26+**。
 
 ```sh
-scripts/test.sh
-scripts/build.sh
+scripts/test.sh            # core tests + localization check
+scripts/build.sh           # universal Release build
 scripts/install-local.sh
 ```
 
-开发时：
-
-```sh
-swift scripts/generate-artwork.swift
-python3 scripts/generate-project.py
-scripts/render-docs.sh
-scripts/integration-test.sh
-swift scripts/ocr-smoke.swift
-swift scripts/ocr-smoke.swift image.png --languages en-US,zh-Hans,ja-JP --expect "Open,打开,開く"
-python3 scripts/check-localizations.py
-scripts/release.sh 0.1.7 adhoc
-```
-
-在 Xcode 中打开 `SprayCan.xcodeproj`。
-
-界面翻译位于 `Resources/<language>.lproj/Localizable.strings`，英文键即为源文本。`scripts/check-localizations.py` 会检查每种语言是否包含所有键以及占位符是否一致。
-
-`SprayCanCore` 包含会话状态机、标签生成与布局、OCR 语言分组、刷新规则、几何计算和快捷键映射。`Sources/SprayCanApp` 包含应用界面、事件捕获、元素查找提供者、鼠标驱动和叠加层。
+更多工具：`scripts/render-docs.sh`（README 图片）、`scripts/snapshot-labels.sh`（在真实窗口上叠加标签）、`scripts/integration-test.sh`、`swift scripts/ocr-smoke.swift`、`python3 scripts/check-localizations.py`。`SprayCanCore` 包含会话状态机、标签布局及其他纯逻辑；`Sources/SprayCanApp` 包含应用本身、事件捕获、元素查找和叠加层。请参阅 [AGENTS.md](AGENTS.md) 和[架构笔记](docs/ARCHITECTURE.md)。
 
 ## 状态
 
-Spray Can 0.1.7 适用于 macOS 14 及更高版本。
-
-导航核心已通过 **1,000 次快速激活循环**的压力测试，原生测试夹具完成了 **60 次元素/网格点按循环**，没有漏点，也没有输入泄漏。
-
-第三方应用、多显示器、全屏以及跨版本的兼容性仍在验证中。
-
-请参阅 [VALIDATION.md](docs/VALIDATION.md)。
+Spray Can 0.1.13 适用于 macOS 14 及更高版本。导航核心已通过 1,000 次快速激活循环的压力测试，原生测试夹具完成了 60 次元素/网格点按循环，没有漏点，也没有输入泄漏。第三方应用、多显示器、全屏以及较早的 macOS 版本仍在验证中；请参阅 [VALIDATION.md](docs/VALIDATION.md)。
 
 ## 社区
 
-欢迎提交[问题和功能建议](https://github.com/Kymer0615/spray_can/issues)、参与测试和[贡献代码](https://github.com/Kymer0615/spray_can/pulls)。
+欢迎提交[问题和功能建议](https://github.com/Kymer0615/spray_can/issues)、参与测试和[贡献代码](https://github.com/Kymer0615/spray_can/pulls)，尤其是辅助功能覆盖范围、OCR 验证、交互设计、文档和跨应用测试方面的帮助。
 
-特别欢迎以下方面的帮助：
-
-* 辅助功能覆盖范围
-* OCR 验证
-* 界面与交互设计
-* 文档
-* 跨应用测试
-
-如果 Spray Can 对你有帮助，欢迎[请我喝杯咖啡](https://buymeacoffee.com/ziyang)。支持完全自愿，也不会解锁任何功能。
+<p>
+  <a href="https://buymeacoffee.com/ziyang"><img src="docs/images/buymeacoffee.png" width="28" alt="请我喝杯咖啡"></a>
+  如果 Spray Can 对你有帮助，欢迎<a href="https://buymeacoffee.com/ziyang">请我喝杯咖啡</a>。支持完全自愿，也不会解锁任何功能。
+</p>
 
 ## 致谢
 
-原创实现和美术资源均以 [MIT License](LICENSE) 发布。
-
-工作流程灵感来源：
-[Scoot](https://github.com/mjrusso/scoot) ·
-[Vimac](https://github.com/nchudleigh/vimac)
-
-本项目未包含上述任一项目的源代码或视觉素材。
-
-请参阅[架构与研究笔记](docs/ARCHITECTURE.md)。
+原创实现和美术资源均以 [MIT License](LICENSE) 发布。工作流程灵感来源：[Scoot](https://github.com/mjrusso/scoot) · [Vimac](https://github.com/nchudleigh/vimac)。本项目未包含上述任一项目的源代码或视觉素材。

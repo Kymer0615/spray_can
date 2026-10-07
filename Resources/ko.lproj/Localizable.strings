@@ -5,12 +5,12 @@
 "%@: %@ is already registered" = "%@: %@은(는) 이미 등록되어 있음";
 "%@: duplicate shortcut" = "%@: 중복된 단축키";
 "%lld targets · Type a label · Return clicks" = "대상 %lld개 · 레이블 입력 · Return으로 클릭";
-"A familiar flow" = "익숙한 흐름";
 "About" = "정보";
 "Above the element" = "요소 위";
 "Accessibility" = "손쉬운 사용";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "macOS 권한을 변경한 후에는 다시 실행해야 할 수 있습니다. 같은 단축키를 쓰는 다른 도구가 있으면 충돌할 수 있으니 Scoot을 종료하거나 해당 키 설정을 변경하십시오.";
 "Always" = "항상";
+"App" = "앱";
 "Appearance" = "모양";
 "Below the element" = "요소 아래";
 "Bold" = "진한 색";
@@ -21,12 +21,14 @@
 "By default, labels move the pointer. Return clicks." = "기본적으로 레이블은 포인터를 이동합니다. Return을 누르면 클릭합니다.";
 "Center" = "가운데";
 "Click as soon as a label is complete" = "레이블 입력이 끝나면 바로 클릭";
+"Clicking" = "클릭";
 "Color coding" = "색상 구분";
 "Color scheme" = "색 구성";
 "Color-blind safe" = "색각 이상 친화";
 "Color-code labels" = "레이블 색상 구분";
 "Colors" = "색상";
 "Don’t move" = "움직이지 않음";
+"Edit shortcuts…" = "단축키 편집…";
 "Elements" = "요소";
 "Enable" = "활성화";
 "Enable Screen Recording to use text targeting." = "텍스트 타기팅을 사용하려면 화면 기록을 허용하십시오.";
@@ -49,6 +51,7 @@
 "Input cleared" = "입력 지워짐";
 "Input queue full · Esc clears" = "입력 대기열 가득 참 · Esc로 지우기";
 "Key %u" = "키 %u";
+"Keyboard" = "키보드";
 "Keyboard capture" = "키보드 캡처";
 "Keyboard capture recovered. Start navigation again." = "키보드 캡처가 복구되었습니다. 탐색을 다시 시작하십시오.";
 "Keyboard capture unavailable. Grant Accessibility, then retry." = "키보드 캡처를 사용할 수 없습니다. 손쉬운 사용 권한을 허용한 후 다시 시도하십시오.";
@@ -94,6 +97,7 @@
 "Plain label colors (grid mode)" = "일반 레이블 색상(그리드 모드)";
 "Point. Type. Click." = "가리키고. 입력하고. 클릭하고.";
 "Pointer in scroll mode" = "스크롤 모드의 포인터";
+"Press Return twice to double-click" = "Return을 두 번 눌러 이중 클릭";
 "Quiet visuals. Clear destinations." = "차분한 화면. 명확한 목적지.";
 "Quit Spray Can" = "Spray Can 종료";
 "Reach your Mac without reaching for the mouse." = "마우스에 손대지 않고 Mac의 모든 곳에.";
@@ -112,7 +116,7 @@
 "Right of the element" = "요소 오른쪽";
 "Screen Recording" = "화면 기록";
 "Scroll" = "스크롤";
-"Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends." = "스크롤 이벤트는 포인터 위치로 전달되므로 포인터가 영역 안에서 기다리다가 스크롤 모드가 끝나면 원래 자리로 돌아갑니다.";
+"Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "스크롤 이벤트는 포인터 위치로 전달됩니다. '움직이지 않음'은 포인터 아래를 스크롤하고, 다른 선택은 스크롤 모드 동안 포인터를 영역 안으로 옮깁니다.";
 "Scroll smoothness · %lld%%" = "스크롤 부드러움 · %lld%%";
 "Scroll smoothness · Off" = "스크롤 부드러움 · 끔";
 "Scrolling" = "스크롤";
@@ -135,6 +139,7 @@
 "Target changed · Activate again to refresh" = "대상 변경됨 · 다시 활성화하여 새로 고침";
 "Target disappeared · Activate again to refresh" = "대상이 사라짐 · 다시 활성화하여 새로 고침";
 "Target selected · Return clicks · = starts dragging" = "대상 선택됨 · Return으로 클릭 · =로 드래그 시작";
+"Targets" = "대상";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "선택한 모든 언어의 텍스트를 한 번의 스캔으로 찾습니다. 문자 체계가 하나 추가될 때마다 인식 과정이 한 번 더 실행되므로 스캔이 조금 더 오래 걸립니다.";
 "Text location · Return clicks here" = "텍스트 위치 · Return으로 여기를 클릭";
 "Text recognition languages" = "텍스트 인식 언어";
@@ -151,6 +156,6 @@
 "Vivid" = "선명";
 "While typing" = "입력 중";
 "Window changed · " = "윈도우 변경됨 · ";
+"Within your Mac’s double-click speed after a click. Any other key goes to the app as usual." = "클릭 후 Mac의 이중 클릭 속도 안에 한 번 더 누르세요. 다른 키는 평소처럼 앱으로 전달됩니다.";
 "Your keyboard, everywhere." = "어디서나, 키보드로.";
-"⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   요소 레이블 표시\n레이블 입력   포인터 이동\nReturn   클릭\nEsc   입력 지우기, 이어서 종료";
 "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Spray Can이 쓰지 않는 ⌘ 및 ⌃ 단축키(복사, 붙여넣기, 윈도우 닫기, Spotlight 등)는 macOS와 앱으로 전달됩니다.";

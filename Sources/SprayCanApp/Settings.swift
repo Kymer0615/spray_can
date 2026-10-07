@@ -39,6 +39,8 @@ final class Settings: ObservableObject {
     @Published var scrollPointer = ScrollPointerPlacement(rawValue: UserDefaults.standard.string(forKey: "scrollPointer") ?? "") ?? .stay {
         didSet { save("scrollPointer", scrollPointer.rawValue) }
     }
+    /// A second Return right after a Return click turns it into a double-click.
+    @Published var returnTwiceDoubleClicks = Settings.flag("returnTwiceDoubleClicks", true) { didSet { save("returnTwiceDoubleClicks", returnTwiceDoubleClicks) } }
     /// Let ⌘ and ⌃ shortcuts Spray Can doesn't use reach macOS and apps during navigation.
     @Published var passSystemShortcuts = Settings.flag("passSystemShortcuts", true) { didSet { save("passSystemShortcuts", passSystemShortcuts) } }
     /// Skip OCR text that an element label already covers.

@@ -204,4 +204,11 @@ final class NavigationTests: XCTestCase {
             }
         }
     }
+    func testReturnTwiceWindow() {
+        XCTAssertTrue(DoubleClickWindow.accepts(code: 36, modifiers: [], elapsed: 0.2, interval: 0.5))
+        XCTAssertTrue(DoubleClickWindow.accepts(code: 76, modifiers: [], elapsed: 0.5, interval: 0.5))   // keypad Enter
+        XCTAssertFalse(DoubleClickWindow.accepts(code: 36, modifiers: [], elapsed: 0.6, interval: 0.5))  // too late
+        XCTAssertFalse(DoubleClickWindow.accepts(code: 36, modifiers: .shift, elapsed: 0.2, interval: 0.5))
+        XCTAssertFalse(DoubleClickWindow.accepts(code: 38, modifiers: [], elapsed: 0.2, interval: 0.5))  // another key
+    }
 }

@@ -51,56 +51,54 @@ struct SettingsView: View {
         switch tab {
         case "General":
             Text("Reach your Mac without reaching for the mouse.").foregroundStyle(.secondary)
-            GroupBox {
-                VStack(alignment: .leading, spacing: 16) {
-                    Toggle("Click as soon as a label is complete", isOn: $settings.instantClick)
-                    Text("By default, labels move the pointer. Return clicks.").font(.caption).foregroundStyle(.secondary)
-                    Toggle("Let macOS shortcuts work during navigation", isOn: $settings.passSystemShortcuts)
-                    Text("⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps.").font(.caption).foregroundStyle(.secondary)
-                    Toggle("Include all visible windows", isOn: $settings.allWindows)
-                    Toggle("Use on-device text recognition", isOn: $settings.vision)
-                    Text("Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)
-                    Toggle("Hide text labels on known elements", isOn: $settings.dedupeOCR).disabled(!settings.vision)
+            section("Clicking") {
+                Toggle("Click as soon as a label is complete", isOn: $settings.instantClick)
+                Text("By default, labels move the pointer. Return clicks.").font(.caption).foregroundStyle(.secondary)
+                Toggle("Press Return twice to double-click", isOn: $settings.returnTwiceDoubleClicks)
+                Text("Within your Mac’s double-click speed after a click. Any other key goes to the app as usual.").font(.caption).foregroundStyle(.secondary)
+            }
+            section("Keyboard") {
+                Toggle("Let macOS shortcuts work during navigation", isOn: $settings.passSystemShortcuts)
+                Text("⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps.").font(.caption).foregroundStyle(.secondary)
+                Button("Edit shortcuts…") { tab = "Shortcuts" }.buttonStyle(.link)
+            }
+            section("Targets") {
+                Toggle("Include all visible windows", isOn: $settings.allWindows)
+                Toggle("Use on-device text recognition", isOn: $settings.vision)
+                Text("Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.").font(.caption).foregroundStyle(.secondary)
+                if settings.vision {
+                    Toggle("Hide text labels on known elements", isOn: $settings.dedupeOCR)
                     Text("Skip recognized text that an element label already marks, such as a button’s title.").font(.caption).foregroundStyle(.secondary)
-                    ocrLanguages.disabled(!settings.vision)
-                    Toggle("Launch at login", isOn: $loginEnabled).onChange(of: loginEnabled) { _, value in
-                        do { if value { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }; loginError = "" }
-                        catch { loginError = error.localizedDescription }
-                    }
-                    if !loginError.isEmpty { Text(loginError).font(.caption).foregroundStyle(.red) }
-                }.padding(10)
+                    ocrLanguages
+                }
             }
-            GroupBox {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Scrolling").font(.subheadline.weight(.semibold))
-                    VStack(alignment: .leading) {
-                        Text(settings.scrollSmoothness < 0.01 ? String(localized: "Scroll smoothness · Off") : String(localized: "Scroll smoothness · \(Int((settings.scrollSmoothness * 100).rounded()))%"))
-                        Slider(value: $settings.scrollSmoothness, in: 0...1, step: 0.05)
-                    }
-                    Picker("Pointer in scroll mode", selection: $settings.scrollPointer) {
-                        ForEach(ScrollPointerPlacement.allCases, id: \.self) { Text(pointerTitle($0)).tag($0) }
-                    }
-                    Text("Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends.").font(.caption).foregroundStyle(.secondary)
-                }.padding(10)
+            section("Scrolling") {
+                VStack(alignment: .leading) {
+                    Text(settings.scrollSmoothness < 0.01 ? String(localized: "Scroll smoothness · Off") : String(localized: "Scroll smoothness · \(Int((settings.scrollSmoothness * 100).rounded()))%"))
+                    Slider(value: $settings.scrollSmoothness, in: 0...1, step: 0.05)
+                }
+                Picker("Pointer in scroll mode", selection: $settings.scrollPointer) {
+                    ForEach(ScrollPointerPlacement.allCases, id: \.self) { Text(pointerTitle($0)).tag($0) }
+                }
+                Text("Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends.").font(.caption).foregroundStyle(.secondary)
             }
-            GroupBox {
-                VStack(alignment: .leading, spacing: 10) {
-                    Picker("Language", selection: $settings.appLanguage) {
-                        Text("System default").tag(String?.none)
-                        ForEach(AppLanguage.options, id: \.code) { Text(verbatim: $0.name).tag(Optional($0.code)) }
+            section("App") {
+                Picker("Language", selection: $settings.appLanguage) {
+                    Text("System default").tag(String?.none)
+                    ForEach(AppLanguage.options, id: \.code) { Text(verbatim: $0.name).tag(Optional($0.code)) }
+                }
+                if settings.appLanguage != settings.launchLanguage {
+                    HStack {
+                        Text("Restart Spray Can to use the new language.").font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Restart Now") { AppLanguage.relaunch() }
                     }
-                    if settings.appLanguage != settings.launchLanguage {
-                        HStack {
-                            Text("Restart Spray Can to use the new language.").font(.caption).foregroundStyle(.secondary)
-                            Spacer()
-                            Button("Restart Now") { AppLanguage.relaunch() }
-                        }
-                    }
-                }.padding(10)
-            }
-            VStack(alignment: .leading, spacing: 10) {
-                Text("A familiar flow").font(.headline)
-                Text("⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit").font(.system(.body, design: .monospaced)).lineSpacing(8)
+                }
+                Toggle("Launch at login", isOn: $loginEnabled).onChange(of: loginEnabled) { _, value in
+                    do { if value { try SMAppService.mainApp.register() } else { try SMAppService.mainApp.unregister() }; loginError = "" }
+                    catch { loginError = error.localizedDescription }
+                }
+                if !loginError.isEmpty { Text(loginError).font(.caption).foregroundStyle(.red) }
             }
         case "Shortcuts":
             Text("Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording.").foregroundStyle(.secondary)

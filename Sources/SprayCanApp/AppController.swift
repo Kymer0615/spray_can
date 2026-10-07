@@ -31,6 +31,8 @@ final class AppController: ObservableObject {
     /// Scroll mode in an app without accessible scroll areas (VS Code, other Electron apps):
     /// scroll wherever the pointer is until Tab moves it to a content area.
     private var scrollUnderPointer = false
+    /// Where the last Return click landed, for a second Return that double-clicks.
+    private var lastClickPoint: CGPoint?
     private var scrollFraction: Double? { ScrollAnimation.fraction(smoothness: settings.scrollSmoothness) }
     /// Where the pointer was before scroll mode moved it; put back when the session ends.
     private var pointerBeforeScroll: CGPoint?
@@ -52,6 +54,10 @@ final class AppController: ObservableObject {
         keyboard.onReady = { [weak self] in self?.status = String(localized: "Ready when you are") }
         keyboard.onActivate = { [weak self] mode in self?.activate(mode) }
         keyboard.onKey = { [weak self] key in self?.handle(key) }
+        keyboard.onDoubleClick = { [weak self] in
+            guard let self, let point = self.lastClickPoint, !self.active else { return }
+            self.lastClickPoint = nil; self.mouse.clickAgain(at: point)
+        }
         keyboard.onInterrupted = { [weak self] message in
             guard let self else { return }
             if self.active { self.cancel() }
@@ -299,9 +305,13 @@ final class AppController: ObservableObject {
             // Order out click-through overlays before injecting mouse events; target app keeps focus.
             self.overlay.hide(); self.keyboard.setActive(false)
             self.selecting = true
+            // A plain single left click (not a drop) can become a double-click with a second Return.
+            let doubleable = button == 0 && modifiers.isEmpty && count == 1 && !self.mouse.holding && self.settings.returnTwiceDoubleClicks
+            let point = self.mouse.point
             self.mouse.click(button: button, modifiers: modifiers, count: count) {
                 guard self.session.generation == generation else { return }
                 self.cancel(); self.status = String(localized: "Ready when you are")
+                if doubleable { self.lastClickPoint = point; self.keyboard.armDoubleClick(interval: NSEvent.doubleClickInterval) }
             }
         }
         if let target = selectedTarget, let element = result.elements[target.id], !mouse.holding {

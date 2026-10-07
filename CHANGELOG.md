@@ -1,5 +1,20 @@
 # Changelog
 
+## Spray Can 0.1.13
+
+- Press Return twice to double-click: after a Return click, a second Return within your Mac's double-click speed turns it into a double-click. Any other key ends the window and goes to the app. Turn it off in General → Clicking.
+- A more organized General tab: Clicking, Keyboard, Targets, Scrolling, and App sections. Text-recognition options appear only when OCR is on, and the shortcut summary moved to the Shortcuts tab and README.
+- A rewritten README in all six languages: a hero demo, three-step how-it-works, a highlights grid, a cheat sheet, and shorter install, privacy, and OCR sections.
+
+Validation: 50 core tests (including the double-click window rule) and a localization check passed. In a native fixture, a second click 0.2 s after the first registered as a double-click (click counts 1, 2). The General tab was rendered with OCR on and off. The live Return-twice path through keyboard capture was not exercised while the installed copy was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.12
 
 - Scroll mode no longer moves the pointer by default: it scrolls whatever is under the pointer, and Tab moves the pointer into a scroll area when you want one. Choose another placement in General → Scrolling → Pointer in scroll mode.

@@ -164,3 +164,11 @@ public enum ScrollPointerPlacement: String, CaseIterable {
         }
     }
 }
+
+/// After a Return click, a second unmodified Return within the double-click interval turns it into
+/// a double-click. Anything else, or a late press, goes to the app as usual.
+public enum DoubleClickWindow {
+    public static func accepts(code: UInt16, modifiers: KeyModifiers, elapsed: TimeInterval, interval: TimeInterval) -> Bool {
+        (code == 36 || code == 76) && modifiers.isEmpty && elapsed >= 0 && elapsed <= interval
+    }
+}

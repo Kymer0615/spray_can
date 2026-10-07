@@ -126,7 +126,7 @@ enum DocumentationRenderer {
                 ("Space · Drop", destination.frame, "")
             ] : [
                 ("Type " + destination.label.uppercased() + " · Move to " + destination.title, destination.frame, ""),
-                ("Return · Click", destination.frame, "")
+                ("Return · Click · twice to double-click", destination.frame, "")
             ]
             for (message, selection, prefix) in steps {
                 canvas.selected = selection; canvas.prefix = prefix; canvas.needsDisplay = true

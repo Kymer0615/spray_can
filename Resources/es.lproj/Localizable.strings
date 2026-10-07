@@ -5,12 +5,12 @@
 "%@: %@ is already registered" = "%@: %@ ya está registrado";
 "%@: duplicate shortcut" = "%@: atajo duplicado";
 "%lld targets · Type a label · Return clicks" = "%lld objetivos · Escribe una etiqueta · Return hace clic";
-"A familiar flow" = "Un flujo familiar";
 "About" = "Acerca de";
 "Above the element" = "Encima del elemento";
 "Accessibility" = "Accesibilidad";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "Tras cambiar los permisos de macOS, puede que haya que reiniciar la app. Otra herramienta que use estos atajos puede causar conflictos; cierra Scoot o cambia sus atajos.";
 "Always" = "Siempre";
+"App" = "App";
 "Appearance" = "Apariencia";
 "Below the element" = "Debajo del elemento";
 "Bold" = "Intenso";
@@ -21,12 +21,14 @@
 "By default, labels move the pointer. Return clicks." = "De forma predeterminada, las etiquetas mueven el puntero. Return hace clic.";
 "Center" = "Centro";
 "Click as soon as a label is complete" = "Hacer clic al completar una etiqueta";
+"Clicking" = "Clic";
 "Color coding" = "Colores de etiquetas";
 "Color scheme" = "Esquema de colores";
 "Color-blind safe" = "Apto para daltonismo";
 "Color-code labels" = "Colorear etiquetas";
 "Colors" = "Colores";
 "Don’t move" = "No mover";
+"Edit shortcuts…" = "Editar atajos…";
 "Elements" = "Elementos";
 "Enable" = "Activar";
 "Enable Screen Recording to use text targeting." = "Activa Grabación de pantalla para buscar texto.";
@@ -49,6 +51,7 @@
 "Input cleared" = "Entrada borrada";
 "Input queue full · Esc clears" = "Cola de entrada llena · Esc la borra";
 "Key %u" = "Tecla %u";
+"Keyboard" = "Teclado";
 "Keyboard capture" = "Captura de teclado";
 "Keyboard capture recovered. Start navigation again." = "Captura de teclado recuperada. Vuelve a iniciar la navegación.";
 "Keyboard capture unavailable. Grant Accessibility, then retry." = "Captura de teclado no disponible. Concede Accesibilidad y vuelve a intentarlo.";
@@ -94,6 +97,7 @@
 "Plain label colors (grid mode)" = "Colores de etiquetas normales (modo cuadrícula)";
 "Point. Type. Click." = "Apunta. Escribe. Haz clic.";
 "Pointer in scroll mode" = "Puntero en el modo de desplazamiento";
+"Press Return twice to double-click" = "Pulsa Retorno dos veces para hacer doble clic";
 "Quiet visuals. Clear destinations." = "Visuales discretos. Destinos claros.";
 "Quit Spray Can" = "Salir de Spray Can";
 "Reach your Mac without reaching for the mouse." = "Llega a todo tu Mac sin tocar el ratón.";
@@ -112,7 +116,7 @@
 "Right of the element" = "A la derecha del elemento";
 "Screen Recording" = "Grabación de pantalla";
 "Scroll" = "Desplazar";
-"Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends." = "Los eventos de desplazamiento van al puntero, así que espera dentro del área y vuelve a su sitio al salir del modo de desplazamiento.";
+"Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "Los eventos de desplazamiento van al puntero. «No mover» desplaza lo que está debajo; las demás opciones lo llevan al área hasta salir del modo de desplazamiento.";
 "Scroll smoothness · %lld%%" = "Suavidad del desplazamiento · %lld %%";
 "Scroll smoothness · Off" = "Suavidad del desplazamiento · Desactivada";
 "Scrolling" = "Desplazamiento";
@@ -135,6 +139,7 @@
 "Target changed · Activate again to refresh" = "Objetivo cambiado · Activa de nuevo para actualizar";
 "Target disappeared · Activate again to refresh" = "El objetivo desapareció · Activa de nuevo para actualizar";
 "Target selected · Return clicks · = starts dragging" = "Objetivo seleccionado · Return hace clic · = empieza a arrastrar";
+"Targets" = "Objetivos";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "El texto de todos los idiomas seleccionados se encuentra en el mismo análisis. Cada sistema de escritura adicional añade una pasada de reconocimiento, así que el análisis tarda algo más.";
 "Text location · Return clicks here" = "Ubicación de texto · Return hace clic aquí";
 "Text recognition languages" = "Idiomas de reconocimiento de texto";
@@ -151,6 +156,6 @@
 "Vivid" = "Vivo";
 "While typing" = "Al escribir";
 "Window changed · " = "Ventana cambiada · ";
+"Within your Mac’s double-click speed after a click. Any other key goes to the app as usual." = "Dentro de la velocidad de doble clic de tu Mac tras un clic. Cualquier otra tecla llega a la app como siempre.";
 "Your keyboard, everywhere." = "Tu teclado, en todas partes.";
-"⇧⌘J   Show element labels\nType a label   Move the pointer\nReturn   Click\nEsc   Clear a prefix, then exit" = "⇧⌘J   Mostrar etiquetas de elementos\nEscribe una etiqueta   Mover el puntero\nReturn   Hacer clic\nEsc   Borrar un prefijo y luego salir";
 "⌘ and ⌃ shortcuts that Spray Can doesn’t use — copy, paste, close window, Spotlight — go to macOS and apps." = "Los atajos con ⌘ y ⌃ que Spray Can no usa (copiar, pegar, cerrar ventana, Spotlight) llegan a macOS y a las apps.";
