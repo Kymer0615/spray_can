@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 public struct KeyModifiers: OptionSet, Equatable, Codable {
     public let rawValue: Int
@@ -128,13 +129,38 @@ public enum ScrollDirection {
 /// smoothly. Whole-pixel steps; the fraction is carried, so the total arrives exactly.
 public enum ScrollAnimation {
     public static let fraction = 0.18
+    /// The share of the remaining distance sent per 120 Hz tick for a 0…1 smoothness setting,
+    /// or nil for 0 (instant). 0.75, the default, gives 0.18 (about 150 ms per step); 1 gives 0.07.
+    public static func fraction(smoothness: Double) -> Double? {
+        guard smoothness > 0.001 else { return nil }
+        let level = min(1, max(0, smoothness))
+        // Piecewise linear: 0.5 → 0.18 up to the default, then 0.18 → 0.07.
+        return level <= 0.75 ? 0.5 - (0.5 - 0.18) * level / 0.75 : 0.18 - (0.18 - 0.07) * (level - 0.75) / 0.25
+    }
     /// The pixels to send this tick and what remains afterwards.
-    public static func next(remaining: Double) -> (step: Int, remaining: Double) {
+    public static func next(remaining: Double, fraction: Double = ScrollAnimation.fraction) -> (step: Int, remaining: Double) {
         guard abs(remaining) >= 1 else { return (0, remaining) }
         let wanted = remaining * fraction
         // At least one pixel per tick, never past the target.
         let magnitude = min(abs(remaining).rounded(.down), max(1, abs(wanted).rounded()))
         let step = Int(remaining < 0 ? -magnitude : magnitude)
         return (step, remaining - Double(step))
+    }
+}
+
+/// Where scroll mode keeps the pointer. Scroll events go to the pointer, so it must be inside the area.
+public enum ScrollPointerPlacement: String, CaseIterable {
+    case rightEdge, leftEdge, bottomEdge, bottomRightCorner, center, stay
+    /// The pointer position inside `frame` (top-left-origin coordinates), or nil to leave it where it is.
+    public func point(in frame: CGRect) -> CGPoint? {
+        let dx = min(12, frame.width / 2), dy = min(12, frame.height / 2)
+        switch self {
+        case .rightEdge: return CGPoint(x: frame.maxX - dx, y: frame.midY)
+        case .leftEdge: return CGPoint(x: frame.minX + dx, y: frame.midY)
+        case .bottomEdge: return CGPoint(x: frame.midX, y: frame.maxY - dy)
+        case .bottomRightCorner: return CGPoint(x: frame.maxX - min(16, frame.width / 2), y: frame.maxY - min(16, frame.height / 2))
+        case .center: return CGPoint(x: frame.midX, y: frame.midY)
+        case .stay: return nil
+        }
     }
 }

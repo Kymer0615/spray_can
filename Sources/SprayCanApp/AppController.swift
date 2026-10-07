@@ -31,6 +31,7 @@ final class AppController: ObservableObject {
     /// Scroll mode in an app without accessible scroll areas (VS Code, other Electron apps):
     /// scroll wherever the pointer is until Tab moves it to a content area.
     private var scrollUnderPointer = false
+    private var scrollFraction: Double? { ScrollAnimation.fraction(smoothness: settings.scrollSmoothness) }
     /// Where the pointer was before scroll mode moved it; put back when the session ends.
     private var pointerBeforeScroll: CGPoint?
     private var previousG = false
@@ -237,7 +238,7 @@ final class AppController: ObservableObject {
                 let points = [CGPoint(x: screen.midX, y: screen.midY), CGPoint(x: screen.minX + 1, y: screen.minY + 1), CGPoint(x: screen.maxX - 1, y: screen.minY + 1), CGPoint(x: screen.maxX - 1, y: screen.maxY - 1), CGPoint(x: screen.minX + 1, y: screen.maxY - 1)]
                 move(points[centerIndex % points.count]); centerIndex += 1
             }
-        case .scroll(let x, let y): mouse.scroll(x: x * 40, y: y * 40); if session.mode == .elements { scheduleRefresh() }
+        case .scroll(let x, let y): mouse.scroll(x: x * 40, y: y * 40, fraction: scrollFraction); if session.mode == .elements { scheduleRefresh() }
         case .toggleLines: settings.showLines.toggle(); render()
         case .toggleLabels: settings.showLabels.toggle(); render()
         case .cellSize(let direction): settings.cellSize = min(240, max(32, settings.cellSize + Double(direction * 12))); rebuildGrid()
@@ -374,10 +375,14 @@ final class AppController: ObservableObject {
         let target = result.scrollAreas[scrollIndex % result.scrollAreas.count]
         // Wheel events go wherever the pointer is, so it must be inside the area; a corner
         // near the scroll bar keeps it off the content being read.
-        if pointerBeforeScroll == nil { pointerBeforeScroll = mouse.point }
         let frame = target.frame
-        let corner = CGPoint(x: frame.maxX - min(16, frame.width / 2), y: frame.maxY - min(16, frame.height / 2))
-        selectedFrame = frame; mouse.move(to: corner); render()
+        selectedFrame = frame
+        // "Don't move" leaves the pointer where it is; scrolling then follows it.
+        if let point = settings.scrollPointer.point(in: frame) {
+            if pointerBeforeScroll == nil { pointerBeforeScroll = mouse.point }
+            mouse.move(to: point)
+        }
+        render()
     }
     private func handleScroll(_ key: CapturedKey) {
         if key.text == "[" && key.modifiers == .control { cancel(); return }
@@ -394,12 +399,12 @@ final class AppController: ObservableObject {
         let dx = half ? Int(frame.width / 2) : 55
         let dy = half ? Int(frame.height / 2) : 55
         switch c {
-        case "h": mouse.scroll(x: -dx, y: 0)
-        case "l": mouse.scroll(x: dx, y: 0)
-        case "j": mouse.scroll(x: 0, y: dy)
-        case "k": mouse.scroll(x: 0, y: -dy)
-        case "d": mouse.scroll(x: 0, y: Int(frame.height / 2))
-        case "u": mouse.scroll(x: 0, y: -Int(frame.height / 2))
+        case "h": mouse.scroll(x: -dx, y: 0, fraction: scrollFraction)
+        case "l": mouse.scroll(x: dx, y: 0, fraction: scrollFraction)
+        case "j": mouse.scroll(x: 0, y: dy, fraction: scrollFraction)
+        case "k": mouse.scroll(x: 0, y: -dy, fraction: scrollFraction)
+        case "d": mouse.scroll(x: 0, y: Int(frame.height / 2), fraction: scrollFraction)
+        case "u": mouse.scroll(x: 0, y: -Int(frame.height / 2), fraction: scrollFraction)
         case "g":
             if half { mouse.scroll(x: 0, y: 100000, instant: true) }
             else if previousG { mouse.scroll(x: 0, y: -100000, instant: true) }

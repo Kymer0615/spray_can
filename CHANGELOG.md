@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.11
+
+- Adjustable scroll smoothness (General → Scrolling): from Off (instant) to very smooth. The default matches 0.1.10 (about 150 ms per step); the smoothest setting glides for about 300 ms.
+- Choose where the pointer waits in scroll mode: right edge (new default, vertically centered), left edge, bottom edge, bottom-right corner, center, or Don't move.
+
+Validation: 49 core tests (including smoothness levels and pointer placements) and a localization check passed. In a native scroll view, one J at smoothness Off, 75%, and 100% settled in 14, 150, and 290 ms, each at exactly 55 pt.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.10
 
 - Smooth scrolling: each scroll step glides in eased increments over about 150 ms instead of jumping, and holding a key scrolls continuously. Top/bottom jumps (gg / G) stay instant.

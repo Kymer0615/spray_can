@@ -92,17 +92,19 @@ final class MouseDriver {
     /// natural-scrolling setting; it is read on every scroll so a change applies immediately.
     /// Scrolls smoothly: the distance is added to what is still pending and sent in eased steps at
     /// 120 Hz, so held keys glide continuously. `instant` sends it as one event (top and bottom jumps).
-    func scroll(x: Int, y: Int, instant: Bool = false) {
-        if instant { cancelScroll(); postScroll(x: x, y: y); return }
+    func scroll(x: Int, y: Int, instant: Bool = false, fraction: Double? = ScrollAnimation.fraction) {
+        guard let fraction, !instant else { cancelScroll(); postScroll(x: x, y: y); return }
+        scrollFraction = fraction
         pendingScroll.x += Double(x); pendingScroll.y += Double(y)
         guard scrollTimer == nil else { return }
         scrollTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 120, repeats: true) { [weak self] _ in self?.stepScroll() }
     }
     func cancelScroll() { scrollTimer?.invalidate(); scrollTimer = nil; pendingScroll = (0, 0) }
     private var pendingScroll: (x: Double, y: Double) = (0, 0)
+    private var scrollFraction = ScrollAnimation.fraction
     private var scrollTimer: Timer?
     private func stepScroll() {
-        let x = ScrollAnimation.next(remaining: pendingScroll.x), y = ScrollAnimation.next(remaining: pendingScroll.y)
+        let x = ScrollAnimation.next(remaining: pendingScroll.x, fraction: scrollFraction), y = ScrollAnimation.next(remaining: pendingScroll.y, fraction: scrollFraction)
         pendingScroll = (x.remaining, y.remaining)
         if x.step == 0 && y.step == 0 { cancelScroll(); return }
         postScroll(x: x.step, y: y.step)

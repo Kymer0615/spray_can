@@ -181,4 +181,27 @@ final class NavigationTests: XCTestCase {
         XCTAssertFalse(passes(11, "b", .option))          // movement / typing
         XCTAssertFalse(passes(33, "[", .control))         // scroll mode exit
     }
+    func testScrollSmoothnessAndPointerPlacement() {
+        XCTAssertNil(ScrollAnimation.fraction(smoothness: 0))
+        XCTAssertEqual(ScrollAnimation.fraction(smoothness: 0.75)!, 0.18, accuracy: 0.0001)
+        XCTAssertEqual(ScrollAnimation.fraction(smoothness: 1)!, 0.07, accuracy: 0.0001)
+        XCTAssertEqual(ScrollAnimation.fraction(smoothness: 0.01)!, 0.5, accuracy: 0.01)
+        func ticks(_ smoothness: Double) -> (count: Int, total: Int) {
+            let fraction = ScrollAnimation.fraction(smoothness: smoothness)!
+            var remaining = 55.0, count = 0, total = 0
+            while abs(remaining) >= 1 { let next = ScrollAnimation.next(remaining: remaining, fraction: fraction); total += next.step; remaining = next.remaining; count += 1 }
+            return (count, total)
+        }
+        let levels = [0.2, 0.5, 0.75, 1.0].map(ticks)
+        XCTAssertTrue(levels.allSatisfy { $0.total == 55 })
+        XCTAssertTrue(zip(levels, levels.dropFirst()).allSatisfy { $0.count < $1.count }, "smoother takes longer: \(levels)")
+        let frame = CGRect(x: 100, y: 200, width: 400, height: 300)
+        XCTAssertEqual(ScrollPointerPlacement.rightEdge.point(in: frame), CGPoint(x: 488, y: 350))
+        XCTAssertNil(ScrollPointerPlacement.stay.point(in: frame))
+        for placement in ScrollPointerPlacement.allCases {
+            for area in [frame, CGRect(x: 0, y: 0, width: 10, height: 8)] {
+                if let point = placement.point(in: area) { XCTAssertTrue(area.insetBy(dx: -0.01, dy: -0.01).contains(point), "\(placement) \(area)") }
+            }
+        }
+    }
 }

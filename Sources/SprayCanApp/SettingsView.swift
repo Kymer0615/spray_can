@@ -72,6 +72,19 @@ struct SettingsView: View {
             }
             GroupBox {
                 VStack(alignment: .leading, spacing: 10) {
+                    Text("Scrolling").font(.subheadline.weight(.semibold))
+                    VStack(alignment: .leading) {
+                        Text(settings.scrollSmoothness < 0.01 ? String(localized: "Scroll smoothness · Off") : String(localized: "Scroll smoothness · \(Int((settings.scrollSmoothness * 100).rounded()))%"))
+                        Slider(value: $settings.scrollSmoothness, in: 0...1, step: 0.05)
+                    }
+                    Picker("Pointer in scroll mode", selection: $settings.scrollPointer) {
+                        ForEach(ScrollPointerPlacement.allCases, id: \.self) { Text(pointerTitle($0)).tag($0) }
+                    }
+                    Text("Scroll events go to the pointer, so it waits inside the area and returns when scroll mode ends.").font(.caption).foregroundStyle(.secondary)
+                }.padding(10)
+            }
+            GroupBox {
+                VStack(alignment: .leading, spacing: 10) {
                     Picker("Language", selection: $settings.appLanguage) {
                         Text("System default").tag(String?.none)
                         ForEach(AppLanguage.options, id: \.code) { Text(verbatim: $0.name).tag(Optional($0.code)) }
@@ -221,6 +234,16 @@ struct SettingsView: View {
         case .grid: return String(localized: "Grid lines")
         case .text: return String(localized: "Label text")
         case .highlight: return String(localized: "Match & selection")
+        }
+    }
+    private func pointerTitle(_ placement: ScrollPointerPlacement) -> String {
+        switch placement {
+        case .rightEdge: return String(localized: "Right edge")
+        case .leftEdge: return String(localized: "Left edge")
+        case .bottomEdge: return String(localized: "Bottom edge")
+        case .bottomRightCorner: return String(localized: "Bottom-right corner")
+        case .center: return String(localized: "Center")
+        case .stay: return String(localized: "Don’t move")
         }
     }
     private func positionTitle(_ position: HintPosition) -> String {
