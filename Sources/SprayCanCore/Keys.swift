@@ -185,3 +185,20 @@ public enum ReturnPress {
         enabled && !holding && modifiers.isEmpty && (code == 36 || code == 76)
     }
 }
+
+/// Keys that belong to scroll mode. Any other key ends scroll mode and goes to the app,
+/// except ⌘/⌃ shortcuts, which are either Spray Can's own or pass through without ending it.
+public enum ScrollKeys {
+    public static func keeps(code: UInt16, text: String, modifiers: KeyModifiers) -> Bool {
+        if code == 53 { return true }                                   // Esc exits through the session
+        if text == "[" && modifiers == .control { return true }         // ⌃[ exits too
+        guard modifiers.isEmpty || modifiers == .shift else { return false }
+        if code == 48 { return true }                                   // Tab / ⇧Tab switch areas
+        if (123...126).contains(code) { return true }                   // arrows scroll
+        return ["h", "j", "k", "l", "d", "u", "g"].contains(text.lowercased())
+    }
+    /// Arrow keys as their HJKL equivalents.
+    public static func letter(forArrow code: UInt16) -> String? {
+        [123: "h", 124: "l", 125: "j", 126: "k"][code]
+    }
+}

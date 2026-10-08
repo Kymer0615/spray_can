@@ -75,7 +75,7 @@ Pulsa **Space** para mantener pulsado el botón, escribe una segunda etiqueta pa
 Y además:
 
 - **Ve lo que la Accesibilidad pasa por alto.** El OCR opcional de Apple Vision etiqueta el texto visible en las apps que no exponen sus controles, en varios idiomas a la vez.
-- **Modo de desplazamiento suave.** **⌃J** y luego **HJKL**, con suavidad ajustable. También funciona en VS Code y otras apps de Electron.
+- **Modo de desplazamiento suave.** **⌃J** y luego **HJKL** o las flechas, con suavidad ajustable; cualquier otra tecla sale del modo y llega a la app. También funciona en VS Code y otras apps de Electron.
 - **Respeta tus atajos.** ⌘C, ⌘V, ⌘W, Spotlight y los demás atajos que Spray Can no usa siguen funcionando mientras las etiquetas están en pantalla.
 - **Te sigue.** Cambia de pestaña, de ventana o de app (incluso con ⌘Tab) y aparecen etiquetas nuevas.
 - **Nativo.** Swift y AppKit, Liquid Glass en macOS 26 y una interfaz en seis idiomas.
@@ -156,7 +156,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.14 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.15 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

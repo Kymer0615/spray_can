@@ -223,4 +223,19 @@ final class NavigationTests: XCTestCase {
         XCTAssertFalse(ReturnPress.defers(code: 36, modifiers: [], holding: false, enabled: false))
         XCTAssertFalse(ReturnPress.defers(code: 30, modifiers: [], holding: false, enabled: true))       // ] right-clicks directly
     }
+    func testScrollModeKeepsOnlyItsOwnKeys() {
+        for (code, text) in [(UInt16(4), "h"), (38, "j"), (40, "k"), (37, "l"), (2, "d"), (32, "u"), (5, "g")] {
+            XCTAssertTrue(ScrollKeys.keeps(code: code, text: text, modifiers: []), text)
+            XCTAssertTrue(ScrollKeys.keeps(code: code, text: text, modifiers: .shift), "⇧" + text)
+        }
+        XCTAssertTrue(ScrollKeys.keeps(code: 53, text: "", modifiers: []))         // Esc
+        XCTAssertTrue(ScrollKeys.keeps(code: 33, text: "[", modifiers: .control))  // ⌃[
+        XCTAssertTrue(ScrollKeys.keeps(code: 48, text: "", modifiers: .shift))     // ⇧Tab
+        XCTAssertTrue(ScrollKeys.keeps(code: 125, text: "", modifiers: []))        // ↓
+        XCTAssertFalse(ScrollKeys.keeps(code: 0, text: "a", modifiers: []))        // exits, goes to the app
+        XCTAssertFalse(ScrollKeys.keeps(code: 49, text: "", modifiers: []))        // Space pages the app
+        XCTAssertFalse(ScrollKeys.keeps(code: 36, text: "", modifiers: []))        // Return
+        XCTAssertFalse(ScrollKeys.keeps(code: 38, text: "j", modifiers: .command)) // shortcuts are decided elsewhere
+        XCTAssertEqual(ScrollKeys.letter(forArrow: 125), "j"); XCTAssertNil(ScrollKeys.letter(forArrow: 0))
+    }
 }

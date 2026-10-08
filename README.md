@@ -75,7 +75,7 @@ Press **Space** to hold the button, type a second label to drag there, and press
 And more:
 
 - **Sees what Accessibility misses.** Optional Apple Vision OCR labels visible text in apps that don't expose their controls, in several languages at once.
-- **Smooth scroll mode.** **⌃J**, then **HJKL**, with adjustable smoothness. It works in VS Code and other Electron apps too.
+- **Smooth scroll mode.** **⌃J**, then **HJKL** or the arrows, with adjustable smoothness; any other key exits and reaches the app. It works in VS Code and other Electron apps too.
 - **Keeps your shortcuts.** ⌘C, ⌘V, ⌘W, Spotlight, and other shortcuts Spray Can doesn't use keep working while labels are up.
 - **Follows you.** Switch tabs, windows, or apps (even with ⌘Tab) and fresh labels appear.
 - **Native.** Swift and AppKit, Liquid Glass on macOS 26, and an interface in six languages.
@@ -156,7 +156,7 @@ More tools: `scripts/render-docs.sh` (README images), `scripts/snapshot-labels.s
 
 ## Status
 
-Spray Can 0.1.14 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.15 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
 
 ## Community
 

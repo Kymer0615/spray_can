@@ -43,6 +43,10 @@ final class KeyboardCapture {
     /// After a Return click: a second Return within `interval` double-clicks; any other key ends the window.
     var onDoubleClick: (() -> Void)?
     var onReturnUp: ((TimeInterval) -> Void)?
+    /// Scroll mode is active: non-scroll keys end it (see `ScrollKeys`).
+    var onScrollExit: (() -> Void)?
+    private var scrollMode = false
+    func setScrollMode(_ on: Bool) { lock.lock(); scrollMode = on; lock.unlock() }
     private var doubleClickArmedAt: TimeInterval?
     private var doubleClickInterval: TimeInterval = 0.5
     func armDoubleClick(interval: TimeInterval) {
@@ -168,7 +172,14 @@ final class KeyboardCapture {
         if modifiers.contains(.shift) && code == 43 { text = "<" }
         if modifiers.contains(.shift) && code == 47 { text = ">" }
         // macOS and app shortcuts Spray Can doesn't use (copy, Spotlight, …) keep working.
-        if passThrough && KeyMap.passesThrough(code: code, text: text, modifiers: activationModifiers.labelModifiers(modifiers), vi: vi) {
+        let ownModifiers = activationModifiers.labelModifiers(modifiers)
+        if passThrough && KeyMap.passesThrough(code: code, text: text, modifiers: ownModifiers, vi: vi) {
+            return Unmanaged.passUnretained(event)
+        }
+        // In scroll mode, a key that isn't a scroll key or a shortcut ends the mode and reaches the app.
+        if scrollMode && ownModifiers.isDisjoint(with: [.command, .control]) && !ScrollKeys.keeps(code: code, text: text, modifiers: ownModifiers) {
+            active = false; scrollMode = false
+            DispatchQueue.main.async { self.onScrollExit?() }
             return Unmanaged.passUnretained(event)
         }
         consumed.insert(code)

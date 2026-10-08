@@ -75,7 +75,7 @@ brew install --cask kymer0615/tap/spray-can
 還有更多：
 
 - **看得見「輔助使用」遺漏之處。** 可選用 Apple Vision OCR，為未提供控制項資訊的 App 中的可見文字加上標籤，並可同時辨識多種語言。
-- **平滑捲動模式。** 按 **⌃J**，再用 **HJKL** 捲動，平滑度可調整。在 VS Code 與其他 Electron App 中也能使用。
+- **平滑捲動模式。** 按 **⌃J**，再用 **HJKL** 或方向鍵捲動，平滑度可調整；按其他鍵即結束，該鍵照常傳給 App。在 VS Code 與其他 Electron App 中也能使用。
 - **保留你的快捷鍵。** 標籤顯示時，⌘C、⌘V、⌘W、Spotlight 以及其他 Spray Can 沒有用到的快捷鍵都照常運作。
 - **跟著你走。** 切換分頁、視窗或 App（即使用 ⌘Tab）時，新的標籤就會出現。
 - **原生打造。** 以 Swift 與 AppKit 開發，在 macOS 26 使用 Liquid Glass，介面提供六種語言。
@@ -156,7 +156,7 @@ scripts/install-local.sh
 
 ## 狀態
 
-Spray Can 0.1.14 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
+Spray Can 0.1.15 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
 
 ## 社群
 

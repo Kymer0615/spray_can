@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.15
+
+- Scroll mode ends when you press a key that isn't a scroll key, and that key goes to the app as usual (Space pages down, a letter types). Scroll keys (HJKL, D/U, gg/G, Tab), Esc, and ⌘/⌃ shortcuts keep it active.
+- Arrow keys scroll in scroll mode, with ⇧ for half pages.
+
+Validation: 52 core tests (including which keys keep scroll mode) and a localization check passed. The live keyboard path was not exercised while the installed copy was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.14
 
 - Hold Return to right-click: after typing a label, holding Return for about half a second right-clicks. A normal press still left-clicks, now on release. Turn it off in General → Clicking → Hold Return to right-click (Return then clicks on press again).

@@ -48,6 +48,7 @@ These are unverified, not implied by a successful compile:
 | VS Code | Editor/sidebar controls, Electron accessibility | Pending |
 | 0.1.3 overlay | Space drag across apps, OCR de-duplication on real pages, HUD repositioning | Pending; core logic unit-tested |
 | 0.1.4 labels | Snapshots of System Settings, Finder (list view), and Safari on github.com: labels touch their elements and sit beside their text; connectors 108→0, 245→2, and 11→8 (of 112 labels) against 0.1.3; layout 2–8 ms per window in a release build | Passed on macOS 27; CJK-only text falls back to accessibility frames (fast recognition is Latin-only) |
+| 0.1.15 Scroll exit | Scroll-mode key rule unit-tested (scroll keys, Esc, ⌃[, Tab, arrows keep; other keys exit and pass through; ⌘/⌃ decided by the shortcut rules) | Live keyboard path pending |
 | 0.1.14 Hold Return | Long-press rule unit-tested (0.45 s threshold; ⇧Return, drops, and disabled setting stay immediate) | Live keyboard path pending |
 | 0.1.13 Return twice | Native fixture: second click 0.2 s later → click counts 1, 2 (apps trust the click-state field, so the event tap's interval check is what limits the window); window rule unit-tested; General tab rendered with OCR on/off | Passed on macOS 27; live keyboard path pending |
 | 0.1.11 scroll settings | Native scroll view: one J at smoothness 0 / 0.75 / 1 settled in 14 / 150 / 290 ms at exactly 55 pt; General tab rendered with the Scrolling group | Passed on macOS 27 |

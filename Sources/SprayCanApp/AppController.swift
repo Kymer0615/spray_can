@@ -58,6 +58,10 @@ final class AppController: ObservableObject {
         keyboard.onActivate = { [weak self] mode in self?.activate(mode) }
         keyboard.onKey = { [weak self] key in self?.handle(key) }
         keyboard.onReturnUp = { [weak self] time in self?.returnReleased(at: time) }
+        keyboard.onScrollExit = { [weak self] in
+            guard let self, self.active, self.session.mode == .scroll else { return }
+            self.cancel(); self.status = String(localized: "Ready when you are")
+        }
         keyboard.onDoubleClick = { [weak self] in
             guard let self, let point = self.lastClickPoint, !self.active else { return }
             self.lastClickPoint = nil; self.mouse.clickAgain(at: point)
@@ -126,6 +130,7 @@ final class AppController: ObservableObject {
         targetPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
         guard targetPID != getpid(), targetPID != 0 else { keyboard.setActive(false); status = String(localized: "Switch to another app, then activate navigation."); return }
         active = true; keyboard.setActive(true); stateChanged?()
+        keyboard.setScrollMode(mode == .scroll)
         let generation = session.begin(mode)
         lastScan = ProcessInfo.processInfo.systemUptime
         // Watch from the start, so changes during a scan are not missed.
@@ -185,7 +190,7 @@ final class AppController: ObservableObject {
         pendingReturn?.work.cancel(); pendingReturn = nil
         refreshWork?.cancel(); ocr.cancel(); accessibilityChanges.stop(); session.cancel(); accessibility.invalidate(session.generation)
         deferred = []; selecting = false; active = false; selectedTarget = nil; selectedFrame = nil
-        mouse.release(); mouse.resetPosition(); keyboard.setActive(false); overlay.hide(); stateChanged?()
+        mouse.release(); mouse.resetPosition(); keyboard.setActive(false); keyboard.setScrollMode(false); overlay.hide(); stateChanged?()
         if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
     }
     private func frontWindow(of pid: pid_t) -> CGRect? {
@@ -434,7 +439,8 @@ final class AppController: ObservableObject {
             previousG = false; updateReadyStatus(); focusScrollArea(); return
         }
         let frame = result.scrollAreas[scrollIndex].frame
-        let c = key.text
+        // Arrows scroll like their HJKL equivalents.
+        let c = ScrollKeys.letter(forArrow: key.code) ?? key.text
         let half = key.modifiers.contains(.shift)
         let dx = half ? Int(frame.width / 2) : 55
         let dy = half ? Int(frame.height / 2) : 55
