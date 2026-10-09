@@ -71,6 +71,8 @@ struct SettingsView: View {
                 if settings.vision {
                     Toggle("Hide text labels on known elements", isOn: $settings.dedupeOCR)
                     Text("Skip recognized text that an element label already marks, such as a button’s title.").font(.caption).foregroundStyle(.secondary)
+                    Toggle("Prepare text labels in advance", isOn: $settings.prescanText)
+                    Text("Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once.").font(.caption).foregroundStyle(.secondary)
                     ocrLanguages
                 }
             }

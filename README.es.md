@@ -134,11 +134,11 @@ Las versiones están **firmadas con el certificado propio del proyecto y no est�
 
 ## Privacidad
 
-Todo se ejecuta en tu Mac. El OCR usa Apple Vision en el dispositivo; las capturas se procesan en memoria y se descartan. Sin registros de capturas, sin analíticas, sin inferencia en la nube y sin cuenta.
+Todo se ejecuta en tu Mac. El OCR usa Apple Vision en el dispositivo; las capturas se procesan en memoria y se descartan. Sin registros de capturas, sin analíticas, sin inferencia en la nube y sin cuenta. Si activas **Preparar las etiquetas de texto con antelación**, Spray Can también lee la ventana activa aproximadamente un segundo después de cambiar a ella (solo con el Mac conectado a la corriente), de la misma forma, y guarda el resultado solo en memoria.
 
 ## OCR
 
-El OCR lee **varios idiomas a la vez**. Elígelos y ordénalos en **General → Idiomas de reconocimiento de texto**. Los idiomas que comparten sistema de escritura (inglés, francés, español…) se leen juntos; cada sistema de escritura adicional (chino, japonés, coreano…) añade una pasada sobre la misma captura, así que el análisis tarda un poco más. De forma predeterminada, Spray Can selecciona los idiomas preferidos de tu Mac más el inglés.
+El OCR lee **varios idiomas a la vez**. Elígelos y ordénalos en **General → Idiomas de reconocimiento de texto**. Los idiomas que comparten sistema de escritura (inglés, francés, español…) se leen juntos; cada sistema de escritura adicional (chino, japonés, coreano…) añade una pasada sobre la misma captura, así que el análisis tarda un poco más. De forma predeterminada, Spray Can selecciona los idiomas preferidos de tu Mac más el inglés. El reconocimiento lee solo la ventana de destino, y **General → Objetivos → Preparar las etiquetas de texto con antelación** (desactivado de forma predeterminada) puede leerla por adelantado para que las etiquetas de texto aparezcan al instante.
 
 El OCR detecta dónde está el texto, no si es clicable, así que una etiqueta de texto puede apuntar a un encabezado. Para iconos sin etiqueta y lienzos personalizados, usa la cuadrícula. Consulta [VALIDATION.md](docs/VALIDATION.md) para ver el estado de compatibilidad y pruebas.
 
@@ -156,7 +156,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.15 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.16 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

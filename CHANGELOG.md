@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.16
+
+- Text recognition reads only the target window instead of the whole display: about 3× faster (Finder, English: 0.67 s → 0.22 s; English + Chinese + Japanese: about 4.9 s → 1.3 s), so OCR labels reshuffle the label set much sooner.
+- New option, off by default: General → Targets → Prepare text labels in advance. About a second after a window gets focus, Spray Can reads it on-device, only when connected to power (not in Low Power Mode or when the Mac is hot). When you activate and a tiny thumbnail shows the window unchanged, text labels appear with the first frame instead of a moment later.
+
+Validation: 55 core tests (pre-scan guards, thumbnail tolerance, reuse rules) and a localization check passed; OCR timing measured on Finder and System Settings with one and three languages; OCR label snapshots on Finder, System Settings, and Chrome. The live pre-scan path was not exercised while the installed copy was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.15
 
 - Scroll mode ends when you press a key that isn't a scroll key, and that key goes to the app as usual (Space pages down, a letter types). Scroll keys (HJKL, D/U, gg/G, Tab), Esc, and ⌘/⌃ shortcuts keep it active.

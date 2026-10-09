@@ -12,7 +12,13 @@ final class AppController: ObservableObject {
     let accessibility = AccessibilityProvider()
     let ocr = OCRProvider()
     let accessibilityChanges = AccessibilityChanges()
-    @Published var status = String(localized: "Ready when you are")
+    private lazy var prescan: TextPrescanner = TextPrescanner(
+        frontWindow: { [weak self] (pid: pid_t) -> CGRect? in self?.frontWindow(of: pid) },
+        screens: { [weak self] () -> [CGRect] in self?.overlay.quartzScreens ?? [] })
+    /// Text read ahead for the target window: nil until known, empty when unusable.
+    private var prescanned: [Target]?
+    private var prescanPending = false
+    @Published var status: String = String(localized: "Ready when you are")
     @Published var active = false
     @Published var shortcutIssues: [String] = []
     var openSettings: (() -> Void)?
@@ -80,6 +86,11 @@ final class AppController: ObservableObject {
             } else { self.cancel() }
         }
         keyboard.onAppSwitchEnded = { [weak self] in self?.resumeFollow(after: 0.15) }
+        settings.$prescanText.combineLatest(settings.$vision, settings.$ocrLanguages).dropFirst().sink { [weak self] _ in
+            // Published before the new value is stored; apply on the next turn.
+            DispatchQueue.main.async { guard let self, !self.active else { return }; self.prescan.reset() }
+        }.store(in: &subscriptions)
+        DispatchQueue.main.async { [weak self] in self?.prescan.resume() }
         settings.$passSystemShortcuts.combineLatest(settings.$vi).sink { [weak self] pass, vi in
             self?.keyboard.setKeyRules(passThrough: pass, vi: vi)
         }.store(in: &subscriptions)
@@ -93,6 +104,7 @@ final class AppController: ObservableObject {
         observers.append(workspace.addObserver(forName: NSWorkspace.didActivateApplicationNotification, object: nil, queue: .main) { [weak self] note in
             guard let self, let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
                   app.processIdentifier != getpid() else { return }
+            if !self.active { self.prescan.resume() }
             if self.followMode != nil { self.resumeFollow(after: 0.15); return }
             guard self.active, app.processIdentifier != self.targetPID else { return }
             self.targetChanged(.structural)
@@ -129,13 +141,19 @@ final class AppController: ObservableObject {
         clearFollow(); windowChanged = false
         targetPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
         guard targetPID != getpid(), targetPID != 0 else { keyboard.setActive(false); status = String(localized: "Switch to another app, then activate navigation."); return }
-        active = true; keyboard.setActive(true); stateChanged?()
+        active = true; keyboard.setActive(true); stateChanged?(); prescan.pause()
         keyboard.setScrollMode(mode == .scroll)
         let generation = session.begin(mode)
         lastScan = ProcessInfo.processInfo.systemUptime
         // Watch from the start, so changes during a scan are not missed.
         if mode == .elements || mode == .scroll { accessibilityChanges.start(pid: targetPID) }
-        detectedText = nil
+        detectedText = nil; prescanned = nil; prescanPending = false
+        if mode == .elements, settings.vision, let window = frontWindow(of: targetPID) {
+            prescanPending = prescan.text(pid: targetPID, frame: window, languages: settings.ocrLanguages) { [weak self] text in
+                guard let self, self.session.generation == generation else { return }
+                self.prescanPending = false; self.prescanned = text ?? []
+            }
+        }
         if mode == .elements, let window = frontWindow(of: targetPID) {
             // Runs alongside the accessibility scan, so labels usually avoid real text from the start.
             ocr.detectText(in: window) { [weak self] rects in
@@ -154,34 +172,50 @@ final class AppController: ObservableObject {
         let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation)
         accessibility.discover(context) { [weak self] discovered in
             guard let self, self.active, self.session.generation == generation else { return }
-            self.result = discovered
-            self.scrollUnderPointer = false
-            if mode == .scroll && discovered.scrollAreas.isEmpty, let window = discovered.captureRects.first {
-                // No accessible scroll areas: fall back to web content areas (largest first), else the window,
-                // and start by scrolling under the pointer when it is already over the window.
-                let areas = discovered.webAreas.filter { $0.width > 40 && $0.height > 40 }.sorted { $0.width * $0.height > $1.width * $1.height }
-                self.result.scrollAreas = (areas.isEmpty ? [window] : areas).enumerated().map { Target(id: "scroll-\($0.offset)", frame: $0.element, source: .accessibility, role: kAXScrollAreaRole) }
-                self.scrollUnderPointer = window.contains(self.mouse.point)
-            }
-            // "Don't move" scrolls wherever the pointer already is; Tab still moves it into an area.
-            if mode == .scroll && self.settings.scrollPointer == .stay && !self.result.scrollAreas.isEmpty { self.scrollUnderPointer = true }
-            let targets = mode == .scroll ? self.result.scrollAreas : discovered.targets
-            _ = self.session.publish(targets, generation: generation, vi: self.settings.vi)
-            self.scrollIndex = 0
-            self.updateReadyStatus()
-            if mode == .scroll { self.focusScrollArea() }
-            self.render(); self.drain()
-            self.log.info("Discovery completed in \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms; targets: \(targets.count); bounded: \(discovered.timedOut)")
-            if mode == .elements && self.settings.vision {
-                let regions = discovered.captureRects.isEmpty ? context.screens : discovered.captureRects
-                self.ocr.discover(screens: context.screens, regions: regions, languages: self.settings.ocrLanguages) { [weak self] text, error in
-                    guard let self, self.active, self.session.generation == generation else { return }
-                    if let error { self.status = error; self.render(); return }
-                    guard !self.session.hasTyped else { return }
-                    let merged = self.settings.dedupeOCR ? Geometry.mergeText(discovered.targets, text) : Geometry.merge(discovered.targets, text)
-                    _ = self.session.publish(merged, generation: generation, vi: self.settings.vi)
-                    self.updateReadyStatus(); self.render()
-                }
+            self.whenPrescanKnown(generation, patience: 0.15) { self.finishDiscovery(discovered, mode: mode, context: context, generation: generation, started: started) }
+        }
+    }
+    /// Text read ahead is usually confirmed before discovery ends; wait briefly rather than publish twice.
+    private func whenPrescanKnown(_ generation: Int, patience: TimeInterval, then finish: @escaping () -> Void) {
+        guard prescanPending, patience > 0 else { prescanPending = false; finish(); return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.03) { [weak self] in
+            guard let self, self.active, self.session.generation == generation else { return }
+            self.whenPrescanKnown(generation, patience: patience - 0.03, then: finish)
+        }
+    }
+    private func finishDiscovery(_ discovered: DiscoveryResult, mode: NavigationMode, context: DiscoveryContext, generation: Int, started: TimeInterval) {
+        result = discovered
+        scrollUnderPointer = false
+        if mode == .scroll && discovered.scrollAreas.isEmpty, let window = discovered.captureRects.first {
+            // No accessible scroll areas: fall back to web content areas (largest first), else the window,
+            // and start by scrolling under the pointer when it is already over the window.
+            let areas = discovered.webAreas.filter { $0.width > 40 && $0.height > 40 }.sorted { $0.width * $0.height > $1.width * $1.height }
+            result.scrollAreas = (areas.isEmpty ? [window] : areas).enumerated().map { Target(id: "scroll-\($0.offset)", frame: $0.element, source: .accessibility, role: kAXScrollAreaRole) }
+            scrollUnderPointer = window.contains(mouse.point)
+        }
+        // "Don't move" scrolls wherever the pointer already is; Tab still moves it into an area.
+        if mode == .scroll && settings.scrollPointer == .stay && !result.scrollAreas.isEmpty { scrollUnderPointer = true }
+        let text = mode == .elements && settings.vision ? prescanned.flatMap { $0.isEmpty ? nil : $0 } : nil
+        let targets = mode == .scroll ? result.scrollAreas
+            : text.map { settings.dedupeOCR ? Geometry.mergeText(discovered.targets, $0) : Geometry.merge(discovered.targets, $0) } ?? discovered.targets
+        _ = session.publish(targets, generation: generation, vi: settings.vi)
+        scrollIndex = 0
+        updateReadyStatus()
+        if mode == .scroll { focusScrollArea() }
+        render(); drain()
+        log.info("Discovery completed in \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms; targets: \(targets.count); bounded: \(discovered.timedOut)")
+        if text != nil { log.info("Text labels reused from the pre-scan") }
+        if mode == .elements && settings.vision && text == nil {
+            let started = ProcessInfo.processInfo.systemUptime
+            let regions = discovered.captureRects.isEmpty ? context.screens : discovered.captureRects
+            ocr.discover(screens: context.screens, regions: regions, languages: settings.ocrLanguages) { [weak self] text, error in
+                guard let self, self.active, self.session.generation == generation else { return }
+                self.log.info("Text recognition completed in \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms; text: \(text.count)")
+                if let error { self.status = error; self.render(); return }
+                guard !self.session.hasTyped else { return }
+                let merged = self.settings.dedupeOCR ? Geometry.mergeText(discovered.targets, text) : Geometry.merge(discovered.targets, text)
+                _ = self.session.publish(merged, generation: generation, vi: self.settings.vi)
+                self.updateReadyStatus(); self.render()
             }
         }
     }
@@ -191,6 +225,7 @@ final class AppController: ObservableObject {
         refreshWork?.cancel(); ocr.cancel(); accessibilityChanges.stop(); session.cancel(); accessibility.invalidate(session.generation)
         deferred = []; selecting = false; active = false; selectedTarget = nil; selectedFrame = nil
         mouse.release(); mouse.resetPosition(); keyboard.setActive(false); keyboard.setScrollMode(false); overlay.hide(); stateChanged?()
+        prescan.resume()
         if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
     }
     private func frontWindow(of pid: pid_t) -> CGRect? {

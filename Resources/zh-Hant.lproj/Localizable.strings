@@ -98,10 +98,12 @@
 "Plain label colors (grid mode)" = "一般標籤顏色（網格模式）";
 "Point. Type. Click." = "指向。輸入。點按。";
 "Pointer in scroll mode" = "捲動模式下的指標";
+"Prepare text labels in advance" = "預先準備文字標籤";
 "Press Return twice to double-click" = "按兩次 Return 進行連按";
 "Quiet visuals. Clear destinations." = "低調的視覺，清楚的目標。";
 "Quit Spray Can" = "結束 Spray Can";
 "Reach your Mac without reaching for the mouse." = "無須伸手拿滑鼠，就能操作你的 Mac。";
+"Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "切換到某個視窗約一秒後讀取該視窗（僅在接上電源時）。文字標籤隨即立刻顯示。";
 "Ready" = "就緒";
 "Ready when you are" = "隨時可以開始";
 "Reduce Transparency keeps label backgrounds opaque." = "「減少透明度」會讓標籤背景保持不透明。";

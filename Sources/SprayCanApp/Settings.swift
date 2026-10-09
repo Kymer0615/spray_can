@@ -47,6 +47,8 @@ final class Settings: ObservableObject {
     @Published var passSystemShortcuts = Settings.flag("passSystemShortcuts", true) { didSet { save("passSystemShortcuts", passSystemShortcuts) } }
     /// Skip OCR text that an element label already covers.
     @Published var dedupeOCR = Settings.flag("dedupeOCR", true) { didSet { save("dedupeOCR", dedupeOCR) } }
+    /// Read the focused window ahead of activation (on power only), so text labels appear at once.
+    @Published var prescanText = Settings.flag("prescanText", false) { didSet { save("prescanText", prescanText) } }
     /// Draw each element label, its connector, and a box around its element in a shared color.
     @Published var colorCodeTargets = Settings.flag("colorCodeTargets", true) { didSet { save("colorCodeTargets", colorCodeTargets) } }
     /// When elements are shaded in their label's color, and how strongly.

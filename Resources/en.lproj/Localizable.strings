@@ -98,10 +98,12 @@
 "Plain label colors (grid mode)" = "Plain label colors (grid mode)";
 "Point. Type. Click." = "Point. Type. Click.";
 "Pointer in scroll mode" = "Pointer in scroll mode";
+"Prepare text labels in advance" = "Prepare text labels in advance";
 "Press Return twice to double-click" = "Press Return twice to double-click";
 "Quiet visuals. Clear destinations." = "Quiet visuals. Clear destinations.";
 "Quit Spray Can" = "Quit Spray Can";
 "Reach your Mac without reaching for the mouse." = "Reach your Mac without reaching for the mouse.";
+"Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once.";
 "Ready" = "Ready";
 "Ready when you are" = "Ready when you are";
 "Reduce Transparency keeps label backgrounds opaque." = "Reduce Transparency keeps label backgrounds opaque.";

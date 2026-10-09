@@ -1,6 +1,6 @@
 #!/bin/bash
 # Render real labels over a capture of an app's focused window, for checking readability.
-# Usage: scripts/snapshot-labels.sh <bundle id> <out.png> [--prefix ab] [--ocr]
+# Usage: scripts/snapshot-labels.sh <bundle id> <out.png> [--prefix ab] [--ocr] [--time-ocr]
 # The terminal running this needs Accessibility and Screen Recording access.
 set -euo pipefail
 cd "$(dirname "$0")/.."

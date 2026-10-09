@@ -98,10 +98,12 @@
 "Plain label colors (grid mode)" = "Colores de etiquetas normales (modo cuadrícula)";
 "Point. Type. Click." = "Apunta. Escribe. Haz clic.";
 "Pointer in scroll mode" = "Puntero en el modo de desplazamiento";
+"Prepare text labels in advance" = "Preparar las etiquetas de texto con antelación";
 "Press Return twice to double-click" = "Pulsa Retorno dos veces para hacer doble clic";
 "Quiet visuals. Clear destinations." = "Visuales discretos. Destinos claros.";
 "Quit Spray Can" = "Salir de Spray Can";
 "Reach your Mac without reaching for the mouse." = "Llega a todo tu Mac sin tocar el ratón.";
+"Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "Lee la ventana activa aproximadamente un segundo después de cambiar a ella, solo cuando el Mac está conectado a la corriente. Así las etiquetas de texto aparecen al instante.";
 "Ready" = "Listo";
 "Ready when you are" = "Listo cuando quieras";
 "Reduce Transparency keeps label backgrounds opaque." = "«Reducir transparencia» mantiene opacos los fondos de las etiquetas.";

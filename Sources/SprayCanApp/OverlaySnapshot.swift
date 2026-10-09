@@ -4,7 +4,7 @@ import SprayCanCore
 
 /// Debug readability check: real discovery of one app's focused window, labels drawn over a
 /// capture of that window, saved as a PNG. Run from a terminal that has Accessibility and
-/// Screen Recording access: `SprayCan --render-overlay --app <bundle id> --out <png> [--prefix ab] [--ocr]`.
+/// Screen Recording access: `SprayCan --render-overlay --app <bundle id> --out <png> [--prefix ab] [--ocr] [--time-ocr]`.
 final class OverlaySnapshot {
     private let accessibility = AccessibilityProvider()
     private let ocr = OCRProvider()
@@ -32,6 +32,7 @@ final class OverlaySnapshot {
                 else { self.finish("No focused window found.") }
                 return
             }
+            if self.arguments.contains("--time-ocr") { self.timeOCR(window: window, screens: screens); return }
             if self.arguments.contains("--dump") { for t in result.targets { print("TARGET", t.role, Int(t.frame.minX), Int(t.frame.minY), Int(t.frame.width), Int(t.frame.height), t.title) } }
             // Same inputs as a live session: detected text plus icons, unless --no-detect.
             self.ocr.detectText(in: self.arguments.contains("--no-detect") ? .zero : window) { rects in
@@ -46,6 +47,34 @@ final class OverlaySnapshot {
                 }
             }
         }
+    }
+    /// `--time-ocr`: full-display vs. window-only capture, and the
+    /// fingerprint used to reuse pre-scanned text. Languages come from `-ocrLanguages`.
+    private func timeOCR(window: CGRect, screens: [CGRect]) {
+        let languages = Settings.shared.ocrLanguages
+        let variants: [(String, Bool)] = [("warm-up", true), ("display", false), ("window", true)]
+        var titles: [String: [String]] = [:]
+        func next(_ index: Int) {
+            guard index < variants.count else {
+                let full = Set(titles["display"] ?? []), cropped = Set(titles["window"] ?? [])
+                print("Only full display: \(full.subtracting(cropped).sorted())")
+                print("Only window: \(cropped.subtracting(full).sorted())")
+                Task { @MainActor in
+                    let first = await OCRProvider.fingerprint(of: window), second = await OCRProvider.fingerprint(of: window)
+                    print("Fingerprint unchanged window matches: \(first.flatMap { a in second.map { a.matches($0) } } ?? false)")
+                    self.finish("Languages: \(languages)")
+                }
+                return
+            }
+            let (name, crop) = variants[index]
+            let started = ProcessInfo.processInfo.systemUptime
+            OCRProvider().discover(screens: screens, regions: [window], languages: languages, crop: crop) { text, _ in
+                print("\(name): \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms, \(text.count) text")
+                titles[name] = text.map(\.title)
+                next(index + 1)
+            }
+        }
+        next(0)
     }
     private func capture(window: CGRect, targets: [Target], content: [CGRect], icons: [CGRect], output: String) {
         SCShareableContent.getExcludingDesktopWindows(false, onScreenWindowsOnly: true) { shareable, _ in

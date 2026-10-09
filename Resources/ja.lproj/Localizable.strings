@@ -98,10 +98,12 @@
 "Plain label colors (grid mode)" = "通常のラベルの色（グリッドモード）";
 "Point. Type. Click." = "指して、入力して、クリック。";
 "Pointer in scroll mode" = "スクロールモードでのポインタ";
+"Prepare text labels in advance" = "テキストラベルを事前に準備";
 "Press Return twice to double-click" = "Return を 2 回押してダブルクリック";
 "Quiet visuals. Clear destinations." = "控えめな表示。明確な行き先。";
 "Quit Spray Can" = "Spray Can を終了";
 "Reach your Mac without reaching for the mouse." = "マウスに手を伸ばさずに、Mac のすべてに手が届く。";
+"Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "ウインドウに切り替えて約1秒後に、そのウインドウを読み取ります（電源接続時のみ）。テキストラベルがすぐに表示されます。";
 "Ready" = "準備完了";
 "Ready when you are" = "いつでも使えます";
 "Reduce Transparency keeps label backgrounds opaque." = "「透明度を下げる」がオンの場合、ラベルの背景は不透明になります。";

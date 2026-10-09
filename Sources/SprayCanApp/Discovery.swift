@@ -309,27 +309,27 @@ final class OCRProvider {
     }()
     /// Runs one request per language pass on the same image and keeps the most
     /// confident reading where passes overlap. Rects are normalized to the image.
+    /// (Running passes in parallel measured no faster: Vision serializes them.)
     static func recognize(_ image: CGImage, languages: [String]) throws -> [OCRText] {
-        var passes: [[OCRText]] = []
-        for pass in OCRLanguages.passes(selected: languages, supported: supportedLanguages) {
-            let request = VNRecognizeTextRequest()
-            request.revision = VNRecognizeTextRequestRevision3
-            request.recognitionLevel = .accurate
-            request.usesLanguageCorrection = false
-            request.recognitionLanguages = pass
-            do { try VNImageRequestHandler(cgImage: image).perform([request]) }
-            catch {
-                // Fall back to the pass's primary language if Vision rejects the combination.
-                guard pass.count > 1 else { continue }
-                request.recognitionLanguages = [pass[0]]
-                try VNImageRequestHandler(cgImage: image).perform([request])
-            }
-            passes.append((request.results ?? []).compactMap { observation in
-                guard let text = observation.topCandidates(1).first else { return nil }
-                return OCRText(frame: observation.boundingBox, text: text.string, confidence: text.confidence)
-            })
+        OCRLanguages.merge(try OCRLanguages.passes(selected: languages, supported: supportedLanguages).map { try read(image, pass: $0) })
+    }
+    private static func read(_ image: CGImage, pass: [String]) throws -> [OCRText] {
+        let request = VNRecognizeTextRequest()
+        request.revision = VNRecognizeTextRequestRevision3
+        request.recognitionLevel = .accurate
+        request.usesLanguageCorrection = false
+        request.recognitionLanguages = pass
+        do { try VNImageRequestHandler(cgImage: image).perform([request]) }
+        catch {
+            // Fall back to the pass's primary language if Vision rejects the combination.
+            guard pass.count > 1 else { return [] }
+            request.recognitionLanguages = [pass[0]]
+            try VNImageRequestHandler(cgImage: image).perform([request])
         }
-        return OCRLanguages.merge(passes)
+        return (request.results ?? []).compactMap { observation in
+            guard let text = observation.topCandidates(1).first else { return nil }
+            return OCRText(frame: observation.boundingBox, text: text.string, confidence: text.confidence)
+        }
     }
     private var detection: Task<Void, Never>?
     func cancel() { task?.cancel(); task = nil; detection?.cancel(); detection = nil }
@@ -374,7 +374,10 @@ final class OCRProvider {
             return CGRect(x: area.minX + b.minX * area.width, y: area.minY + (1 - b.maxY) * area.height, width: b.width * area.width, height: b.height * area.height)
         }
     }
-    func discover(screens: [CGRect], regions: [CGRect], languages: [String], completion: @escaping ([Target], String?) -> Void) {
+    /// Reads text inside `regions`. Only the part of each display the regions cover is captured,
+    /// which keeps recognition time proportional to the window rather than the screen.
+    func discover(screens: [CGRect], regions: [CGRect], languages: [String], crop: Bool = true,
+                  completion: @escaping ([Target], String?) -> Void) {
         cancel()
         guard CGPreflightScreenCaptureAccess() else { completion([], String(localized: "Enable Screen Recording to use text targeting.")); return }
         task = Task {
@@ -386,19 +389,23 @@ final class OCRProvider {
                     try Task.checkCancellation()
                     let bounds = CGDisplayBounds(display.displayID)
                     guard screens.contains(where: { $0.intersects(bounds) }) else { continue }
+                    let covered = regions.reduce(CGRect.null) { $0.union($1.intersection(bounds)) }
+                    let area = (crop ? covered : bounds).integral.intersection(bounds)
+                    guard !area.isNull, area.width > 1, area.height > 1 else { continue }
                     let filter = SCContentFilter(display: display, excludingApplications: ownApps, exceptingWindows: [])
                     let config = SCStreamConfiguration()
+                    config.sourceRect = area.offsetBy(dx: -bounds.minX, dy: -bounds.minY)
                     // OCR at native logical resolution keeps processing bounded on Retina displays.
-                    config.width = Int(bounds.width); config.height = Int(bounds.height); config.showsCursor = false
+                    config.width = Int(area.width); config.height = Int(area.height); config.showsCursor = false
                     let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config)
                     let recognized = try Self.recognize(image, languages: languages)
                     try Task.checkCancellation()
                     for (index, text) in recognized.enumerated() {
                         guard text.confidence >= 0.65 else { continue }
                         let b = text.frame
-                        let rect = CGRect(x: bounds.minX + b.minX * bounds.width,
-                                          y: bounds.minY + (1 - b.maxY) * bounds.height,
-                                          width: b.width * bounds.width, height: b.height * bounds.height)
+                        let rect = CGRect(x: area.minX + b.minX * area.width,
+                                          y: area.minY + (1 - b.maxY) * area.height,
+                                          width: b.width * area.width, height: b.height * area.height)
                         guard regions.contains(where: { $0.contains(CGPoint(x: rect.midX, y: rect.midY)) }) else { continue }
                         targets.append(Target(id: "text-\(display.displayID)-\(index)", frame: rect, source: .text, title: text.text))
                     }
@@ -411,6 +418,29 @@ final class OCRProvider {
                 await MainActor.run { completion([], String(localized: "Text targeting unavailable. Accessibility and grid navigation still work.")) }
             }
         }
+    }
+    /// A tiny grayscale thumbnail of a region, to check whether text read earlier is still on screen.
+    static func fingerprint(of region: CGRect) async -> TextFingerprint? {
+        guard CGPreflightScreenCaptureAccess(), region.width > 1, region.height > 1,
+              let content = try? await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true),
+              let display = mainDisplay(for: region, in: content.displays) else { return nil }
+        let bounds = CGDisplayBounds(display.displayID)
+        let area = region.intersection(bounds)
+        let config = SCStreamConfiguration()
+        config.sourceRect = area.offsetBy(dx: -bounds.minX, dy: -bounds.minY)
+        config.width = TextFingerprint.width * 4; config.height = TextFingerprint.height * 4; config.showsCursor = false
+        let filter = SCContentFilter(display: display, excludingApplications: content.applications.filter { $0.processID == getpid() }, exceptingWindows: [])
+        guard let image = try? await SCScreenshotManager.captureImage(contentFilter: filter, configuration: config) else { return nil }
+        var pixels = [UInt8](repeating: 0, count: TextFingerprint.width * TextFingerprint.height)
+        let drawn = pixels.withUnsafeMutableBytes { buffer -> Bool in
+            guard let context = CGContext(data: buffer.baseAddress, width: TextFingerprint.width, height: TextFingerprint.height,
+                                          bitsPerComponent: 8, bytesPerRow: TextFingerprint.width, space: CGColorSpaceCreateDeviceGray(),
+                                          bitmapInfo: CGImageAlphaInfo.none.rawValue) else { return false }
+            context.interpolationQuality = .medium
+            context.draw(image, in: CGRect(x: 0, y: 0, width: TextFingerprint.width, height: TextFingerprint.height))
+            return true
+        }
+        return drawn ? TextFingerprint(pixels: pixels) : nil
     }
 }
 
