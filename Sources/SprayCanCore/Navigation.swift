@@ -122,6 +122,21 @@ public enum Geometry {
     }
 }
 
+/// Which on-screen windows can hide a control from the user.
+public enum Occlusion {
+    /// Overlays above normal windows that span a whole display (the screenshot helper's leftover
+    /// selection layer, screen dimmers) are not real occluders: counting them hides every control.
+    /// The cursor layer and above never occlude either.
+    public static func occludes(layer: Int, bounds: CGRect, screens: [CGRect], cursorLayer: Int) -> Bool {
+        guard layer < cursorLayer else { return false }
+        guard layer > 0 else { return true }
+        return !screens.contains { screen in
+            let covered = bounds.intersection(screen)
+            return !covered.isNull && covered.width * covered.height >= screen.width * screen.height * 0.9
+        }
+    }
+}
+
 public enum HintLabels {
     public static func assign(_ targets: [Target], vi: Bool = false) -> [Target] {
         let targets = TargetCollection.unique(targets)

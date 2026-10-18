@@ -184,8 +184,10 @@ final class AccessibilityProvider: TargetProvider {
         let windows = (CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []).filter {
             ($0[kCGWindowOwnerPID as String] as? Int32) != getpid() &&
             ($0[kCGWindowAlpha as String] as? Double ?? 1) > 0 &&
-            // WindowServer exposes the cursor as a window; it never occludes a control.
-            ($0[kCGWindowLayer as String] as? Int ?? 0) < Int(CGWindowLevelForKey(.cursorWindow))
+            // The cursor and full-display overlays (e.g. the screenshot helper's leftover layer) never hide a control.
+            Occlusion.occludes(layer: $0[kCGWindowLayer as String] as? Int ?? 0,
+                               bounds: ($0[kCGWindowBounds as String] as? NSDictionary).flatMap { CGRect(dictionaryRepresentation: $0) } ?? .zero,
+                               screens: context.screens, cursorLayer: Int(CGWindowLevelForKey(.cursorWindow)))
         }
         func topOwner(at point: CGPoint) -> pid_t? {
             for window in windows {

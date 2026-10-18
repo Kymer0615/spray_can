@@ -238,4 +238,19 @@ final class NavigationTests: XCTestCase {
         XCTAssertFalse(ScrollKeys.keeps(code: 38, text: "j", modifiers: .command)) // shortcuts are decided elsewhere
         XCTAssertEqual(ScrollKeys.letter(forArrow: 125), "j"); XCTAssertNil(ScrollKeys.letter(forArrow: 0))
     }
+
+    func testFullScreenOverlaysDoNotOcclude() {
+        let screens = [CGRect(x: 0, y: 0, width: 1920, height: 1200), CGRect(x: 1920, y: 0, width: 1280, height: 800)]
+        func occludes(_ layer: Int, _ bounds: CGRect) -> Bool { Occlusion.occludes(layer: layer, bounds: bounds, screens: screens, cursorLayer: 2_147_483_630) }
+        // Normal windows always count, even full screen.
+        XCTAssertTrue(occludes(0, screens[0]))
+        // Menu bar, Dock, and floating panels count.
+        XCTAssertTrue(occludes(24, CGRect(x: 0, y: 0, width: 1920, height: 30)))
+        XCTAssertTrue(occludes(3, CGRect(x: 100, y: 100, width: 400, height: 300)))
+        // A leftover full-display overlay (screenshot helper, layer 24) does not, on either display.
+        XCTAssertFalse(occludes(24, screens[0]))
+        XCTAssertFalse(occludes(24, screens[1].insetBy(dx: 10, dy: 10)))
+        // The cursor never does.
+        XCTAssertFalse(occludes(2_147_483_630, CGRect(x: 0, y: 0, width: 28, height: 40)))
+    }
 }

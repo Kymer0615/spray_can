@@ -1,5 +1,18 @@
 # Changelog
 
+## Spray Can 0.1.17
+
+- Fixed element labels disappearing in every app (only menu-bar labels remained) while macOS's screenshot helper kept an invisible full-screen layer open, for example after a screenshot that suggested an event. Overlays above normal windows that cover a whole display no longer count as hiding controls.
+
+Validation: 56 core tests (including the overlay rule) and a localization check passed. With the screenshot helper's layer present, labels in Finder went from 8 (menu bar only) to 87; System Settings 45 and Chrome 93. Clicks were unaffected: the accessibility hit test already saw through the layer.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.16
 
 - Text recognition reads only the target window instead of the whole display: about 3× faster (Finder, English: 0.67 s → 0.22 s; English + Chinese + Japanese: about 4.9 s → 1.3 s), so OCR labels reshuffle the label set much sooner.
