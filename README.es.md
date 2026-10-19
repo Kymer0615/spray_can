@@ -114,7 +114,7 @@ La lista completa, con las combinaciones de Emacs y vi, está en [SHORTCUTS.md](
 - Suavidad del desplazamiento y dónde espera el puntero en el modo de desplazamiento
 - Hacer clic en cuanto la etiqueta está completa, y Return dos veces para doble clic
 - OCR activado o desactivado, y sus idiomas de reconocimiento
-- Ajustes por app: OCR activado o desactivado y más tiempo de análisis para apps lentas, en **Ajustes → Apps** o **Esta app** en la barra de menús
+- Ajustes por app: OCR activado o desactivado, más tiempo límite de análisis para apps lentas y accesibilidad completa al abrir para apps basadas en Chromium como Spotify, en **Ajustes → Apps** o **Esta app** en la barra de menús
 - **Análisis de apps:** comprueba lo bien que Spray Can lee las apps que elijas y aplica sugerencias tras revisar sus riesgos, como la accesibilidad mejorada para apps web (se prueba primero y solo se mantiene si ayuda)
 - Todos los atajos globales, además de las teclas de vi opcionales
 
@@ -158,7 +158,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.19 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.20 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

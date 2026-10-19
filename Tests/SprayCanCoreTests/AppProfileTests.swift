@@ -44,6 +44,9 @@ final class AppAdaptationTests: XCTestCase {
         XCTAssertEqual(AppKind.detect(frameworks: ["QtCore.framework"]), .qt)
         XCTAssertEqual(AppKind.detect(frameworks: []), .native)
         XCTAssertTrue(AppKind.webView2.enhanceable)
+        XCTAssertFalse(AppKind.cef.enhanceable)
+        XCTAssertTrue(AppKind.cef.relaunchable)
+        XCTAssertFalse(AppKind.electron.relaunchable)
         XCTAssertFalse(AppKind.electron.enhanceable)
         XCTAssertFalse(AppKind.native.enhanceable)
     }
@@ -58,8 +61,11 @@ final class AppAdaptationTests: XCTestCase {
         // Teams: web-based, poorly covered, switch settable; text recognition offered too.
         XCTAssertEqual(AppAdvice.recommend(analysis(.webView2, labels: 34, coverage: 0.2), current: plain), [.enhance, .ocr])
         XCTAssertEqual(AppAdvice.recommend(analysis(.webView2, labels: 34, coverage: 0.5), current: plain), [.enhance])
-        // Spotify: read text when the switch is refused.
-        XCTAssertEqual(AppAdvice.recommend(analysis(.cef, labels: 3, coverage: 0, supported: false), current: plain), [.ocr])
+        // Spotify (CEF): relaunch with full accessibility, and read text as a fallback.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.cef, labels: 3, coverage: 0), current: plain), [.relaunch, .ocr])
+        XCTAssertEqual(AppAdvice.recommend(analysis(.cef, labels: 3, coverage: 0), current: AppBehavior(ocr: true, prescan: false, scanTime: .normal, launchAccessibility: true)), [])
+        XCTAssertFalse(analysis(.cef, labels: 3, coverage: 0).readsWell)
+        XCTAssertTrue(analysis(.cef, labels: 161, coverage: 1).readsWell)
         // Reminders, Chrome: already good.
         XCTAssertEqual(AppAdvice.recommend(analysis(.native, coverage: 1), current: plain), [])
         XCTAssertEqual(AppAdvice.recommend(analysis(.chromium, labels: 115, coverage: 0.9), current: plain), [])
@@ -107,5 +113,9 @@ final class AppAdaptationTests: XCTestCase {
         XCTAssertTrue(AppBehavior.resolve(bundleID: "t", profiles: profiles, vision: false, prescan: false).enhanced)
         XCTAssertFalse(AppBehavior.decode(#"{"x":{"name":"X"}}"#)["x"]!.enhanced)
         XCTAssertTrue(AppBehavior.decode(#"{"x":{"name":"X","enhanced":"YES"}}"#)["x"]!.enhanced)
+        let spotify = AppBehavior.decode(#"{"s":{"name":"S","launchAccessibility":true}}"#)
+        XCTAssertTrue(spotify["s"]!.launchAccessibility)
+        XCTAssertFalse(spotify["s"]!.isDefault)
+        XCTAssertTrue(AppBehavior.resolve(bundleID: "s", profiles: spotify, vision: false, prescan: false).launchAccessibility)
     }
 }

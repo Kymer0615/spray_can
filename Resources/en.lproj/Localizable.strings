@@ -31,7 +31,7 @@
 "By default, labels move the pointer. Return clicks." = "By default, labels move the pointer. Return clicks.";
 "Cancel" = "Cancel";
 "Center" = "Center";
-"Choose text recognition and scan time for individual apps. Other apps follow General." = "Choose text recognition and scan time for individual apps. Other apps follow General.";
+"Choose text recognition, scan time limit, and accessibility options for individual apps. Other apps follow General." = "Choose text recognition, scan time limit, and accessibility options for individual apps. Other apps follow General.";
 "Click as soon as a label is complete" = "Click as soon as a label is complete";
 "Clicking" = "Clicking";
 "Color coding" = "Color coding";
@@ -46,12 +46,14 @@
 "Enable Screen Recording to use text targeting." = "Enable Screen Recording to use text targeting.";
 "Enhanced accessibility" = "Enhanced accessibility";
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above.";
-"Extended" = "Extended";
-"Extended scan time" = "Extended scan time";
+"Extended (up to 2 s)" = "Extended (up to 2 s)";
+"Extended scan time limit" = "Extended scan time limit";
+"Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons.";
 "Find controls and move, click, drag, and scroll." = "Find controls and move, click, drag, and scroll.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.";
 "Finding targets…" = "Finding targets…";
 "Freestyle" = "Freestyle";
+"Full accessibility at launch" = "Full accessibility at launch";
 "General" = "General";
 "Grant Accessibility to enable navigation." = "Grant Accessibility to enable navigation.";
 "Granted" = "Granted";
@@ -83,7 +85,7 @@
 "Label text" = "Label text";
 "Label tint" = "Label tint";
 "Labels" = "Labels";
-"Labels %lld · Text covered %@ · Scan %lld ms" = "Labels %lld · Text covered %@ · Scan %lld ms";
+"Labels %lld · Text covered %@ · Scan took %lld ms" = "Labels %lld · Text covered %@ · Scan took %lld ms";
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you.";
 "Language" = "Language";
@@ -106,7 +108,8 @@
 "No matching label · Esc clears your input" = "No matching label · Esc clears your input";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No scroll areas · ⇧⌘L for pointer scrolling";
 "No targets found · ⇧⌘K opens the grid" = "No targets found · ⇧⌘K opens the grid";
-"Normal" = "Normal";
+"Normal (up to 0.85 s)" = "Normal (up to 0.85 s)";
+"Not kept: it didn’t help enough (labels %lld → %lld). The app keeps running this way until you quit it." = "Not kept: it didn’t help enough (labels %lld → %lld). The app keeps running this way until you quit it.";
 "Not running" = "Not running";
 "Not running." = "Not running.";
 "OCR label tint" = "OCR label tint";
@@ -116,6 +119,7 @@
 "Only the access needed to navigate." = "Only the access needed to navigate.";
 "Open a window of this app, then analyze again." = "Open a window of this app, then analyze again.";
 "Open System Settings → Privacy & Security to enable access." = "Open System Settings → Privacy & Security to enable access.";
+"Open the app with full accessibility" = "Open the app with full accessibility";
 "Optional. Find text from an on-demand screenshot." = "Optional. Find text from an on-demand screenshot.";
 "Pastel" = "Pastel";
 "Permissions" = "Permissions";
@@ -126,6 +130,7 @@
 "Press Return twice to double-click" = "Press Return twice to double-click";
 "Quiet visuals. Clear destinations." = "Quiet visuals. Clear destinations.";
 "Quit Spray Can" = "Quit Spray Can";
+"Quits and reopens the app now, and again each time you open it, so it builds its full accessibility tree. Playback or unsaved work in the app may be interrupted." = "Quits and reopens the app now, and again each time you open it, so it builds its full accessibility tree. Playback or unsaved work in the app may be interrupted.";
 "Reach your Mac without reaching for the mouse." = "Reach your Mac without reaching for the mouse.";
 "Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once.";
 "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable." = "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable.";
@@ -134,6 +139,7 @@
 "Ready when you are" = "Ready when you are";
 "Reduce Transparency keeps label backgrounds opaque." = "Reduce Transparency keeps label backgrounds opaque.";
 "Remove" = "Remove";
+"Restart App Now" = "Restart App Now";
 "Restart Now" = "Restart Now";
 "Restart Spray Can to use the new language." = "Restart Spray Can to use the new language.";
 "Restore color coding" = "Restore color coding";
@@ -147,8 +153,7 @@
 "Right of the element" = "Right of the element";
 "Same as General (Off)" = "Same as General (Off)";
 "Same as General (On)" = "Same as General (On)";
-"Scan time" = "Scan time";
-"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls.";
+"Scan time limit" = "Scan time limit";
 "Screen Recording" = "Screen Recording";
 "Scroll" = "Scroll";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends.";
@@ -181,6 +186,8 @@
 "Text recognition" = "Text recognition";
 "Text recognition languages" = "Text recognition languages";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "Text targeting unavailable. Accessibility and grid navigation still work.";
+"The app didn’t quit or reopen. Quit it yourself, then try again." = "The app didn’t quit or reopen. Quit it yourself, then try again.";
+"The scan time limit is how long Spray Can waits for an app to report its controls when you activate. Extended helps slow apps such as Finder and System Settings." = "The scan time limit is how long Spray Can waits for an app to report its controls when you activate. Extended helps slow apps such as Finder and System Settings.";
 "The target window changed. Activate again to refresh." = "The target window changed. Activate again to refresh.";
 "This app didn’t accept enhanced accessibility." = "This app didn’t accept enhanced accessibility.";
 "This App: %@" = "This App: %@";
@@ -190,9 +197,9 @@
 "Turned off again: it didn’t help enough (labels %lld → %lld)." = "Turned off again: it didn’t help enough (labels %lld → %lld).";
 "Type shortcut…" = "Type shortcut…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording.";
-"Use Extended scan time" = "Use Extended scan time";
 "Use Liquid Glass" = "Use Liquid Glass";
 "Use on-device text recognition" = "Use on-device text recognition";
+"Use the Extended scan time limit" = "Use the Extended scan time limit";
 "Use vi cursor bindings" = "Use vi cursor bindings";
 "Vertical offset · %lld pt" = "Vertical offset · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active.";

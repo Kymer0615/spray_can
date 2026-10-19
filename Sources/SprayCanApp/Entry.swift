@@ -90,7 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             submenu.addItem(entry)
         }
         submenu.addItem(.separator())
-        let extended = NSMenuItem(title: String(localized: "Extended scan time"), action: #selector(toggleScanTime(_:)), keyEquivalent: "")
+        let extended = NSMenuItem(title: String(localized: "Extended scan time limit"), action: #selector(toggleScanTime(_:)), keyEquivalent: "")
         extended.target = self; extended.representedObject = [id, name]; extended.state = profile.scanTime == .extended ? .on : .off
         submenu.addItem(extended)
         submenu.addItem(.separator())

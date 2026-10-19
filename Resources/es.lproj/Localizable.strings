@@ -31,7 +31,7 @@
 "By default, labels move the pointer. Return clicks." = "De forma predeterminada, las etiquetas mueven el puntero. Return hace clic.";
 "Cancel" = "Cancelar";
 "Center" = "Centro";
-"Choose text recognition and scan time for individual apps. Other apps follow General." = "Elige el reconocimiento de texto y el tiempo de análisis para cada app. Las demás apps siguen la configuración General.";
+"Choose text recognition, scan time limit, and accessibility options for individual apps. Other apps follow General." = "Elige el reconocimiento de texto, el tiempo límite de análisis y las opciones de accesibilidad para cada app. Las demás apps siguen la configuración General.";
 "Click as soon as a label is complete" = "Hacer clic al completar una etiqueta";
 "Clicking" = "Clic";
 "Color coding" = "Colores de etiquetas";
@@ -46,12 +46,14 @@
 "Enable Screen Recording to use text targeting." = "Activa Grabación de pantalla para buscar texto.";
 "Enhanced accessibility" = "Accesibilidad mejorada";
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "La accesibilidad mejorada se prueba primero y se vuelve a desactivar si no ayuda. Puedes cambiar o eliminar cualquier ajuste de app de arriba.";
-"Extended" = "Ampliado";
-"Extended scan time" = "Tiempo de análisis ampliado";
+"Extended (up to 2 s)" = "Ampliado (hasta 2 s)";
+"Extended scan time limit" = "Tiempo límite de análisis ampliado";
+"Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "Pocos controles de esta app son accesibles y aquí no se puede activar nada más. Usa el reconocimiento de texto para su texto y la cuadrícula para los iconos.";
 "Find controls and move, click, drag, and scroll." = "Busca controles y mueve, haz clic, arrastra y desplázate.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "Busca texto que las apps no exponen a la accesibilidad. Las etiquetas OCR marcan la ubicación del texto, que puede no ser clicable. Requiere Grabación de pantalla. Las imágenes permanecen en memoria en este Mac.";
 "Finding targets…" = "Buscando objetivos…";
 "Freestyle" = "Libre";
+"Full accessibility at launch" = "Accesibilidad completa al abrir";
 "General" = "General";
 "Grant Accessibility to enable navigation." = "Concede Accesibilidad para activar la navegación.";
 "Granted" = "Concedido";
@@ -83,7 +85,7 @@
 "Label text" = "Texto de etiqueta";
 "Label tint" = "Tinte de etiqueta";
 "Labels" = "Etiquetas";
-"Labels %lld · Text covered %@ · Scan %lld ms" = "Etiquetas %lld · Texto cubierto %@ · Análisis %lld ms";
+"Labels %lld · Text covered %@ · Scan took %lld ms" = "Etiquetas %lld · Texto cubierto %@ · Análisis en %lld ms";
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "Las etiquetas junto a un elemento lo dejan visible. Los desplazamientos mueven todas las etiquetas; los valores positivos las mueven a la derecha y hacia abajo. Las etiquetas apiñadas se reubican para seguir siendo legibles. Las de la cuadrícula quedan centradas en su celda.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "Las etiquetas se colocan junto al texto de su elemento. La opacidad se aplica a los fondos normales; el cristal y Reducir transparencia la gestionan por ti.";
 "Language" = "Idioma";
@@ -106,7 +108,8 @@
 "No matching label · Esc clears your input" = "Ninguna etiqueta coincide · Esc borra la entrada";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No hay áreas desplazables · ⇧⌘L para desplazar con el puntero";
 "No targets found · ⇧⌘K opens the grid" = "No se encontraron objetivos · ⇧⌘K abre la cuadrícula";
-"Normal" = "Normal";
+"Normal (up to 0.85 s)" = "Normal (hasta 0,85 s)";
+"Not kept: it didn’t help enough (labels %lld → %lld). The app keeps running this way until you quit it." = "No se mantiene: no ayudó lo suficiente (etiquetas %lld → %lld). La app sigue funcionando así hasta que la cierres.";
 "Not running" = "No activa";
 "Not running." = "No está abierta.";
 "OCR label tint" = "Tinte de etiqueta OCR";
@@ -116,6 +119,7 @@
 "Only the access needed to navigate." = "Solo el acceso necesario para navegar.";
 "Open a window of this app, then analyze again." = "Abre una ventana de esta app y vuelve a analizar.";
 "Open System Settings → Privacy & Security to enable access." = "Abre Ajustes del Sistema → Privacidad y seguridad para conceder acceso.";
+"Open the app with full accessibility" = "Abrir la app con accesibilidad completa";
 "Optional. Find text from an on-demand screenshot." = "Opcional. Busca texto en una captura bajo demanda.";
 "Pastel" = "Pastel";
 "Permissions" = "Permisos";
@@ -126,6 +130,7 @@
 "Press Return twice to double-click" = "Pulsa Retorno dos veces para hacer doble clic";
 "Quiet visuals. Clear destinations." = "Visuales discretos. Destinos claros.";
 "Quit Spray Can" = "Salir de Spray Can";
+"Quits and reopens the app now, and again each time you open it, so it builds its full accessibility tree. Playback or unsaved work in the app may be interrupted." = "Cierra y vuelve a abrir la app ahora, y de nuevo cada vez que la abras, para que cree su árbol de accesibilidad completo. Puede interrumpir la reproducción o el trabajo sin guardar en la app.";
 "Reach your Mac without reaching for the mouse." = "Llega a todo tu Mac sin tocar el ratón.";
 "Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "Lee la ventana activa aproximadamente un segundo después de cambiar a ella, solo cuando el Mac está conectado a la corriente. Así las etiquetas de texto aparecen al instante.";
 "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable." = "Lee la ventana con reconocimiento de texto en el dispositivo al activar. Requiere Grabación de pantalla; las etiquetas de texto marcan texto, que puede no ser clicable.";
@@ -134,6 +139,7 @@
 "Ready when you are" = "Listo cuando quieras";
 "Reduce Transparency keeps label backgrounds opaque." = "«Reducir transparencia» mantiene opacos los fondos de las etiquetas.";
 "Remove" = "Eliminar";
+"Restart App Now" = "Reiniciar la app ahora";
 "Restart Now" = "Reiniciar ahora";
 "Restart Spray Can to use the new language." = "Reinicia Spray Can para usar el nuevo idioma.";
 "Restore color coding" = "Restaurar colores de etiquetas";
@@ -147,8 +153,7 @@
 "Right of the element" = "A la derecha del elemento";
 "Same as General (Off)" = "Igual que General (desactivado)";
 "Same as General (On)" = "Igual que General (activado)";
-"Scan time" = "Tiempo de análisis";
-"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "El tiempo de análisis Ampliado da más tiempo a las apps lentas, como Finder y Ajustes del Sistema, para mostrar sus controles.";
+"Scan time limit" = "Tiempo límite de análisis";
 "Screen Recording" = "Grabación de pantalla";
 "Scroll" = "Desplazar";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "Los eventos de desplazamiento van al puntero. «No mover» desplaza lo que está debajo; las demás opciones lo llevan al área hasta salir del modo de desplazamiento.";
@@ -181,6 +186,8 @@
 "Text recognition" = "Reconocimiento de texto";
 "Text recognition languages" = "Idiomas de reconocimiento de texto";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "Búsqueda de texto no disponible. La Accesibilidad y la cuadrícula siguen funcionando.";
+"The app didn’t quit or reopen. Quit it yourself, then try again." = "La app no se cerró o no se volvió a abrir. Ciérrala tú y vuelve a intentarlo.";
+"The scan time limit is how long Spray Can waits for an app to report its controls when you activate. Extended helps slow apps such as Finder and System Settings." = "El tiempo límite de análisis es cuánto espera Spray Can a que una app muestre sus controles al activarlo. Ampliado ayuda a apps lentas como Finder y Ajustes del Sistema.";
 "The target window changed. Activate again to refresh." = "La ventana de destino cambió. Activa de nuevo para actualizar.";
 "This app didn’t accept enhanced accessibility." = "Esta app no aceptó la accesibilidad mejorada.";
 "This App: %@" = "Esta app: %@";
@@ -190,9 +197,9 @@
 "Turned off again: it didn’t help enough (labels %lld → %lld)." = "Desactivada de nuevo: no ayudó lo suficiente (etiquetas %lld → %lld).";
 "Type shortcut…" = "Escribe un atajo…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "Usa un modificador con una letra o un número. Haz clic en un atajo para grabar uno nuevo. Escape cancela la grabación.";
-"Use Extended scan time" = "Usar el tiempo de análisis ampliado";
 "Use Liquid Glass" = "Usar Liquid Glass";
 "Use on-device text recognition" = "Usar reconocimiento de texto en el dispositivo";
+"Use the Extended scan time limit" = "Usar el tiempo límite de análisis ampliado";
 "Use vi cursor bindings" = "Usar teclas de cursor de vi";
 "Vertical offset · %lld pt" = "Desplazamiento vertical · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "El modo vi reserva HJKL para el movimiento y las quita de las etiquetas. Las letras de las etiquetas siempre usan las posiciones físicas del teclado estadounidense, incluso con un IME activo.";

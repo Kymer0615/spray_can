@@ -13,7 +13,8 @@ final class AppController: ObservableObject {
     let ocr = OCRProvider()
     let accessibilityChanges = AccessibilityChanges()
     let boost = AccessibilityBoost()
-    lazy var analyzer = AppAnalyzer(boost: boost)
+    let relauncher = AccessibilityRelauncher()
+    lazy var analyzer = AppAnalyzer(boost: boost, relauncher: relauncher)
     private lazy var prescan: TextPrescanner = TextPrescanner(
         frontWindow: { [weak self] (pid: pid_t) -> CGRect? in self?.frontWindow(of: pid) },
         screens: { [weak self] () -> [CGRect] in self?.overlay.quartzScreens ?? [] })

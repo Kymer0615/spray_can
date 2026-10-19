@@ -24,8 +24,13 @@ public struct AppProfile: Codable, Equatable {
     /// Ask the app for its full accessibility tree (`AXEnhancedUserInterface`), with nested
     /// pressable wrappers pruned from the labels. Only offered for web-based apps.
     public var enhanced: Bool
-    public init(name: String, ocr: AppOverride = .inherit, prescan: AppOverride = .inherit, scanTime: ScanTime = .normal, enhanced: Bool = false) {
-        self.name = name; self.ocr = ocr; self.prescan = prescan; self.scanTime = scanTime; self.enhanced = enhanced
+    /// Open the app with `--force-renderer-accessibility`, which makes Chromium-based apps (CEF:
+    /// Spotify) build their full accessibility tree. Spray Can relaunches the app once when it opens.
+    public var launchAccessibility: Bool
+    public init(name: String, ocr: AppOverride = .inherit, prescan: AppOverride = .inherit, scanTime: ScanTime = .normal,
+                enhanced: Bool = false, launchAccessibility: Bool = false) {
+        self.name = name; self.ocr = ocr; self.prescan = prescan; self.scanTime = scanTime
+        self.enhanced = enhanced; self.launchAccessibility = launchAccessibility
     }
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
@@ -34,11 +39,15 @@ public struct AppProfile: Codable, Equatable {
         prescan = (try? values.decodeIfPresent(AppOverride.self, forKey: .prescan)) ?? .inherit
         scanTime = (try? values.decodeIfPresent(ScanTime.self, forKey: .scanTime)) ?? .normal
         // Command-line defaults are property lists, where a flag arrives as text ("YES", "1").
-        enhanced = (try? values.decodeIfPresent(Bool.self, forKey: .enhanced))
-            ?? (try? values.decodeIfPresent(String.self, forKey: .enhanced)).flatMap { ["1", "yes", "true"].contains($0.lowercased()) } ?? false
+        func flag(_ key: CodingKeys) -> Bool {
+            (try? values.decodeIfPresent(Bool.self, forKey: key))
+                ?? (try? values.decodeIfPresent(String.self, forKey: key)).flatMap { ["1", "yes", "true"].contains($0.lowercased()) } ?? false
+        }
+        enhanced = flag(.enhanced)
+        launchAccessibility = flag(.launchAccessibility)
     }
     /// Nothing differs from the global settings.
-    public var isDefault: Bool { ocr == .inherit && prescan == .inherit && scanTime == .normal && !enhanced }
+    public var isDefault: Bool { ocr == .inherit && prescan == .inherit && scanTime == .normal && !enhanced && !launchAccessibility }
 }
 
 /// What Spray Can does in one app after applying its profile to the global settings.
@@ -47,8 +56,9 @@ public struct AppBehavior: Equatable {
     public var prescan: Bool
     public var scanTime: ScanTime
     public var enhanced: Bool
-    public init(ocr: Bool, prescan: Bool, scanTime: ScanTime, enhanced: Bool = false) {
-        self.ocr = ocr; self.prescan = prescan; self.scanTime = scanTime; self.enhanced = enhanced
+    public var launchAccessibility: Bool
+    public init(ocr: Bool, prescan: Bool, scanTime: ScanTime, enhanced: Bool = false, launchAccessibility: Bool = false) {
+        self.ocr = ocr; self.prescan = prescan; self.scanTime = scanTime; self.enhanced = enhanced; self.launchAccessibility = launchAccessibility
     }
 
     public static func resolve(bundleID: String?, profiles: [String: AppProfile], vision: Bool, prescan: Bool) -> AppBehavior {
@@ -56,7 +66,8 @@ public struct AppBehavior: Equatable {
         let ocr = profile?.ocr.resolve(vision) ?? vision
         // Reading ahead only makes sense where text is read at all.
         let ahead = ocr && (profile?.prescan.resolve(prescan) ?? prescan)
-        return AppBehavior(ocr: ocr, prescan: ahead, scanTime: profile?.scanTime ?? .normal, enhanced: profile?.enhanced ?? false)
+        return AppBehavior(ocr: ocr, prescan: ahead, scanTime: profile?.scanTime ?? .normal,
+                           enhanced: profile?.enhanced ?? false, launchAccessibility: profile?.launchAccessibility ?? false)
     }
 
     /// Profiles as saved: a JSON object keyed by bundle identifier. Unreadable data means no profiles.
@@ -83,9 +94,12 @@ public enum AppKind: String, Codable {
         if has("FlutterMacOS") { return .flutter }
         return .native
     }
-    /// Web-based apps that may answer `AXEnhancedUserInterface` with a fuller tree. Electron already
-    /// exposes its tree when asked for a role, so it is not offered there.
-    public var enhanceable: Bool { [.chromium, .cef, .webView2].contains(self) }
+    /// Web-based apps that may answer `AXEnhancedUserInterface` with a fuller tree (Teams). Electron
+    /// already exposes its tree when asked for a role; CEF (Spotify) accepts the switch but ignores it.
+    public var enhanceable: Bool { [.chromium, .webView2].contains(self) }
+    /// Chromium-based apps that build their full tree when launched with `--force-renderer-accessibility`
+    /// (Spotify: 3 → 161 labels). Electron is left out: editors such as VS Code may switch to screen-reader mode.
+    public var relaunchable: Bool { [.cef, .chromium].contains(self) }
 }
 
 /// One app's read-only measurement: how many labels Spray Can finds, and how much visible text they cover.
@@ -104,6 +118,9 @@ public struct AppAnalysis: Equatable {
         self.scanMilliseconds = scanMilliseconds; self.truncated = truncated; self.enhanceSupported = enhanceSupported
     }
 
+    /// Labels already cover most visible text.
+    public var readsWell: Bool { coverage.map { $0 >= 0.6 } ?? (labels >= 10) }
+
     /// Share of `lines` whose center lies inside (or within a few points of) some target.
     public static func coverage(lines: [CGRect], targets: [CGRect]) -> Double? {
         guard !lines.isEmpty else { return nil }
@@ -114,13 +131,14 @@ public struct AppAnalysis: Equatable {
 
 /// Adaptations Spray Can can suggest after analyzing an app.
 public enum AppAdvice: String, CaseIterable, Codable {
-    case enhance, ocr, extendScan
+    case relaunch, enhance, ocr, extendScan
 
     /// Nothing is suggested when labels already cover most visible text, or for what `current` already does.
     public static func recommend(_ analysis: AppAnalysis, current: AppBehavior) -> [AppAdvice] {
         var advice: [AppAdvice] = []
         let coverage = analysis.coverage
-        let poor = coverage.map { $0 < 0.6 } ?? (analysis.labels < 10)
+        let poor = !analysis.readsWell
+        if analysis.kind.relaunchable && poor && !current.launchAccessibility { advice.append(.relaunch) }
         if analysis.kind.enhanceable && analysis.enhanceSupported && poor && !current.enhanced { advice.append(.enhance) }
         // Little of the visible text is reachable: reading it is the dependable fallback. Some apps
         // (Spotify) accept the enhanced switch but ignore it, so this is offered alongside.

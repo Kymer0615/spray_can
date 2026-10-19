@@ -1,5 +1,21 @@
 # Changelog
 
+## Spray Can 0.1.20
+
+- **Full accessibility at launch** for Chromium-based apps such as Spotify (CEF), which ignore enhanced accessibility: Spray Can quits the app and opens it with `--force-renderer-accessibility`, and does so again whenever you open it normally. In Spotify, labels went from 3 to 166 and covered text from 0% to 99%. App analysis suggests it for poorly covered CEF and Chromium apps, tries it after you confirm, and keeps it only if it helps.
+- App analysis no longer says "Reads well" when labels cover little of an app's text but nothing more can be turned on; it explains that text recognition and the grid remain.
+- "Scan time" is now **Scan time limit**, with its seconds shown (Normal up to 0.85 s, Extended up to 2 s), and analysis shows how long the scan took.
+- Enhanced accessibility is no longer offered for CEF apps, which accept but ignore it.
+
+Validation: 65 core tests and a localization check passed. Spotify opened normally: analysis suggested full accessibility at launch; the trial quit and reopened it with the flag and kept the setting (labels 3 → 166, text covered 0% → 99%). With the setting on, Spotify opened normally was relaunched with the flag within seconds. Apps page rendered in Chinese with example results. The Settings flow in the installed copy was not exercised while it was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.19
 
 - **App analysis** in Settings → Apps: choose running apps and analyze them. Analysis only reads: it counts the labels Spray Can finds, measures how much visible text they cover (with Screen Recording), and times the scan. Each app gets suggestions with their risks: enhanced accessibility for web-based apps (WebView2, Chromium, CEF), text recognition for this app, or Extended scan time. Nothing changes until you tick suggestions and confirm.

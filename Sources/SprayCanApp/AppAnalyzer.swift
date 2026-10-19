@@ -17,10 +17,11 @@ final class AppAnalyzer: ObservableObject {
     @Published private(set) var busy = false
     private let accessibility = AccessibilityProvider()
     private let boost: AccessibilityBoost
+    private let relauncher: AccessibilityRelauncher
     private let settings = Settings.shared
     private var generation = 1_000_000
 
-    init(boost: AccessibilityBoost) { self.boost = boost }
+    init(boost: AccessibilityBoost, relauncher: AccessibilityRelauncher) { self.boost = boost; self.relauncher = relauncher }
     /// Documentation renders show example results without analyzing real apps.
     func showExamples(_ examples: [String: Entry]) { entries = examples }
 
@@ -52,6 +53,7 @@ final class AppAnalyzer: ObservableObject {
         guard let entry = entries[id] else { return }
         if advice.contains(.ocr) { settings.updateProfile(id, name: entry.name) { $0.ocr = .on } }
         if advice.contains(.extendScan) { settings.updateProfile(id, name: entry.name) { $0.scanTime = .extended } }
+        if advice.contains(.relaunch) { relaunch(id, entry: entry, completion: completion); return }
         guard advice.contains(.enhance), let before = entry.analysis,
               let app = NSRunningApplication.runningApplications(withBundleIdentifier: id).first else {
             entries[id]?.outcome = String(localized: "Applied."); completion(); return
@@ -78,6 +80,43 @@ final class AppAnalyzer: ObservableObject {
                 completion()
             }
         }
+    }
+
+    /// Quit and reopen the app with full accessibility, wait for its window, and keep the setting only if it helps.
+    private func relaunch(_ id: String, entry: Entry, completion: @escaping () -> Void) {
+        guard let before = entry.analysis, let app = NSRunningApplication.runningApplications(withBundleIdentifier: id).first else { completion(); return }
+        busy = true
+        relauncher.relaunch(app) { [weak self] reopened in
+            guard let self else { return }
+            guard reopened != nil else {
+                self.busy = false
+                self.entries[id]?.outcome = String(localized: "The app didn’t quit or reopen. Quit it yourself, then try again.")
+                completion(); return
+            }
+            self.whenWindowAppears(id, waited: 0) {
+                self.measure(id, prune: false, lines: self.lastLines[id]) { [weak self] after, _ in
+                    guard let self else { return }
+                    self.busy = false
+                    guard let analysis = after.analysis, Enhancement.worthKeeping(before: before, after: analysis) else {
+                        self.entries[id]?.outcome = String(localized: "Not kept: it didn’t help enough (labels \(before.labels) → \(after.analysis?.labels ?? 0)). The app keeps running this way until you quit it.")
+                        completion(); return
+                    }
+                    self.settings.updateProfile(id, name: entry.name) { $0.launchAccessibility = true }
+                    self.entries[id]?.analysis = analysis
+                    self.entries[id]?.advice = AppAdvice.recommend(analysis, current: self.settings.behavior(for: id))
+                    self.entries[id]?.outcome = String(localized: "Kept: labels \(before.labels) → \(analysis.labels), text covered \(Self.percent(before.coverage)) → \(Self.percent(analysis.coverage)).")
+                    completion()
+                }
+            }
+        }
+    }
+    /// A relaunched app needs its window, then a moment to build its tree.
+    private func whenWindowAppears(_ id: String, waited: TimeInterval, then: @escaping () -> Void) {
+        if let pid = NSRunningApplication.runningApplications(withBundleIdentifier: id).first?.processIdentifier, Self.mainWindow(of: pid) != nil {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) { then() }; return
+        }
+        guard waited < 20 else { then(); return }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { self.whenWindowAppears(id, waited: waited + 0.5, then: then) }
     }
 
     static func percent(_ value: Double?) -> String { value.map { "\(Int(($0 * 100).rounded()))%" } ?? "–" }

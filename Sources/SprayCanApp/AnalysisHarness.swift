@@ -1,14 +1,19 @@
 import AppKit
 import SprayCanCore
 
-/// Debug check for app analysis: `SprayCan --analyze-apps <id,id…> [--try-enhance <id>]`. Prints the
-/// feasibility table, optionally tries enhanced accessibility on one app, and always restores it.
+/// Debug check for app analysis: `SprayCan --analyze-apps <id,id…> [--try-enhance <id> | --try-relaunch <id>]`.
+/// Prints the feasibility table, optionally tries one adaptation, and always turns enhanced mode off again.
 enum AnalysisHarness {
     static func run(_ analyzer: AppAnalyzer, boost: AccessibilityBoost) {
         let arguments = ProcessInfo.processInfo.arguments
         func value(_ flag: String) -> String? { arguments.firstIndex(of: flag).flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil } }
+        // `--watch-launches <seconds>`: stay up so profiles with full accessibility at launch relaunch apps opened meanwhile.
+        if let seconds = value("--watch-launches").flatMap(Double.init) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { NSApp.terminate(nil) }; return
+        }
         let ids = (value("--analyze-apps") ?? "").split(separator: ",").map(String.init)
-        let trial = value("--try-enhance")
+        let trial = value("--try-enhance") ?? value("--try-relaunch")
+        let advice: AppAdvice = value("--try-relaunch") != nil ? .relaunch : .enhance
         analyzer.analyze(ids)
         wait(analyzer) {
             print("| App | Type | Labels | Text covered | Scan | Suggestions |")
@@ -20,11 +25,12 @@ enum AnalysisHarness {
             }
             guard let trial, let pid = NSRunningApplication.runningApplications(withBundleIdentifier: trial).first?.processIdentifier else { NSApp.terminate(nil); return }
             print("Before trial, enhanced: \(AccessibilityBoost.isOn(pid))")
-            analyzer.apply(trial, [.enhance]) {
+            analyzer.apply(trial, [advice]) {
                 print("Outcome: \(analyzer.entries[trial]?.outcome ?? "-")")
-                print("During, enhanced: \(AccessibilityBoost.isOn(pid))")
+                let now = NSRunningApplication.runningApplications(withBundleIdentifier: trial).first?.processIdentifier ?? pid
+                print("During, enhanced: \(AccessibilityBoost.isOn(now)); launched with full accessibility: \(AccessibilityRelauncher.hasFlag(now))")
                 boost.restoreAll()
-                print("After restore, enhanced: \(AccessibilityBoost.isOn(pid))")
+                print("After restore, enhanced: \(AccessibilityBoost.isOn(now))")
                 NSApp.terminate(nil)
             }
         }

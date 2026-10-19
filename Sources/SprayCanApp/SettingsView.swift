@@ -106,7 +106,7 @@ struct SettingsView: View {
                 if !loginError.isEmpty { Text(loginError).font(.caption).foregroundStyle(.red) }
             }
         case "Apps":
-            Text("Choose text recognition and scan time for individual apps. Other apps follow General.").foregroundStyle(.secondary)
+            Text("Choose text recognition, scan time limit, and accessibility options for individual apps. Other apps follow General.").foregroundStyle(.secondary)
             if settings.appProfiles.isEmpty {
                 Text("No app settings yet. Add an app, or use This App in the menu bar while you work in it.").font(.callout).foregroundStyle(.secondary)
             }
@@ -118,7 +118,7 @@ struct SettingsView: View {
                     Button(app.name) { settings.updateProfile(app.id, name: app.name) { _ in } }
                 }
             }.fixedSize()
-            Text("Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls.").font(.caption).foregroundStyle(.secondary)
+            Text("The scan time limit is how long Spray Can waits for an app to report its controls when you activate. Extended helps slow apps such as Finder and System Settings.").font(.caption).foregroundStyle(.secondary)
             AppAnalysisSection(analyzer: controller.analyzer)
         case "Shortcuts":
             Text("Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording.").foregroundStyle(.secondary)
@@ -238,9 +238,17 @@ struct SettingsView: View {
                         Text("Off").tag(AppOverride.off)
                     }
                 }
-                Picker("Scan time", selection: binding(\.scanTime)) {
-                    Text("Normal").tag(ScanTime.normal)
-                    Text("Extended").tag(ScanTime.extended)
+                Picker("Scan time limit", selection: binding(\.scanTime)) {
+                    Text("Normal (up to 0.85 s)").tag(ScanTime.normal)
+                    Text("Extended (up to 2 s)").tag(ScanTime.extended)
+                }
+                if AppAnalyzer.kind(of: id).relaunchable || profile.launchAccessibility {
+                    Toggle("Full accessibility at launch", isOn: binding(\.launchAccessibility))
+                    Text(AppAdvice.relaunch.risk).font(.caption).foregroundStyle(.secondary)
+                    if profile.launchAccessibility, let app = NSRunningApplication.runningApplications(withBundleIdentifier: id).first,
+                       !AccessibilityRelauncher.hasFlag(app.processIdentifier) {
+                        Button("Restart App Now") { controller.relauncher.relaunch(app) { _ in } }
+                    }
                 }
                 if AppAnalyzer.kind(of: id).enhanceable || profile.enhanced {
                     Toggle("Enhanced accessibility", isOn: binding(\.enhanced))
@@ -388,13 +396,15 @@ final class RecorderButton: NSButton {
 extension AppAdvice {
     var title: String {
         switch self {
+        case .relaunch: return String(localized: "Open the app with full accessibility")
         case .enhance: return String(localized: "Turn on enhanced accessibility")
         case .ocr: return String(localized: "Turn on text recognition for this app")
-        case .extendScan: return String(localized: "Use Extended scan time")
+        case .extendScan: return String(localized: "Use the Extended scan time limit")
         }
     }
     var risk: String {
         switch self {
+        case .relaunch: return String(localized: "Quits and reopens the app now, and again each time you open it, so it builds its full accessibility tree. Playback or unsaved work in the app may be interrupted.")
         case .enhance: return String(localized: "Asks the app for its full accessibility tree, and keeps one label per row. The app stays in this mode until Spray Can turns it off or quits; window managers may move its windows more slowly.")
         case .ocr: return String(localized: "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable.")
         case .extendScan: return String(localized: "Waits up to 2 s instead of 0.85 s for the app’s controls, so labels may appear later.")
@@ -472,8 +482,11 @@ struct AppAnalysisSection: View {
                 }
                 if let problem = entry.problem { Text(problem).font(.callout).foregroundStyle(.secondary) }
                 if let analysis = entry.analysis {
-                    Text("Labels \(analysis.labels) · Text covered \(AppAnalyzer.percent(analysis.coverage)) · Scan \(analysis.scanMilliseconds) ms").font(.callout).monospacedDigit()
-                    if entry.advice.isEmpty && entry.outcome == nil { Text("Reads well. No changes needed.").font(.callout).foregroundStyle(.secondary) }
+                    Text("Labels \(analysis.labels) · Text covered \(AppAnalyzer.percent(analysis.coverage)) · Scan took \(analysis.scanMilliseconds) ms").font(.callout).monospacedDigit()
+                    if entry.advice.isEmpty && entry.outcome == nil {
+                        Text(analysis.readsWell ? "Reads well. No changes needed." : "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons.")
+                            .font(.callout).foregroundStyle(.secondary)
+                    }
                     ForEach(entry.advice, id: \.self) { advice in
                         Toggle(isOn: Binding(get: { accepted[id, default: []].contains(advice) },
                                              set: { if $0 { accepted[id, default: []].insert(advice) } else { accepted[id]?.remove(advice) } })) {

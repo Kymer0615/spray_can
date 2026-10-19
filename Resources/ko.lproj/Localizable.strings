@@ -31,7 +31,7 @@
 "By default, labels move the pointer. Return clicks." = "기본적으로 레이블은 포인터를 이동합니다. Return을 누르면 클릭합니다.";
 "Cancel" = "취소";
 "Center" = "가운데";
-"Choose text recognition and scan time for individual apps. Other apps follow General." = "앱별로 텍스트 인식과 스캔 시간을 선택합니다. 다른 앱은 일반 설정을 따릅니다.";
+"Choose text recognition, scan time limit, and accessibility options for individual apps. Other apps follow General." = "앱별로 텍스트 인식, 스캔 제한 시간, 손쉬운 사용 옵션을 선택합니다. 다른 앱은 일반 설정을 따릅니다.";
 "Click as soon as a label is complete" = "레이블 입력이 끝나면 바로 클릭";
 "Clicking" = "클릭";
 "Color coding" = "색상 구분";
@@ -46,12 +46,14 @@
 "Enable Screen Recording to use text targeting." = "텍스트 타기팅을 사용하려면 화면 기록을 허용하십시오.";
 "Enhanced accessibility" = "향상된 손쉬운 사용";
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "향상된 손쉬운 사용은 먼저 시험해 보고 도움이 되지 않으면 다시 끕니다. 위의 앱 설정은 언제든지 변경하거나 제거할 수 있습니다.";
-"Extended" = "연장";
-"Extended scan time" = "스캔 시간 연장";
+"Extended (up to 2 s)" = "연장(최대 2초)";
+"Extended scan time limit" = "스캔 제한 시간 연장";
+"Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "이 앱에서 접근할 수 있는 컨트롤이 적고, 여기에서 더 켤 수 있는 항목이 없습니다. 텍스트에는 텍스트 인식을, 아이콘에는 격자를 사용하세요.";
 "Find controls and move, click, drag, and scroll." = "컨트롤을 찾아 이동, 클릭, 드래그, 스크롤합니다.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "앱이 손쉬운 사용에 노출하지 않는 텍스트를 찾습니다. OCR 레이블은 텍스트 위치를 표시하며, 클릭할 수 없는 위치일 수도 있습니다. 화면 기록 권한이 필요합니다. 이미지는 이 Mac의 메모리에만 머뭅니다.";
 "Finding targets…" = "대상 찾는 중…";
 "Freestyle" = "자유 이동";
+"Full accessibility at launch" = "실행 시 전체 손쉬운 사용";
 "General" = "일반";
 "Grant Accessibility to enable navigation." = "탐색을 사용하려면 손쉬운 사용 권한을 허용하십시오.";
 "Granted" = "허용됨";
@@ -83,7 +85,7 @@
 "Label text" = "레이블 텍스트";
 "Label tint" = "레이블 색조";
 "Labels" = "레이블";
-"Labels %lld · Text covered %@ · Scan %lld ms" = "레이블 %lld · 텍스트 포함률 %@ · 스캔 %lld ms";
+"Labels %lld · Text covered %@ · Scan took %lld ms" = "레이블 %lld · 텍스트 포함률 %@ · 스캔 %lld ms";
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "레이블을 요소 옆에 두면 요소가 가려지지 않습니다. 오프셋은 모든 레이블을 이동하며, 양수 값은 오른쪽과 아래로 이동합니다. 밀집된 레이블은 읽기 쉽도록 자동으로 비켜납니다. 그리드 레이블은 셀 중앙에 유지됩니다.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "레이블은 요소의 텍스트 옆에 표시됩니다. 불투명도는 일반 배경에 적용되며, 글래스와 '투명도 줄이기'에서는 자동으로 관리됩니다.";
 "Language" = "언어";
@@ -106,7 +108,8 @@
 "No matching label · Esc clears your input" = "일치하는 레이블 없음 · Esc로 입력 지우기";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "스크롤 영역 없음 · ⇧⌘L로 포인터 스크롤";
 "No targets found · ⇧⌘K opens the grid" = "대상을 찾을 수 없음 · ⇧⌘K로 그리드 열기";
-"Normal" = "보통";
+"Normal (up to 0.85 s)" = "보통(최대 0.85초)";
+"Not kept: it didn’t help enough (labels %lld → %lld). The app keeps running this way until you quit it." = "유지하지 않음: 충분히 도움이 되지 않았습니다(레이블 %lld → %lld). 앱을 종료할 때까지 이 상태로 실행됩니다.";
 "Not running" = "실행 중 아님";
 "Not running." = "실행 중이 아닙니다.";
 "OCR label tint" = "OCR 레이블 색조";
@@ -116,6 +119,7 @@
 "Only the access needed to navigate." = "탐색에 필요한 권한만 사용합니다.";
 "Open a window of this app, then analyze again." = "이 앱의 윈도우를 연 다음 다시 분석하세요.";
 "Open System Settings → Privacy & Security to enable access." = "시스템 설정 → 개인정보 보호 및 보안에서 접근을 허용하십시오.";
+"Open the app with full accessibility" = "전체 손쉬운 사용으로 앱 열기";
 "Optional. Find text from an on-demand screenshot." = "선택 사항. 필요할 때 찍는 스크린샷에서 텍스트를 찾습니다.";
 "Pastel" = "파스텔";
 "Permissions" = "권한";
@@ -126,6 +130,7 @@
 "Press Return twice to double-click" = "Return을 두 번 눌러 이중 클릭";
 "Quiet visuals. Clear destinations." = "차분한 화면. 명확한 목적지.";
 "Quit Spray Can" = "Spray Can 종료";
+"Quits and reopens the app now, and again each time you open it, so it builds its full accessibility tree. Playback or unsaved work in the app may be interrupted." = "지금 앱을 종료한 뒤 다시 열고, 이후 열 때마다 같은 방식으로 열어 전체 손쉬운 사용 트리를 만들게 합니다. 앱의 재생이나 저장하지 않은 작업이 중단될 수 있습니다.";
 "Reach your Mac without reaching for the mouse." = "마우스에 손대지 않고 Mac의 모든 곳에.";
 "Reads the focused window about a second after you switch to it, only when connected to power. Text labels then appear at once." = "윈도우로 전환하고 약 1초 후에 해당 윈도우를 읽습니다(전원에 연결된 경우에만). 텍스트 레이블이 바로 표시됩니다.";
 "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable." = "활성화할 때 기기 내 텍스트 인식으로 윈도우를 읽습니다. 화면 기록이 필요하며, 텍스트 레이블은 텍스트 위치를 표시하므로 클릭할 수 없을 수도 있습니다.";
@@ -134,6 +139,7 @@
 "Ready when you are" = "언제든 준비 완료";
 "Reduce Transparency keeps label backgrounds opaque." = "투명도 줄이기가 켜져 있으면 레이블 배경이 불투명하게 유지됩니다.";
 "Remove" = "제거";
+"Restart App Now" = "지금 앱 재시작";
 "Restart Now" = "지금 재시작";
 "Restart Spray Can to use the new language." = "새 언어를 사용하려면 Spray Can을 재시작하십시오.";
 "Restore color coding" = "색상 구분 설정 복원";
@@ -147,8 +153,7 @@
 "Right of the element" = "요소 오른쪽";
 "Same as General (Off)" = "일반과 동일(끔)";
 "Same as General (On)" = "일반과 동일(켬)";
-"Scan time" = "스캔 시간";
-"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "스캔 시간을 연장으로 설정하면 Finder나 시스템 설정처럼 응답이 느린 앱이 컨트롤을 알려 줄 시간이 늘어납니다.";
+"Scan time limit" = "스캔 제한 시간";
 "Screen Recording" = "화면 기록";
 "Scroll" = "스크롤";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "스크롤 이벤트는 포인터 위치로 전달됩니다. '움직이지 않음'은 포인터 아래를 스크롤하고, 다른 선택은 스크롤 모드 동안 포인터를 영역 안으로 옮깁니다.";
@@ -181,6 +186,8 @@
 "Text recognition" = "텍스트 인식";
 "Text recognition languages" = "텍스트 인식 언어";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "텍스트 타기팅을 사용할 수 없습니다. 손쉬운 사용 및 그리드 탐색은 계속 작동합니다.";
+"The app didn’t quit or reopen. Quit it yourself, then try again." = "앱이 종료되지 않았거나 다시 열리지 않았습니다. 직접 종료한 다음 다시 시도하세요.";
+"The scan time limit is how long Spray Can waits for an app to report its controls when you activate. Extended helps slow apps such as Finder and System Settings." = "스캔 제한 시간은 활성화할 때 Spray Can이 앱의 컨트롤 정보를 기다리는 시간입니다. 연장은 Finder나 시스템 설정처럼 느린 앱에 도움이 됩니다.";
 "The target window changed. Activate again to refresh." = "대상 윈도우가 변경되었습니다. 다시 활성화하여 새로 고치십시오.";
 "This app didn’t accept enhanced accessibility." = "이 앱이 향상된 손쉬운 사용을 받아들이지 않았습니다.";
 "This App: %@" = "이 앱: %@";
@@ -190,9 +197,9 @@
 "Turned off again: it didn’t help enough (labels %lld → %lld)." = "다시 껐습니다: 충분히 도움이 되지 않았습니다(레이블 %lld → %lld).";
 "Type shortcut…" = "단축키 입력…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "보조 키와 문자 또는 숫자를 함께 사용하십시오. 단축키를 클릭하면 새 단축키를 기록합니다. Esc를 누르면 기록이 취소됩니다.";
-"Use Extended scan time" = "스캔 시간 연장 사용";
 "Use Liquid Glass" = "Liquid Glass 사용";
 "Use on-device text recognition" = "기기 내 텍스트 인식 사용";
+"Use the Extended scan time limit" = "스캔 제한 시간 연장 사용";
 "Use vi cursor bindings" = "vi 커서 키 사용";
 "Vertical offset · %lld pt" = "세로 오프셋 · %lld pt";
 "Vi mode reserves HJKL for movement and removes them from labels. Label letters always use physical US key positions, including when an IME is active." = "vi 모드에서는 HJKL을 이동용으로 예약하고 레이블에서 제외합니다. 레이블 문자는 IME가 활성화되어 있어도 항상 미국 자판의 물리적 키 위치를 사용합니다.";
