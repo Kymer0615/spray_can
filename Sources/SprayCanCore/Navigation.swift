@@ -35,6 +35,27 @@ public struct DiscoveryIdentity<Key: Hashable> {
     }
 }
 public enum TargetCollection {
+    /// Real controls, which always keep their own label in an enhanced tree.
+    static let controlRoles: Set<String> = ["AXButton", "AXCheckBox", "AXRadioButton", "AXPopUpButton", "AXMenuButton", "AXLink",
+                                            "AXTextField", "AXTextArea", "AXSlider", "AXIncrementor", "AXMenuBarItem", "AXMenuItem",
+                                            "AXTab", "AXDisclosureTriangle", "AXComboBox", "AXSearchField", "AXDockItem"]
+    /// An enhanced web tree marks many wrappers as pressable: a chat row, its text, and the groups
+    /// between. Keep real controls, plus each generic pressable that is row-sized (at most 140 pt tall
+    /// and 15% of the window) and not inside another such one, so a row gets one label.
+    public static func pruned(_ targets: [Target], window: CGRect) -> [Target] {
+        let windowArea = max(window.width * window.height, 1)
+        func rowSized(_ target: Target) -> Bool { target.frame.height <= 140 && target.frame.width * target.frame.height <= windowArea * 0.15 }
+        let rows = targets.filter { !controlRoles.contains($0.role) && rowSized($0) }
+        func inside(_ inner: Target, _ outer: Target) -> Bool {
+            inner.id != outer.id && outer.frame.insetBy(dx: -1, dy: -1).contains(inner.frame)
+                && outer.frame.width * outer.frame.height > inner.frame.width * inner.frame.height
+        }
+        return targets.filter { target in
+            if controlRoles.contains(target.role) { return true }
+            return rowSized(target) && !rows.contains { inside(target, $0) }
+        }
+    }
+
     public static func unique(_ targets: [Target]) -> [Target] {
         var seen = Set<String>()
         return targets.filter { seen.insert($0.id).inserted && $0.frame.minX.isFinite && $0.frame.minY.isFinite && $0.frame.width.isFinite && $0.frame.height.isFinite }

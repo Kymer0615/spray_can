@@ -115,6 +115,7 @@ The full list, including Emacs and vi bindings, is in [SHORTCUTS.md](docs/SHORTC
 - Click as soon as a label is complete, Return twice to double-click, and hold Return to right-click
 - OCR on or off, and its recognition languages
 - Per-app settings: OCR on or off and a longer scan time for slow apps, in **Settings → Apps** or **This App** in the menu bar
+- **App analysis:** check how well Spray Can reads chosen apps and apply suggestions after reviewing their risks, such as enhanced accessibility for web-based apps (tried first, kept only if it helps)
 - Every global shortcut, plus optional vi bindings
 
 ## Install
@@ -135,7 +136,7 @@ Releases are **signed with the project's own certificate and not notarized**. Th
 
 ## Privacy
 
-Everything runs on your Mac. OCR uses Apple Vision on-device; screenshots are processed in memory and discarded. There are no screenshot logs, no analytics, no cloud inference, and no account. If you turn on **Prepare text labels in advance**, Spray Can also reads the focused window about a second after you switch to it (only when connected to power), the same way, and keeps the result in memory only.
+Everything runs on your Mac. OCR uses Apple Vision on-device; screenshots are processed in memory and discarded. There are no screenshot logs, no analytics, no cloud inference, and no account. If you turn on **Prepare text labels in advance**, Spray Can also reads the focused window about a second after you switch to it (only when connected to power), the same way, and keeps the result in memory only. **App analysis** reads the chosen apps' windows once, only when you start it.
 
 ## OCR
 
@@ -157,7 +158,7 @@ More tools: `scripts/render-docs.sh` (README images), `scripts/snapshot-labels.s
 
 ## Status
 
-Spray Can 0.1.18 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.19 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
 
 ## Community
 

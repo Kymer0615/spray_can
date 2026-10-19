@@ -119,6 +119,7 @@ struct SettingsView: View {
                 }
             }.fixedSize()
             Text("Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls.").font(.caption).foregroundStyle(.secondary)
+            AppAnalysisSection(analyzer: controller.analyzer)
         case "Shortcuts":
             Text("Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording.").foregroundStyle(.secondary)
             ForEach(NavigationMode.allCases, id: \.self) { mode in
@@ -240,6 +241,10 @@ struct SettingsView: View {
                 Picker("Scan time", selection: binding(\.scanTime)) {
                     Text("Normal").tag(ScanTime.normal)
                     Text("Extended").tag(ScanTime.extended)
+                }
+                if AppAnalyzer.kind(of: id).enhanceable || profile.enhanced {
+                    Toggle("Enhanced accessibility", isOn: binding(\.enhanced))
+                    Text(AppAdvice.enhance.risk).font(.caption).foregroundStyle(.secondary)
                 }
             }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -377,5 +382,107 @@ final class RecorderButton: NSButton {
     }
     override func performKeyEquivalent(with event: NSEvent) -> Bool {
         if recording { keyDown(with: event); return true }; return super.performKeyEquivalent(with: event)
+    }
+}
+
+extension AppAdvice {
+    var title: String {
+        switch self {
+        case .enhance: return String(localized: "Turn on enhanced accessibility")
+        case .ocr: return String(localized: "Turn on text recognition for this app")
+        case .extendScan: return String(localized: "Use Extended scan time")
+        }
+    }
+    var risk: String {
+        switch self {
+        case .enhance: return String(localized: "Asks the app for its full accessibility tree, and keeps one label per row. The app stays in this mode until Spray Can turns it off or quits; window managers may move its windows more slowly.")
+        case .ocr: return String(localized: "Reads the window with on-device text recognition when you activate. Needs Screen Recording; text labels mark text, which may not be clickable.")
+        case .extendScan: return String(localized: "Waits up to 2 s instead of 0.85 s for the app’s controls, so labels may appear later.")
+        }
+    }
+}
+
+extension AppKind {
+    var title: String {
+        switch self {
+        case .native: return String(localized: "Native")
+        case .electron: return "Electron"
+        case .chromium: return "Chromium"
+        case .cef: return "CEF"
+        case .webView2: return "WebView2"
+        case .qt: return "Qt"
+        case .flutter: return "Flutter"
+        }
+    }
+}
+
+/// Analyze chosen apps (read-only), show a feasibility table with risks, and apply what the user ticks.
+struct AppAnalysisSection: View {
+    @ObservedObject var analyzer: AppAnalyzer
+    @State private var chosen = Set<String>()
+    @State private var accepted: [String: Set<AppAdvice>] = [:]
+    @State private var confirming = false
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Analyze apps").font(.headline).padding(.top, 8)
+            Text("See how well Spray Can reads each app and what would help. Analysis only reads; nothing changes until you apply a suggestion. Each app needs an open window.").font(.caption).foregroundStyle(.secondary)
+            GroupBox {
+                VStack(alignment: .leading, spacing: 6) {
+                    ForEach(AppProfileCandidates.running(excluding: []), id: \.id) { app in
+                        Toggle(isOn: Binding(get: { chosen.contains(app.id) }, set: { if $0 { chosen.insert(app.id) } else { chosen.remove(app.id) } })) {
+                            HStack(spacing: 6) { Image(nsImage: AppProfileCandidates.icon(for: app.id)).resizable().frame(width: 16, height: 16); Text(verbatim: app.name) }
+                        }.toggleStyle(.checkbox)
+                    }
+                }.padding(6).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            HStack {
+                Button("Analyze Selected") { analyzer.analyze(chosen.sorted()) }.disabled(chosen.isEmpty || analyzer.busy)
+                if analyzer.busy { ProgressView().controlSize(.small) }
+            }
+            ForEach(analyzer.entries.keys.sorted { (analyzer.entries[$0]?.name ?? $0).localizedCaseInsensitiveCompare(analyzer.entries[$1]?.name ?? $1) == .orderedAscending }, id: \.self) { id in
+                if let entry = analyzer.entries[id] { result(id, entry) }
+            }
+            if accepted.values.contains(where: { !$0.isEmpty }) {
+                Button("Apply Selected Suggestions…") { confirming = true }.disabled(analyzer.busy)
+                    .alert("Apply these suggestions?", isPresented: $confirming) {
+                        Button("Apply") {
+                            for (id, advice) in accepted where !advice.isEmpty { analyzer.apply(id, advice) }
+                            accepted = [:]
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text(confirmation)
+                    }
+            }
+        }
+    }
+    private var confirmation: String {
+        accepted.filter { !$0.value.isEmpty }.sorted { $0.key < $1.key }.map { id, advice in
+            (analyzer.entries[id]?.name ?? id) + ": " + advice.sorted { $0.rawValue < $1.rawValue }.map(\.title).joined(separator: ", ")
+        }.joined(separator: "\n") + "\n\n" + String(localized: "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above.")
+    }
+    private func result(_ id: String, _ entry: AppAnalyzer.Entry) -> some View {
+        GroupBox {
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) {
+                    Image(nsImage: AppProfileCandidates.icon(for: id)).resizable().frame(width: 22, height: 22)
+                    Text(verbatim: entry.name).font(.headline)
+                    if let kind = entry.analysis?.kind { Text(verbatim: kind.title).font(.caption).padding(.horizontal, 6).padding(.vertical, 2).background(.quaternary, in: Capsule()) }
+                    Spacer()
+                }
+                if let problem = entry.problem { Text(problem).font(.callout).foregroundStyle(.secondary) }
+                if let analysis = entry.analysis {
+                    Text("Labels \(analysis.labels) · Text covered \(AppAnalyzer.percent(analysis.coverage)) · Scan \(analysis.scanMilliseconds) ms").font(.callout).monospacedDigit()
+                    if entry.advice.isEmpty && entry.outcome == nil { Text("Reads well. No changes needed.").font(.callout).foregroundStyle(.secondary) }
+                    ForEach(entry.advice, id: \.self) { advice in
+                        Toggle(isOn: Binding(get: { accepted[id, default: []].contains(advice) },
+                                             set: { if $0 { accepted[id, default: []].insert(advice) } else { accepted[id]?.remove(advice) } })) {
+                            VStack(alignment: .leading, spacing: 2) { Text(advice.title); Text(advice.risk).font(.caption).foregroundStyle(.secondary) }
+                        }.toggleStyle(.checkbox)
+                    }
+                }
+                if let outcome = entry.outcome { Text(outcome).font(.callout).foregroundStyle(.teal) }
+            }.padding(6).frame(maxWidth: .infinity, alignment: .leading)
+        }
     }
 }

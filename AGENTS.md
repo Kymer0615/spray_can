@@ -33,6 +33,7 @@ Put new logic in the core with tests whenever it can be expressed without AppKit
 ```sh
 scripts/test.sh                 # core XCTest suite + localization check
 scripts/snapshot-labels.sh com.apple.finder /tmp/finder.png   # real labels over a capture; add --prefix ab, --dump
+swift build && .build/debug/SprayCan --analyze-apps com.apple.finder,com.google.Chrome [--try-enhance <id>]   # app analysis table; trials are always turned off again
 scripts/build.sh                # universal (arm64 + x86_64) Release app in build/, ad-hoc signed
 python3 scripts/verify-bundle.py 'build/Build/Products/Release/Spray Can.app'
 scripts/integration-test.sh     # live event-tap/click fixture; needs an interactive desktop and Accessibility

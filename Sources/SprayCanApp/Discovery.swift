@@ -10,6 +10,10 @@ struct DiscoveryContext {
     let allWindows: Bool
     let generation: Int
     var scanTime = ScanTime.normal
+    /// Keep one label per row in an enhanced web tree (see `TargetCollection.pruned`).
+    var prune = false
+    /// App analysis: scan this window only, even when it is behind others.
+    var window: AXUIElement?
 }
 struct DiscoveryResult {
     var targets: [Target] = []
@@ -65,6 +69,17 @@ final class AccessibilityProvider: TargetProvider {
             }
             let completed = result
             DispatchQueue.main.async { completion(completed) }
+        }
+    }
+    /// App analysis: one scan of `context.window` with the longest budget, timed. Not a session:
+    /// use a provider of its own so sessions never invalidate it.
+    func survey(_ context: DiscoveryContext, completion: @escaping (DiscoveryResult, Int) -> Void) {
+        invalidate(context.generation)
+        queue.async {
+            let started = ProcessInfo.processInfo.systemUptime
+            let result = self.scan(context, budget: ScanTime.extended.budget.retry)
+            let milliseconds = Int((ProcessInfo.processInfo.systemUptime - started) * 1000)
+            DispatchQueue.main.async { completion(result, milliseconds) }
         }
     }
     /// Chrome exposes tab-strip tabs as radio buttons inside a tab group.
@@ -239,7 +254,7 @@ final class AccessibilityProvider: TargetProvider {
                 if clipped.isNull { return }
                 if role == kAXScrollAreaRole || role == kAXWindowRole { childClip = clipped }
                 let onScreen = context.screens.contains { $0.intersects(clipped) }
-                let visible = onScreen && (system || topOwner(at: CGPoint(x: clipped.midX, y: clipped.midY)) == pid)
+                let visible = onScreen && (system || context.window != nil || topOwner(at: CGPoint(x: clipped.midX, y: clipped.midY)) == pid)
                 let enabled = values[4] as? Bool ?? true
                 if visible && enabled {
                     var actions: CFArray?
@@ -265,12 +280,13 @@ final class AccessibilityProvider: TargetProvider {
         AXUIElementSetMessagingTimeout(activeApp, 0.20)
         // Reading role wakes Chromium's basic accessibility support without global VoiceOver emulation.
         let _: String? = axValue(activeApp, kAXRoleAttribute)
-        let focused: AXUIElement? = axValue(activeApp, kAXFocusedWindowAttribute) ?? axValue(activeApp, kAXMainWindowAttribute) ?? (axValue(activeApp, kAXWindowsAttribute) as [AXUIElement]?)?.first
+        let focused: AXUIElement? = context.window ?? axValue(activeApp, kAXFocusedWindowAttribute) ?? axValue(activeApp, kAXMainWindowAttribute) ?? (axValue(activeApp, kAXWindowsAttribute) as [AXUIElement]?)?.first
         if focused == nil { result.needsRetry = true }
         if let focused {
             if let rect = axFrame(focused) { result.captureRects.append(rect) }
             traverse(focused, pid: context.pid, clip: axFrame(focused), system: false)
         }
+        if context.window != nil { return finish(result, context) }
         if let menu: AXUIElement = axValue(activeApp, kAXMenuBarAttribute) { traverse(menu, pid: context.pid, clip: nil, system: true) }
         // Active menus can be attached to the app, outside its focused-window subtree.
         let appChildren: [AXUIElement] = axValue(activeApp, kAXChildrenAttribute) ?? []
@@ -296,7 +312,15 @@ final class AccessibilityProvider: TargetProvider {
                 }
             }
         }
+        return finish(result, context)
+    }
+    private func finish(_ partial: DiscoveryResult, _ context: DiscoveryContext) -> DiscoveryResult {
+        var result = partial
         result.targets = TargetCollection.ordered(TargetCollection.collapsed(result.targets))
+        if context.prune, let window = result.captureRects.first {
+            let kept = Set(TargetCollection.pruned(result.targets, window: window).map(\.id))
+            result.targets = result.targets.filter { kept.contains($0.id) }
+        }
         return result
     }
 }

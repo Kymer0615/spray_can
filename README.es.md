@@ -115,6 +115,7 @@ La lista completa, con las combinaciones de Emacs y vi, está en [SHORTCUTS.md](
 - Hacer clic en cuanto la etiqueta está completa, y Return dos veces para doble clic
 - OCR activado o desactivado, y sus idiomas de reconocimiento
 - Ajustes por app: OCR activado o desactivado y más tiempo de análisis para apps lentas, en **Ajustes → Apps** o **Esta app** en la barra de menús
+- **Análisis de apps:** comprueba lo bien que Spray Can lee las apps que elijas y aplica sugerencias tras revisar sus riesgos, como la accesibilidad mejorada para apps web (se prueba primero y solo se mantiene si ayuda)
 - Todos los atajos globales, además de las teclas de vi opcionales
 
 ## Instalación
@@ -135,7 +136,7 @@ Las versiones están **firmadas con el certificado propio del proyecto y no est�
 
 ## Privacidad
 
-Todo se ejecuta en tu Mac. El OCR usa Apple Vision en el dispositivo; las capturas se procesan en memoria y se descartan. Sin registros de capturas, sin analíticas, sin inferencia en la nube y sin cuenta. Si activas **Preparar las etiquetas de texto con antelación**, Spray Can también lee la ventana activa aproximadamente un segundo después de cambiar a ella (solo con el Mac conectado a la corriente), de la misma forma, y guarda el resultado solo en memoria.
+Todo se ejecuta en tu Mac. El OCR usa Apple Vision en el dispositivo; las capturas se procesan en memoria y se descartan. Sin registros de capturas, sin analíticas, sin inferencia en la nube y sin cuenta. Si activas **Preparar las etiquetas de texto con antelación**, Spray Can también lee la ventana activa aproximadamente un segundo después de cambiar a ella (solo con el Mac conectado a la corriente), de la misma forma, y guarda el resultado solo en memoria. El **análisis de apps** lee una vez las ventanas de las apps elegidas, solo cuando lo inicias.
 
 ## OCR
 
@@ -157,7 +158,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.18 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.19 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

@@ -12,6 +12,8 @@ final class AppController: ObservableObject {
     let accessibility = AccessibilityProvider()
     let ocr = OCRProvider()
     let accessibilityChanges = AccessibilityChanges()
+    let boost = AccessibilityBoost()
+    lazy var analyzer = AppAnalyzer(boost: boost)
     private lazy var prescan: TextPrescanner = TextPrescanner(
         frontWindow: { [weak self] (pid: pid_t) -> CGRect? in self?.frontWindow(of: pid) },
         screens: { [weak self] () -> [CGRect] in self?.overlay.quartzScreens ?? [] })
@@ -95,6 +97,10 @@ final class AppController: ObservableObject {
             DispatchQueue.main.async { guard let self, !self.active else { return }; self.prescan.reset() }
         }.store(in: &subscriptions)
         DispatchQueue.main.async { [weak self] in self?.prescan.resume() }
+        settings.$appProfiles.dropFirst().sink { [weak self] _ in
+            // Published before the new value is stored; apply on the next turn.
+            DispatchQueue.main.async { guard let self, self.accessibilityGranted else { return }; self.boost.apply() }
+        }.store(in: &subscriptions)
         settings.$passSystemShortcuts.combineLatest(settings.$vi).sink { [weak self] pass, vi in
             self?.keyboard.setKeyRules(passThrough: pass, vi: vi)
         }.store(in: &subscriptions)
@@ -122,6 +128,7 @@ final class AppController: ObservableObject {
         guard accessibilityGranted else { status = String(localized: "Grant Accessibility to enable navigation."); return }
         keyboard.configure(settings.shortcuts); shortcutIssues = keyboard.conflicts
         keyboard.start(); status = keyboardReady ? String(localized: "Ready when you are") : String(localized: "Starting keyboard capture…")
+        boost.apply()
     }
     func requestAccessibility() {
         _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
@@ -174,7 +181,7 @@ final class AppController: ObservableObject {
             _ = session.publish(targets, generation: generation, vi: settings.vi)
             updateReadyStatus(); render(); return
         }
-        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation, scanTime: appBehavior.scanTime)
+        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation, scanTime: appBehavior.scanTime, prune: appBehavior.enhanced)
         accessibility.discover(context) { [weak self] discovered in
             guard let self, self.active, self.session.generation == generation else { return }
             self.whenPrescanKnown(generation, patience: 0.15) { self.finishDiscovery(discovered, mode: mode, context: context, generation: generation, started: started) }

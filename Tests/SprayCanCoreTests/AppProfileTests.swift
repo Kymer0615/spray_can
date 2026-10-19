@@ -34,3 +34,78 @@ final class AppProfileTests: XCTestCase {
         XCTAssertEqual(AppBehavior.decode("not json"), [:])
     }
 }
+
+final class AppAdaptationTests: XCTestCase {
+    func testKindFromBundleFrameworks() {
+        XCTAssertEqual(AppKind.detect(frameworks: ["Electron Framework.framework", "Squirrel.framework"]), .electron)
+        XCTAssertEqual(AppKind.detect(frameworks: ["Chromium Embedded Framework.framework"]), .cef)
+        XCTAssertEqual(AppKind.detect(frameworks: ["AppCenter.framework", "MSWebView2.framework"]), .webView2)
+        XCTAssertEqual(AppKind.detect(frameworks: ["Google Chrome Framework.framework"]), .chromium)
+        XCTAssertEqual(AppKind.detect(frameworks: ["QtCore.framework"]), .qt)
+        XCTAssertEqual(AppKind.detect(frameworks: []), .native)
+        XCTAssertTrue(AppKind.webView2.enhanceable)
+        XCTAssertFalse(AppKind.electron.enhanceable)
+        XCTAssertFalse(AppKind.native.enhanceable)
+    }
+
+    private func analysis(_ kind: AppKind, labels: Int = 40, coverage: Double?, lines: Int = 15, ms: Int = 100,
+                          truncated: Bool = false, supported: Bool = true) -> AppAnalysis {
+        AppAnalysis(kind: kind, labels: labels, coverage: coverage, textLines: lines, scanMilliseconds: ms, truncated: truncated, enhanceSupported: supported)
+    }
+
+    func testAdviceMatchesMeasuredApps() {
+        let plain = AppBehavior(ocr: false, prescan: false, scanTime: .normal)
+        // Teams: web-based, poorly covered, switch settable; text recognition offered too.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.webView2, labels: 34, coverage: 0.2), current: plain), [.enhance, .ocr])
+        XCTAssertEqual(AppAdvice.recommend(analysis(.webView2, labels: 34, coverage: 0.5), current: plain), [.enhance])
+        // Spotify: read text when the switch is refused.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.cef, labels: 3, coverage: 0, supported: false), current: plain), [.ocr])
+        // Reminders, Chrome: already good.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.native, coverage: 1), current: plain), [])
+        XCTAssertEqual(AppAdvice.recommend(analysis(.chromium, labels: 115, coverage: 0.9), current: plain), [])
+        // Slow or cut-off scans get more time.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.native, coverage: 0.9, ms: 2000, truncated: true), current: plain), [.extendScan])
+        // Too few lines to judge: no OCR suggestion.
+        XCTAssertEqual(AppAdvice.recommend(analysis(.native, coverage: 0, lines: 3), current: plain), [])
+        // What is already in effect is not suggested again.
+        let adapted = AppBehavior(ocr: true, prescan: false, scanTime: .extended, enhanced: true)
+        XCTAssertEqual(AppAdvice.recommend(analysis(.webView2, labels: 34, coverage: 0.2, ms: 2000), current: adapted), [])
+    }
+
+    func testEnhancementKeptOnlyWhenItHelps() {
+        let before = analysis(.webView2, labels: 34, coverage: 0.2)
+        XCTAssertTrue(Enhancement.worthKeeping(before: before, after: analysis(.webView2, labels: 71, coverage: 0.9)))
+        XCTAssertTrue(Enhancement.worthKeeping(before: before, after: analysis(.webView2, labels: 34, coverage: 0.4)))
+        XCTAssertFalse(Enhancement.worthKeeping(before: before, after: analysis(.webView2, labels: 36, coverage: 0.25)))
+    }
+
+    func testCoverageCountsLinesInsideTargets() {
+        let targets = [CGRect(x: 0, y: 0, width: 100, height: 30)]
+        XCTAssertEqual(AppAnalysis.coverage(lines: [CGRect(x: 10, y: 10, width: 50, height: 10), CGRect(x: 10, y: 200, width: 50, height: 10)], targets: targets), 0.5)
+        XCTAssertNil(AppAnalysis.coverage(lines: [], targets: targets))
+    }
+
+    func testPruningKeepsControlsAndOneLabelPerRow() {
+        let window = CGRect(x: 0, y: 0, width: 1500, height: 1000)
+        func target(_ id: String, _ role: String, _ frame: CGRect) -> Target { Target(id: id, frame: frame, source: .accessibility, role: role) }
+        let targets = [
+            target("pane", "AXGroup", CGRect(x: 0, y: 0, width: 400, height: 1000)),        // huge wrapper
+            target("row", "AXGroup", CGRect(x: 10, y: 100, width: 380, height: 60)),        // a chat row
+            target("rowText", "AXStaticText", CGRect(x: 60, y: 110, width: 200, height: 20)),
+            target("rowInner", "AXGroup", CGRect(x: 50, y: 105, width: 300, height: 50)),
+            target("more", "AXButton", CGRect(x: 350, y: 110, width: 24, height: 24)),      // a real control in the row
+            target("other", "AXGroup", CGRect(x: 10, y: 170, width: 380, height: 60)),
+        ]
+        XCTAssertEqual(TargetCollection.pruned(targets, window: window).map(\.id).sorted(), ["more", "other", "row"])
+        XCTAssertEqual(TargetCollection.pruned(targets.reversed(), window: window).map(\.id).sorted(), ["more", "other", "row"])
+    }
+
+    func testEnhancedFlagRoundTripsAndDefaultsOff() {
+        let profiles = ["t": AppProfile(name: "T", enhanced: true)]
+        XCTAssertEqual(AppBehavior.decode(AppBehavior.encode(profiles)), profiles)
+        XCTAssertFalse(AppProfile(name: "T", enhanced: true).isDefault)
+        XCTAssertTrue(AppBehavior.resolve(bundleID: "t", profiles: profiles, vision: false, prescan: false).enhanced)
+        XCTAssertFalse(AppBehavior.decode(#"{"x":{"name":"X"}}"#)["x"]!.enhanced)
+        XCTAssertTrue(AppBehavior.decode(#"{"x":{"name":"X","enhanced":"YES"}}"#)["x"]!.enhanced)
+    }
+}

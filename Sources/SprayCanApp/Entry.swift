@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateIcon(); rebuildMenu()
         if ProcessInfo.processInfo.arguments.contains("--render-docs") { DocumentationRenderer.render(); NSApp.terminate(nil); return }
         if ProcessInfo.processInfo.arguments.contains("--render-overlay") { snapshot = OverlaySnapshot(); snapshot?.run(); return }
+        if ProcessInfo.processInfo.arguments.contains("--analyze-apps") { AnalysisHarness.run(controller.analyzer, boost: controller.boost); return }
         if ProcessInfo.processInfo.arguments.contains("--diagnose") {
             print("Accessibility: \(controller.accessibilityGranted); Keyboard capture running: \(controller.keyboardReady); Screen Recording: \(controller.screenGranted)")
             NSApp.terminate(nil); return
@@ -38,7 +39,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             showSettings(); UserDefaults.standard.set(true, forKey: "onboarded")
         }
     }
-    func applicationWillTerminate(_ notification: Notification) { controller.cancel() }
+    func applicationWillTerminate(_ notification: Notification) { controller.cancel(); controller.boost.restoreAll() }
     private func updateIcon() {
         let name = controller.active ? "MenuActive" : "MenuIdle"
         let image = NSImage(named: name) ?? NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in

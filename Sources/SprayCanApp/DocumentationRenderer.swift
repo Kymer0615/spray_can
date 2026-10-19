@@ -80,7 +80,13 @@ enum DocumentationRenderer {
         if let height = ProcessInfo.processInfo.environment["SPRAYCAN_FULL_APPEARANCE_HEIGHT"].flatMap(Double.init) {
             save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance", height: height)), name: "appearance-full.png", size: CGSize(width: 696, height: height))
             save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "General", height: height)), name: "general-full.png", size: CGSize(width: 696, height: height))
-            save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Apps", height: height)), name: "apps-full.png", size: CGSize(width: 696, height: height))
+            let apps = AppController()
+            apps.analyzer.showExamples([
+                "com.example.chat": .init(name: "Chat", analysis: AppAnalysis(kind: .webView2, labels: 34, coverage: 0.2, textLines: 15, scanMilliseconds: 85, truncated: false, enhanceSupported: true), advice: [.enhance, .ocr]),
+                "com.example.files": .init(name: "Files", analysis: AppAnalysis(kind: .native, labels: 85, coverage: 0.96, textLines: 40, scanMilliseconds: 1200, truncated: false, enhanceSupported: false), advice: [.extendScan]),
+                "com.example.notes": .init(name: "Notes", analysis: AppAnalysis(kind: .native, labels: 76, coverage: 1, textLines: 38, scanMilliseconds: 90, truncated: false, enhanceSupported: false)),
+                "com.example.music": .init(name: "Music", analysis: AppAnalysis(kind: .cef, labels: 3, coverage: 0, textLines: 74, scanMilliseconds: 27, truncated: false, enhanceSupported: true), outcome: "Turned off again: it didn’t help enough (labels 3 → 3).")])
+            save(NSHostingView(rootView: SettingsView(controller: apps, initialTab: "Apps", height: height)), name: "apps-full.png", size: CGSize(width: 696, height: height))
         }
         save(NSHostingView(rootView: AppearancePreview().frame(width: 600, height: 160).background(Color(nsColor: .windowBackgroundColor))), name: "clustered-labels.png", size: CGSize(width: 600, height: 160))
         for grid in [false, true] {

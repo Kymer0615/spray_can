@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.19
+
+- **App analysis** in Settings → Apps: choose running apps and analyze them. Analysis only reads: it counts the labels Spray Can finds, measures how much visible text they cover (with Screen Recording), and times the scan. Each app gets suggestions with their risks: enhanced accessibility for web-based apps (WebView2, Chromium, CEF), text recognition for this app, or Extended scan time. Nothing changes until you tick suggestions and confirm.
+- **Enhanced accessibility** per app: asks a web-based app for its full accessibility tree and keeps one label per row. When applied from analysis it is tried first and turned off again unless labels grow by 20% or text coverage by 15 points. Spray Can turns it off when you switch it off, remove the app, or quit.
+
+Validation: 65 core tests (app type detection, suggestions, keep rule, row pruning, profile compatibility) and a localization check passed. Analysis run on nine running apps; trials on Teams (57 → 63 labels) and Spotify (3 → 3) were turned off again automatically and confirmed off afterwards. With Teams in enhanced mode, pruning cut labels from 152 to 63 and connectors from 55 to 17. The Settings page and live sessions in the installed copy were not exercised while it was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.18
 
 - Per-app settings: a new **Apps** page in Settings, and **This App** in the menu bar for the app you're working in. For each app, choose text recognition (Same as General, On, Off), whether to prepare text labels in advance, and scan time (Normal or Extended, for apps such as Finder and System Settings that answer slowly). Apps without settings follow General.
