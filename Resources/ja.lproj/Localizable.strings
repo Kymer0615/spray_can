@@ -8,10 +8,13 @@
 "About" = "情報";
 "Above the element" = "要素の上";
 "Accessibility" = "アクセシビリティ";
+"Add App" = "Appを追加";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "macOS の権限を変更した後は、再起動が必要な場合があります。同じショートカットを使う別のツールがあると競合することがあります。Scoot を終了するか、そのキー割り当てを変更してください。";
 "Always" = "常に";
 "App" = "App";
+"App Settings…" = "App設定…";
 "Appearance" = "外観";
+"Apps" = "App";
 "Below the element" = "要素の下";
 "Bold" = "ボールド";
 "Bottom edge" = "下端";
@@ -20,6 +23,7 @@
 "Buy me a coffee — support Ziyang" = "コーヒーをおごる — Ziyang を支援";
 "By default, labels move the pointer. Return clicks." = "デフォルトでは、ラベルでポインタを移動し、Return でクリックします。";
 "Center" = "中央";
+"Choose text recognition and scan time for individual apps. Other apps follow General." = "Appごとにテキスト認識とスキャン時間を選択します。その他のAppは「一般」の設定に従います。";
 "Click as soon as a label is complete" = "ラベルの入力が完了したらすぐにクリック";
 "Clicking" = "クリック";
 "Color coding" = "色分け";
@@ -32,6 +36,8 @@
 "Elements" = "要素";
 "Enable" = "有効にする";
 "Enable Screen Recording to use text targeting." = "テキストターゲットを使うには画面収録を有効にしてください。";
+"Extended" = "延長";
+"Extended scan time" = "スキャン時間を延長";
 "Find controls and move, click, drag, and scroll." = "コントロールを見つけて、移動・クリック・ドラッグ・スクロール。";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "アプリがアクセシビリティに公開していないテキストを見つけます。OCR ラベルはテキストの位置を示すもので、クリックできるとは限りません。画面収録が必要です。画像はこの Mac のメモリ内にのみ保持されます。";
 "Finding targets…" = "ターゲットを検索中…";
@@ -83,12 +89,15 @@
 "Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "近くのラベルははっきり異なる色になります。入力中は、一致する要素がラベルと同じ色で囲まれます。";
 "Neon" = "ネオン";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "分析なし。クラウド推論なし。スクリーンショットの保存なし。診断情報には時間と回数のみが含まれ、入力したラベルやキャプチャした画面の内容は含まれません。";
+"No app settings yet. Add an app, or use This App in the menu bar while you work in it." = "App別の設定はまだありません。Appを追加するか、使用中にメニューバーの「このApp」を使ってください。";
 "No matching label · Esc clears your input" = "一致するラベルがありません · Esc で入力をクリア";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "スクロール領域がありません · ⇧⌘L でポインタスクロール";
 "No targets found · ⇧⌘K opens the grid" = "ターゲットが見つかりません · ⇧⌘K でグリッドを開く";
+"Normal" = "標準";
 "Not running" = "停止中";
 "OCR label tint" = "OCR ラベルの色";
 "Off" = "オフ";
+"On" = "オン";
 "On the element" = "要素の上に重ねる";
 "Only the access needed to navigate." = "ナビゲーションに必要な権限だけを使います。";
 "Open System Settings → Privacy & Security to enable access." = "システム設定 → プライバシーとセキュリティ を開いて、アクセスを有効にしてください。";
@@ -107,6 +116,7 @@
 "Ready" = "準備完了";
 "Ready when you are" = "いつでも使えます";
 "Reduce Transparency keeps label backgrounds opaque." = "「透明度を下げる」がオンの場合、ラベルの背景は不透明になります。";
+"Remove" = "削除";
 "Restart Now" = "今すぐ再起動";
 "Restart Spray Can to use the new language." = "新しい言語を使うには Spray Can を再起動してください。";
 "Restore color coding" = "色分けの設定を元に戻す";
@@ -118,6 +128,10 @@
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: 左クリック · [: 中クリック · ]: 右クリック\n\\: ダブルクリック · =: 左ボタンを押したまま · Return: ドロップ\n⇧ 矢印: スクロール · ⌘H: 隠す · ⌘,: 設定";
 "Right edge" = "右端";
 "Right of the element" = "要素の右";
+"Same as General (Off)" = "「一般」と同じ（オフ）";
+"Same as General (On)" = "「一般」と同じ（オン）";
+"Scan time" = "スキャン時間";
+"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "スキャン時間を「延長」にすると、Finderやシステム設定のように応答の遅いAppでもコントロールを取得する時間が長くなります。";
 "Screen Recording" = "画面収録";
 "Scroll" = "スクロール";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "スクロールはポインタの位置に届きます。「動かさない」ではポインタの下をスクロールし、ほかの選択肢ではスクロールモード中ポインタを領域内に移します。";
@@ -146,9 +160,11 @@
 "Targets" = "対象";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "選択したすべての言語のテキストを 1 回のスキャンで検出します。文字体系が増えるごとに認識処理が 1 回追加されるため、スキャンに少し時間がかかります。";
 "Text location · Return clicks here" = "テキストの位置 · Return でここをクリック";
+"Text recognition" = "テキスト認識";
 "Text recognition languages" = "テキスト認識の言語";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "テキストターゲットを利用できません。アクセシビリティとグリッドによるナビゲーションは引き続き使えます。";
 "The target window changed. Activate again to refresh." = "対象のウインドウが変わりました。もう一度起動して更新してください。";
+"This App: %@" = "このApp: %@";
 "Turn off Use Liquid Glass in Appearance to adjust opacity." = "不透明度を調整するには、「外観」で「Liquid Glass を使用」をオフにしてください。";
 "Type shortcut…" = "ショートカットを入力…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "修飾キーと文字または数字を組み合わせてください。ショートカットをクリックすると新しく記録できます。Esc で記録をキャンセルします。";

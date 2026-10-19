@@ -25,8 +25,8 @@ final class TextPrescanner {
     /// Watch the frontmost app again and read it once it keeps focus.
     func resume() {
         paused = false; work?.cancel(); ocr.cancel(); watcher.stop()
-        guard settings.prescanText, settings.vision, let app = NSWorkspace.shared.frontmostApplication,
-              app.processIdentifier != getpid() else { return }
+        guard let app = NSWorkspace.shared.frontmostApplication, app.processIdentifier != getpid(),
+              settings.behavior(for: app.bundleIdentifier).prescan else { return }
         watcher.start(pid: app.processIdentifier)
         schedule()
     }
@@ -47,7 +47,8 @@ final class TextPrescanner {
         guard let app = NSWorkspace.shared.frontmostApplication else { return }
         let pid = app.processIdentifier
         let process = ProcessInfo.processInfo
-        guard TextPrescan.allowed(enabled: settings.prescanText, vision: settings.vision, screenRecording: CGPreflightScreenCaptureAccess(),
+        let behavior = settings.behavior(for: app.bundleIdentifier)
+        guard TextPrescan.allowed(enabled: behavior.prescan, vision: behavior.ocr, screenRecording: CGPreflightScreenCaptureAccess(),
                                   onPower: Self.onPower, lowPower: process.isLowPowerModeEnabled,
                                   thermalSerious: process.thermalState.rawValue >= ProcessInfo.ThermalState.serious.rawValue,
                                   sessionActive: paused, ownApp: pid == getpid()),
@@ -69,7 +70,8 @@ final class TextPrescanner {
     /// Text read earlier for this window, if the window still looks the same. Returns false when
     /// nothing saved could apply, so the caller need not wait; otherwise calls back once on main.
     func text(pid: pid_t, frame: CGRect, languages: [String], completion: @escaping ([Target]?) -> Void) -> Bool {
-        guard settings.prescanText, let cache, cache.reusable(pid: pid, frame: frame, languages: languages, now: ProcessInfo.processInfo.systemUptime)
+        guard settings.behavior(for: NSRunningApplication(processIdentifier: pid)?.bundleIdentifier).prescan,
+              let cache, cache.reusable(pid: pid, frame: frame, languages: languages, now: ProcessInfo.processInfo.systemUptime)
         else { return false }
         Task { @MainActor in
             let now = await OCRProvider.fingerprint(of: frame)

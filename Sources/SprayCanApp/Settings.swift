@@ -49,6 +49,19 @@ final class Settings: ObservableObject {
     @Published var dedupeOCR = Settings.flag("dedupeOCR", true) { didSet { save("dedupeOCR", dedupeOCR) } }
     /// Read the focused window ahead of activation (on power only), so text labels appear at once.
     @Published var prescanText = Settings.flag("prescanText", false) { didSet { save("prescanText", prescanText) } }
+    /// Per-app overrides keyed by bundle identifier, saved as JSON text. A command-line default
+    /// (`-appProfiles '{com.example = {name = Example; ocr = off;};}'`) arrives as a dictionary instead.
+    @Published var appProfiles = Settings.savedProfiles() {
+        didSet { save("appProfiles", AppBehavior.encode(appProfiles)) }
+    }
+    /// What applies in one app: its profile over the global settings.
+    func behavior(for bundleID: String?) -> AppBehavior {
+        AppBehavior.resolve(bundleID: bundleID, profiles: appProfiles, vision: vision, prescan: prescanText)
+    }
+    func updateProfile(_ bundleID: String, name: String, _ change: (inout AppProfile) -> Void) {
+        var profile = appProfiles[bundleID] ?? AppProfile(name: name)
+        change(&profile); appProfiles[bundleID] = profile
+    }
     /// Draw each element label, its connector, and a box around its element in a shared color.
     @Published var colorCodeTargets = Settings.flag("colorCodeTargets", true) { didSet { save("colorCodeTargets", colorCodeTargets) } }
     /// When elements are shaded in their label's color, and how strongly.
@@ -94,6 +107,14 @@ final class Settings: ObservableObject {
         colors[role.rawValue] = String(format: "%02X%02X%02X", Int((rgb.redComponent * 255).rounded()), Int((rgb.greenComponent * 255).rounded()), Int((rgb.blueComponent * 255).rounded()))
     }
     func restoreColors() { colors = [:] }
+    private static func savedProfiles() -> [String: AppProfile] {
+        switch UserDefaults.standard.object(forKey: "appProfiles") {
+        case let json as String: return AppBehavior.decode(json)
+        case let plist as [String: Any]:
+            return (try? JSONSerialization.data(withJSONObject: plist)).flatMap { String(data: $0, encoding: .utf8) }.map(AppBehavior.decode) ?? [:]
+        default: return [:]
+        }
+    }
     private func save(_ key: String, _ value: Any) { UserDefaults.standard.set(value, forKey: key) }
     /// Saved or command-line values. Command-line defaults (`-key NO`, `-key 0.3`) arrive as strings,
     /// which `bool(forKey:)` and `double(forKey:)` understand but a cast to Bool or Double does not.

@@ -1,5 +1,18 @@
 # Changelog
 
+## Spray Can 0.1.18
+
+- Per-app settings: a new **Apps** page in Settings, and **This App** in the menu bar for the app you're working in. For each app, choose text recognition (Same as General, On, Off), whether to prepare text labels in advance, and scan time (Normal or Extended, for apps such as Finder and System Settings that answer slowly). Apps without settings follow General.
+
+Validation: 59 core tests (profile resolution, saved-profile compatibility) and a localization check passed. With the snapshot harness on Chrome, OCR followed the app setting in all six combinations of app setting and global setting. Apps page rendered and checked. The menu-bar submenu and live sessions were not exercised while the installed copy was running; see docs/VALIDATION.md.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.17
 
 - Fixed element labels disappearing in every app (only menu-bar labels remained) while macOS's screenshot helper kept an invisible full-screen layer open, for example after a screenshot that suggested an event. Overlays above normal windows that cover a whole display no longer count as hiding controls.

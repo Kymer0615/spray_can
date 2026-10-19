@@ -18,9 +18,13 @@ final class AppController: ObservableObject {
     /// Text read ahead for the target window: nil until known, empty when unusable.
     private var prescanned: [Target]?
     private var prescanPending = false
+    /// The target app's profile applied to the global settings, fixed for the session.
+    private var appBehavior = AppBehavior(ocr: false, prescan: false, scanTime: .normal)
     @Published var status: String = String(localized: "Ready when you are")
     @Published var active = false
     @Published var shortcutIssues: [String] = []
+    /// A Settings tab to show next, e.g. Apps when chosen from the menu bar.
+    @Published var requestedTab: String?
     var openSettings: (() -> Void)?
     var stateChanged: (() -> Void)?
     private var session = NavigationSession()
@@ -86,7 +90,7 @@ final class AppController: ObservableObject {
             } else { self.cancel() }
         }
         keyboard.onAppSwitchEnded = { [weak self] in self?.resumeFollow(after: 0.15) }
-        settings.$prescanText.combineLatest(settings.$vision, settings.$ocrLanguages).dropFirst().sink { [weak self] _ in
+        settings.$prescanText.combineLatest(settings.$vision, settings.$ocrLanguages, settings.$appProfiles).dropFirst().sink { [weak self] _ in
             // Published before the new value is stored; apply on the next turn.
             DispatchQueue.main.async { guard let self, !self.active else { return }; self.prescan.reset() }
         }.store(in: &subscriptions)
@@ -140,6 +144,7 @@ final class AppController: ObservableObject {
         if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
         clearFollow(); windowChanged = false
         targetPID = NSWorkspace.shared.frontmostApplication?.processIdentifier ?? 0
+        appBehavior = settings.behavior(for: NSRunningApplication(processIdentifier: targetPID)?.bundleIdentifier)
         guard targetPID != getpid(), targetPID != 0 else { keyboard.setActive(false); status = String(localized: "Switch to another app, then activate navigation."); return }
         active = true; keyboard.setActive(true); stateChanged?(); prescan.pause()
         keyboard.setScrollMode(mode == .scroll)
@@ -148,7 +153,7 @@ final class AppController: ObservableObject {
         // Watch from the start, so changes during a scan are not missed.
         if mode == .elements || mode == .scroll { accessibilityChanges.start(pid: targetPID) }
         detectedText = nil; prescanned = nil; prescanPending = false
-        if mode == .elements, settings.vision, let window = frontWindow(of: targetPID) {
+        if mode == .elements, appBehavior.prescan, let window = frontWindow(of: targetPID) {
             prescanPending = prescan.text(pid: targetPID, frame: window, languages: settings.ocrLanguages) { [weak self] text in
                 guard let self, self.session.generation == generation else { return }
                 self.prescanPending = false; self.prescanned = text ?? []
@@ -169,7 +174,7 @@ final class AppController: ObservableObject {
             _ = session.publish(targets, generation: generation, vi: settings.vi)
             updateReadyStatus(); render(); return
         }
-        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation)
+        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation, scanTime: appBehavior.scanTime)
         accessibility.discover(context) { [weak self] discovered in
             guard let self, self.active, self.session.generation == generation else { return }
             self.whenPrescanKnown(generation, patience: 0.15) { self.finishDiscovery(discovered, mode: mode, context: context, generation: generation, started: started) }
@@ -195,7 +200,7 @@ final class AppController: ObservableObject {
         }
         // "Don't move" scrolls wherever the pointer already is; Tab still moves it into an area.
         if mode == .scroll && settings.scrollPointer == .stay && !result.scrollAreas.isEmpty { scrollUnderPointer = true }
-        let text = mode == .elements && settings.vision ? prescanned.flatMap { $0.isEmpty ? nil : $0 } : nil
+        let text = mode == .elements && appBehavior.ocr ? prescanned.flatMap { $0.isEmpty ? nil : $0 } : nil
         let targets = mode == .scroll ? result.scrollAreas
             : text.map { settings.dedupeOCR ? Geometry.mergeText(discovered.targets, $0) : Geometry.merge(discovered.targets, $0) } ?? discovered.targets
         _ = session.publish(targets, generation: generation, vi: settings.vi)
@@ -205,7 +210,7 @@ final class AppController: ObservableObject {
         render(); drain()
         log.info("Discovery completed in \(Int((ProcessInfo.processInfo.systemUptime - started) * 1000)) ms; targets: \(targets.count); bounded: \(discovered.timedOut)")
         if text != nil { log.info("Text labels reused from the pre-scan") }
-        if mode == .elements && settings.vision && text == nil {
+        if mode == .elements && appBehavior.ocr && text == nil {
             let started = ProcessInfo.processInfo.systemUptime
             let regions = discovered.captureRects.isEmpty ? context.screens : discovered.captureRects
             ocr.discover(screens: context.screens, regions: regions, languages: settings.ocrLanguages) { [weak self] text, error in

@@ -80,6 +80,7 @@ enum DocumentationRenderer {
         if let height = ProcessInfo.processInfo.environment["SPRAYCAN_FULL_APPEARANCE_HEIGHT"].flatMap(Double.init) {
             save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Appearance", height: height)), name: "appearance-full.png", size: CGSize(width: 696, height: height))
             save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "General", height: height)), name: "general-full.png", size: CGSize(width: 696, height: height))
+            save(NSHostingView(rootView: SettingsView(controller: AppController(), initialTab: "Apps", height: height)), name: "apps-full.png", size: CGSize(width: 696, height: height))
         }
         save(NSHostingView(rootView: AppearancePreview().frame(width: 600, height: 160).background(Color(nsColor: .windowBackgroundColor))), name: "clustered-labels.png", size: CGSize(width: 600, height: 160))
         for grid in [false, true] {

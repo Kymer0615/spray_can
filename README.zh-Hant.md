@@ -114,6 +114,7 @@ brew install --cask kymer0615/tap/spray-can
 - 捲動平滑度，以及捲動模式下的指標位置
 - 標籤輸入完成時立即點按，以及按兩次 Return 進行連按
 - 開啟或關閉 OCR，以及其辨識語言
+- 依 App 設定：在**設定 → App**或選單列的**目前的 App**中，個別開關 OCR，或為較慢的 App 延長掃描時間
 - 所有全域快捷鍵，以及選用的 vi 按鍵
 
 ## 安裝
@@ -156,7 +157,7 @@ scripts/install-local.sh
 
 ## 狀態
 
-Spray Can 0.1.17 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
+Spray Can 0.1.18 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
 
 ## 社群
 

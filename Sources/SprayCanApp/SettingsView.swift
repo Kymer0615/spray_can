@@ -25,7 +25,7 @@ struct SettingsView: View {
                     SprayCanMark().stroke(.teal, style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round)).frame(width: 30, height: 40)
                     VStack(alignment: .leading) { Text("Spray Can").font(.headline); Text("Point. Type. Click.").font(.caption).foregroundStyle(.secondary) }
                 }.padding(.bottom, 24).padding(.top, 10)
-                ForEach(["General", "Shortcuts", "Appearance", "Permissions", "About"], id: \.self) { item in
+                ForEach(["General", "Apps", "Shortcuts", "Appearance", "Permissions", "About"], id: \.self) { item in
                     Button { tab = item } label: {
                         Label(LocalizedStringKey(item), systemImage: icon(item)).frame(maxWidth: .infinity, alignment: .leading).padding(10)
                             .background(tab == item ? Color.teal.opacity(0.15) : .clear, in: RoundedRectangle(cornerRadius: 9))
@@ -43,9 +43,10 @@ struct SettingsView: View {
             }.frame(width: 490).background(Color(nsColor: .windowBackgroundColor))
         }.frame(height: height)
             .onReceive(timer) { _ in permissionRevision += 1 }
+            .onReceive(controller.$requestedTab.compactMap { $0 }) { requested in tab = requested; controller.requestedTab = nil }
     }
     private func icon(_ name: String) -> String {
-        ["General":"cursorarrow.motionlines", "Shortcuts":"keyboard", "Appearance":"paintpalette", "Permissions":"hand.raised", "About":"info.circle"][name] ?? "circle"
+        ["General":"cursorarrow.motionlines", "Apps":"square.grid.2x2", "Shortcuts":"keyboard", "Appearance":"paintpalette", "Permissions":"hand.raised", "About":"info.circle"][name] ?? "circle"
     }
     @ViewBuilder private var content: some View {
         switch tab {
@@ -104,6 +105,20 @@ struct SettingsView: View {
                 }
                 if !loginError.isEmpty { Text(loginError).font(.caption).foregroundStyle(.red) }
             }
+        case "Apps":
+            Text("Choose text recognition and scan time for individual apps. Other apps follow General.").foregroundStyle(.secondary)
+            if settings.appProfiles.isEmpty {
+                Text("No app settings yet. Add an app, or use This App in the menu bar while you work in it.").font(.callout).foregroundStyle(.secondary)
+            }
+            ForEach(settings.appProfiles.keys.sorted { (settings.appProfiles[$0]?.name ?? $0).localizedCaseInsensitiveCompare(settings.appProfiles[$1]?.name ?? $1) == .orderedAscending }, id: \.self) { id in
+                appRow(id)
+            }
+            Menu("Add App") {
+                ForEach(AppProfileCandidates.running(excluding: Set(settings.appProfiles.keys)), id: \.id) { app in
+                    Button(app.name) { settings.updateProfile(app.id, name: app.name) { _ in } }
+                }
+            }.fixedSize()
+            Text("Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls.").font(.caption).foregroundStyle(.secondary)
         case "Shortcuts":
             Text("Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording.").foregroundStyle(.secondary)
             ForEach(NavigationMode.allCases, id: \.self) { mode in
@@ -193,6 +208,40 @@ struct SettingsView: View {
             }.accessibilityLabel("Buy me a coffee — support Ziyang")
             Text("No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content.").font(.caption).foregroundStyle(.secondary)
             Text("MIT License · © 2026 Spray Can contributors").font(.caption2).foregroundStyle(.secondary)
+        }
+    }
+    /// One app's overrides; Same as General shows what the global setting currently is.
+    private func appRow(_ id: String) -> some View {
+        let profile = settings.appProfiles[id] ?? AppProfile(name: id)
+        let behavior = settings.behavior(for: id)
+        func binding<Value>(_ path: WritableKeyPath<AppProfile, Value>) -> Binding<Value> {
+            Binding(get: { profile[keyPath: path] }, set: { value in settings.updateProfile(id, name: profile.name) { $0[keyPath: path] = value } })
+        }
+        return GroupBox {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    Image(nsImage: AppProfileCandidates.icon(for: id)).resizable().frame(width: 28, height: 28)
+                    Text(verbatim: profile.name).font(.headline)
+                    Spacer()
+                    Button("Remove") { settings.appProfiles[id] = nil }.buttonStyle(.link)
+                }
+                Picker("Text recognition", selection: binding(\.ocr)) {
+                    Text(settings.vision ? "Same as General (On)" : "Same as General (Off)").tag(AppOverride.inherit)
+                    Text("On").tag(AppOverride.on)
+                    Text("Off").tag(AppOverride.off)
+                }
+                if behavior.ocr {
+                    Picker("Prepare text labels in advance", selection: binding(\.prescan)) {
+                        Text(settings.prescanText ? "Same as General (On)" : "Same as General (Off)").tag(AppOverride.inherit)
+                        Text("On").tag(AppOverride.on)
+                        Text("Off").tag(AppOverride.off)
+                    }
+                }
+                Picker("Scan time", selection: binding(\.scanTime)) {
+                    Text("Normal").tag(ScanTime.normal)
+                    Text("Extended").tag(ScanTime.extended)
+                }
+            }.padding(8).frame(maxWidth: .infinity, alignment: .leading)
         }
     }
     private func section<Content: View>(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) -> some View {

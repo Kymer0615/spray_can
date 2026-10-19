@@ -114,6 +114,7 @@ The full list, including Emacs and vi bindings, is in [SHORTCUTS.md](docs/SHORTC
 - Scroll smoothness and where the pointer waits in scroll mode
 - Click as soon as a label is complete, Return twice to double-click, and hold Return to right-click
 - OCR on or off, and its recognition languages
+- Per-app settings: OCR on or off and a longer scan time for slow apps, in **Settings → Apps** or **This App** in the menu bar
 - Every global shortcut, plus optional vi bindings
 
 ## Install
@@ -156,7 +157,7 @@ More tools: `scripts/render-docs.sh` (README images), `scripts/snapshot-labels.s
 
 ## Status
 
-Spray Can 0.1.17 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.18 runs on macOS 14 and later. The navigation core has been stress-tested with 1,000 rapid activation cycles, and a native fixture completed 60 element/grid click cycles without missed clicks or leaked input. Third-party apps, multiple displays, full screen, and older macOS versions are still being validated; see [VALIDATION.md](docs/VALIDATION.md).
 
 ## Community
 

@@ -24,7 +24,9 @@ final class OverlaySnapshot {
     private func scan(_ app: NSRunningApplication, output: String, attempt: Int = 1) {
         let primaryHeight = NSScreen.screens.first?.frame.height ?? 0
         let screens = NSScreen.screens.map { Geometry.cocoa($0.frame, primaryHeight: primaryHeight) }
-        let context = DiscoveryContext(pid: app.processIdentifier, screens: screens, allWindows: false, generation: 1)
+        // The app's own settings apply, as in a live session.
+        let behavior = Settings.shared.behavior(for: app.bundleIdentifier)
+        let context = DiscoveryContext(pid: app.processIdentifier, screens: screens, allWindows: false, generation: 1, scanTime: behavior.scanTime)
         accessibility.discover(context) { result in
             // Right after activation the app may not report its focused window yet.
             guard let window = result.captureRects.first, !result.targets.isEmpty else {
@@ -41,6 +43,7 @@ final class OverlaySnapshot {
                 if self.arguments.contains("--dump") { for r in content { print("TEXT", Int(r.minX), Int(r.minY), Int(r.width), Int(r.height)) }; for r in result.icons { print("ICON", Int(r.minX), Int(r.minY), Int(r.width), Int(r.height)) } }
                 let draw: ([Target]) -> Void = { targets in self.capture(window: window, targets: targets, content: content, icons: result.icons, output: output) }
                 guard self.arguments.contains("--ocr") else { draw(result.targets); return }
+                guard behavior.ocr else { print("Text recognition is off for this app"); draw(result.targets); return }
                 OCRProvider().discover(screens: screens, regions: [window], languages: Settings.shared.ocrLanguages) { text, error in
                     if let error { print(error) }
                     draw(Settings.shared.dedupeOCR ? Geometry.mergeText(result.targets, text) : Geometry.merge(result.targets, text))

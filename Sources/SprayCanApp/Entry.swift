@@ -61,12 +61,53 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             entry.representedObject = mode.rawValue; entry.target = self; menu.addItem(entry)
         }
         menu.addItem(.separator())
+        let thisApp = NSMenuItem(title: "", action: nil, keyEquivalent: ""); thisApp.tag = Self.thisAppTag; menu.addItem(thisApp)
+        updateThisApp(thisApp)
         let preferences = NSMenuItem(title: String(localized: "Settings…"), action: #selector(settingsAction), keyEquivalent: ","); preferences.target = self; menu.addItem(preferences)
         let help = NSMenuItem(title: String(localized: "Help & Shortcuts"), action: #selector(helpAction), keyEquivalent: ""); help.target = self; menu.addItem(help)
         let quit = NSMenuItem(title: String(localized: "Quit Spray Can"), action: #selector(quitAction), keyEquivalent: "q"); quit.target = self; menu.addItem(quit)
         item.menu = menu
     }
+    private static let thisAppTag = 77
+    /// Opening a menu-bar menu leaves the app in use frontmost, so this names the app being worked in.
+    private func updateThisApp(_ item: NSMenuItem) {
+        guard let app = NSWorkspace.shared.frontmostApplication, app.processIdentifier != getpid(), let id = app.bundleIdentifier else {
+            item.isHidden = true; return
+        }
+        let settings = controller.settings
+        let name = app.localizedName ?? id
+        let profile = settings.appProfiles[id] ?? AppProfile(name: name)
+        item.isHidden = false
+        item.title = String(localized: "This App: \(name)")
+        let submenu = NSMenu()
+        submenu.addItem(NSMenuItem.sectionHeader(title: String(localized: "Text recognition")))
+        let choices: [(AppOverride, String)] = [(.inherit, settings.vision ? String(localized: "Same as General (On)") : String(localized: "Same as General (Off)")),
+                                               (.on, String(localized: "On")), (.off, String(localized: "Off"))]
+        for (choice, title) in choices {
+            let entry = NSMenuItem(title: title, action: #selector(setTextRecognition(_:)), keyEquivalent: "")
+            entry.target = self; entry.representedObject = [id, name, choice.rawValue]; entry.state = profile.ocr == choice ? .on : .off
+            submenu.addItem(entry)
+        }
+        submenu.addItem(.separator())
+        let extended = NSMenuItem(title: String(localized: "Extended scan time"), action: #selector(toggleScanTime(_:)), keyEquivalent: "")
+        extended.target = self; extended.representedObject = [id, name]; extended.state = profile.scanTime == .extended ? .on : .off
+        submenu.addItem(extended)
+        submenu.addItem(.separator())
+        let more = NSMenuItem(title: String(localized: "App Settings…"), action: #selector(appSettingsAction), keyEquivalent: ""); more.target = self
+        submenu.addItem(more)
+        item.submenu = submenu
+    }
+    @objc private func setTextRecognition(_ sender: NSMenuItem) {
+        guard let values = sender.representedObject as? [String], values.count == 3, let choice = AppOverride(rawValue: values[2]) else { return }
+        controller.settings.updateProfile(values[0], name: values[1]) { $0.ocr = choice }
+    }
+    @objc private func toggleScanTime(_ sender: NSMenuItem) {
+        guard let values = sender.representedObject as? [String], values.count == 2 else { return }
+        controller.settings.updateProfile(values[0], name: values[1]) { $0.scanTime = $0.scanTime == .extended ? .normal : .extended }
+    }
+    @objc private func appSettingsAction() { showSettings(); controller.requestedTab = "Apps" }
     func menuWillOpen(_ menu: NSMenu) {
+        if let thisApp = menu.item(withTag: Self.thisAppTag) { updateThisApp(thisApp) }
         menu.item(at: 1)?.title = controller.status
         for (index, mode) in NavigationMode.allCases.enumerated() {
             menu.item(at: index + 2)?.title = "\(mode.localizedTitle)  \(shortcutTitle(controller.settings.shortcuts[mode]!))"

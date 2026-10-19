@@ -9,6 +9,7 @@ struct DiscoveryContext {
     let screens: [CGRect]
     let allWindows: Bool
     let generation: Int
+    var scanTime = ScanTime.normal
 }
 struct DiscoveryResult {
     var targets: [Target] = []
@@ -54,12 +55,12 @@ final class AccessibilityProvider: TargetProvider {
     func discover(_ context: DiscoveryContext, completion: @escaping (DiscoveryResult) -> Void) {
         invalidate(context.generation)
         queue.async {
-            var result = self.scan(context, budget: 0.85)
+            var result = self.scan(context, budget: context.scanTime.budget.first)
             if (result.needsRetry || result.timedOut || result.targets.isEmpty), self.current(context.generation) {
                 // Cold accessibility servers can initialize after the first request.
                 // Retry within the same activation, while keyboard input stays buffered.
                 Thread.sleep(forTimeInterval: 0.05)
-                let retry = self.scan(context, budget: 2.0)
+                let retry = self.scan(context, budget: context.scanTime.budget.retry)
                 if !retry.targets.isEmpty || result.targets.isEmpty { result = retry }
             }
             let completed = result

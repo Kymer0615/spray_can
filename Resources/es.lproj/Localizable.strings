@@ -8,10 +8,13 @@
 "About" = "Acerca de";
 "Above the element" = "Encima del elemento";
 "Accessibility" = "Accesibilidad";
+"Add App" = "Añadir app";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "Tras cambiar los permisos de macOS, puede que haya que reiniciar la app. Otra herramienta que use estos atajos puede causar conflictos; cierra Scoot o cambia sus atajos.";
 "Always" = "Siempre";
 "App" = "App";
+"App Settings…" = "Ajustes de apps…";
 "Appearance" = "Apariencia";
+"Apps" = "Apps";
 "Below the element" = "Debajo del elemento";
 "Bold" = "Intenso";
 "Bottom edge" = "Borde inferior";
@@ -20,6 +23,7 @@
 "Buy me a coffee — support Ziyang" = "Invítame a un café — apoya a Ziyang";
 "By default, labels move the pointer. Return clicks." = "De forma predeterminada, las etiquetas mueven el puntero. Return hace clic.";
 "Center" = "Centro";
+"Choose text recognition and scan time for individual apps. Other apps follow General." = "Elige el reconocimiento de texto y el tiempo de análisis para cada app. Las demás apps siguen la configuración General.";
 "Click as soon as a label is complete" = "Hacer clic al completar una etiqueta";
 "Clicking" = "Clic";
 "Color coding" = "Colores de etiquetas";
@@ -32,6 +36,8 @@
 "Elements" = "Elementos";
 "Enable" = "Activar";
 "Enable Screen Recording to use text targeting." = "Activa Grabación de pantalla para buscar texto.";
+"Extended" = "Ampliado";
+"Extended scan time" = "Tiempo de análisis ampliado";
 "Find controls and move, click, drag, and scroll." = "Busca controles y mueve, haz clic, arrastra y desplázate.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "Busca texto que las apps no exponen a la accesibilidad. Las etiquetas OCR marcan la ubicación del texto, que puede no ser clicable. Requiere Grabación de pantalla. Las imágenes permanecen en memoria en este Mac.";
 "Finding targets…" = "Buscando objetivos…";
@@ -83,12 +89,15 @@
 "Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "Las etiquetas cercanas tienen colores claramente distintos. Mientras escribes, los elementos que coinciden se resaltan con el color de su etiqueta.";
 "Neon" = "Neón";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "Sin analíticas. Sin inferencia en la nube. Sin capturas guardadas. Los diagnósticos contienen tiempos y recuentos, no etiquetas escritas ni contenido de pantalla capturado.";
+"No app settings yet. Add an app, or use This App in the menu bar while you work in it." = "Aún no hay ajustes por app. Añade una app o usa Esta app en la barra de menús mientras trabajas en ella.";
 "No matching label · Esc clears your input" = "Ninguna etiqueta coincide · Esc borra la entrada";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "No hay áreas desplazables · ⇧⌘L para desplazar con el puntero";
 "No targets found · ⇧⌘K opens the grid" = "No se encontraron objetivos · ⇧⌘K abre la cuadrícula";
+"Normal" = "Normal";
 "Not running" = "No activa";
 "OCR label tint" = "Tinte de etiqueta OCR";
 "Off" = "Desactivado";
+"On" = "Activado";
 "On the element" = "Sobre el elemento";
 "Only the access needed to navigate." = "Solo el acceso necesario para navegar.";
 "Open System Settings → Privacy & Security to enable access." = "Abre Ajustes del Sistema → Privacidad y seguridad para conceder acceso.";
@@ -107,6 +116,7 @@
 "Ready" = "Listo";
 "Ready when you are" = "Listo cuando quieras";
 "Reduce Transparency keeps label backgrounds opaque." = "«Reducir transparencia» mantiene opacos los fondos de las etiquetas.";
+"Remove" = "Eliminar";
 "Restart Now" = "Reiniciar ahora";
 "Restart Spray Can to use the new language." = "Reinicia Spray Can para usar el nuevo idioma.";
 "Restore color coding" = "Restaurar colores de etiquetas";
@@ -118,6 +128,10 @@
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return: clic izquierdo · [: clic central · ]: clic derecho\n\\: doble clic · =: mantener botón izquierdo · Return: soltar\n⇧ flechas: desplazar · ⌘H: ocultar · ⌘,: ajustes";
 "Right edge" = "Borde derecho";
 "Right of the element" = "A la derecha del elemento";
+"Same as General (Off)" = "Igual que General (desactivado)";
+"Same as General (On)" = "Igual que General (activado)";
+"Scan time" = "Tiempo de análisis";
+"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "El tiempo de análisis Ampliado da más tiempo a las apps lentas, como Finder y Ajustes del Sistema, para mostrar sus controles.";
 "Screen Recording" = "Grabación de pantalla";
 "Scroll" = "Desplazar";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "Los eventos de desplazamiento van al puntero. «No mover» desplaza lo que está debajo; las demás opciones lo llevan al área hasta salir del modo de desplazamiento.";
@@ -146,9 +160,11 @@
 "Targets" = "Objetivos";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "El texto de todos los idiomas seleccionados se encuentra en el mismo análisis. Cada sistema de escritura adicional añade una pasada de reconocimiento, así que el análisis tarda algo más.";
 "Text location · Return clicks here" = "Ubicación de texto · Return hace clic aquí";
+"Text recognition" = "Reconocimiento de texto";
 "Text recognition languages" = "Idiomas de reconocimiento de texto";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "Búsqueda de texto no disponible. La Accesibilidad y la cuadrícula siguen funcionando.";
 "The target window changed. Activate again to refresh." = "La ventana de destino cambió. Activa de nuevo para actualizar.";
+"This App: %@" = "Esta app: %@";
 "Turn off Use Liquid Glass in Appearance to adjust opacity." = "Desactiva «Usar Liquid Glass» en Apariencia para ajustar la opacidad.";
 "Type shortcut…" = "Escribe un atajo…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "Usa un modificador con una letra o un número. Haz clic en un atajo para grabar uno nuevo. Escape cancela la grabación.";

@@ -8,10 +8,13 @@
 "About" = "关于";
 "Above the element" = "元素上方";
 "Accessibility" = "辅助功能";
+"Add App" = "添加 App";
 "After changing macOS permissions, a relaunch may be needed. Another tool using these shortcuts can cause conflicts; quit Scoot or change its bindings." = "更改 macOS 权限后可能需要重新启动。其他工具使用相同快捷键可能导致冲突；请退出 Scoot 或更改其按键绑定。";
 "Always" = "始终";
 "App" = "应用";
+"App Settings…" = "App 设置…";
 "Appearance" = "外观";
+"Apps" = "App";
 "Below the element" = "元素下方";
 "Bold" = "浓烈";
 "Bottom edge" = "底边缘";
@@ -20,6 +23,7 @@
 "Buy me a coffee — support Ziyang" = "请我喝杯咖啡 — 支持 Ziyang";
 "By default, labels move the pointer. Return clicks." = "默认情况下，输入标签会移动指针，按 Return 点按。";
 "Center" = "中央";
+"Choose text recognition and scan time for individual apps. Other apps follow General." = "为单个 App 选择文本识别和扫描时间。其他 App 遵循“通用”设置。";
 "Click as soon as a label is complete" = "输入完整标签后立即点按";
 "Clicking" = "点按";
 "Color coding" = "颜色区分";
@@ -32,6 +36,8 @@
 "Elements" = "元素";
 "Enable" = "启用";
 "Enable Screen Recording to use text targeting." = "启用屏幕录制以使用文本定位。";
+"Extended" = "延长";
+"Extended scan time" = "延长扫描时间";
 "Find controls and move, click, drag, and scroll." = "查找控件，并移动、点按、拖移和滚动。";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "查找应用未向辅助功能公开的文本。OCR 标签仅标记文本位置，该位置未必可点按。需要屏幕录制权限。图像仅保留在这台 Mac 的内存中。";
 "Finding targets…" = "正在查找目标…";
@@ -83,12 +89,15 @@
 "Nearby labels get clearly different colors. While you type, the matching elements are outlined in their label’s color." = "相邻的标签使用明显不同的颜色。输入时，匹配的元素会以其标签的颜色描边。";
 "Neon" = "霓虹";
 "No analytics. No cloud inference. No saved screenshots. Diagnostics contain timings and counts, not typed labels or captured screen content." = "无数据分析，无云端推理，不保存截屏。诊断信息仅包含耗时和计数，不含输入的标签或捕获的屏幕内容。";
+"No app settings yet. Add an app, or use This App in the menu bar while you work in it." = "还没有 App 设置。添加一个 App，或在使用某个 App 时通过菜单栏中的“当前 App”设置。";
 "No matching label · Esc clears your input" = "无匹配标签 · Esc 清除输入";
 "No scroll areas · ⇧⌘L for pointer scrolling" = "无可滚动区域 · ⇧⌘L 使用指针滚动";
 "No targets found · ⇧⌘K opens the grid" = "未找到目标 · ⇧⌘K 打开网格";
+"Normal" = "普通";
 "Not running" = "未运行";
 "OCR label tint" = "OCR 标签颜色";
 "Off" = "关闭";
+"On" = "开";
 "On the element" = "元素之上";
 "Only the access needed to navigate." = "仅请求导航所需的权限。";
 "Open System Settings → Privacy & Security to enable access." = "打开“系统设置”→“隐私与安全性”以启用访问权限。";
@@ -107,6 +116,7 @@
 "Ready" = "就绪";
 "Ready when you are" = "随时待命";
 "Reduce Transparency keeps label backgrounds opaque." = "开启“降低透明度”时标签背景保持不透明。";
+"Remove" = "移除";
 "Restart Now" = "立即重新启动";
 "Restart Spray Can to use the new language." = "重新启动 Spray Can 以使用新语言。";
 "Restore color coding" = "恢复颜色区分设置";
@@ -118,6 +128,10 @@
 "Return: left click · [: middle click · ]: right click\n\\: double-click · =: hold left button · Return: drop\n⇧ arrows: scroll · ⌘H: hide · ⌘,: settings" = "Return：左键点按 · [：中键点按 · ]：右键点按\n\\：连按两次 · =：按住左键 · Return：放下\n⇧ 方向键：滚动 · ⌘H：隐藏 · ⌘,：设置";
 "Right edge" = "右边缘";
 "Right of the element" = "元素右侧";
+"Same as General (Off)" = "与“通用”相同（关）";
+"Same as General (On)" = "与“通用”相同（开）";
+"Scan time" = "扫描时间";
+"Scan time Extended gives slow apps such as Finder and System Settings longer to report their controls." = "将扫描时间设为“延长”后，访达和系统设置等响应较慢的 App 有更多时间提供其控件。";
 "Screen Recording" = "屏幕录制";
 "Scroll" = "滚动";
 "Scroll events go to the pointer. Don’t move scrolls what’s under it; other choices move it into the area until scroll mode ends." = "滚动事件会发送到指针所在位置。“不移动”会滚动指针下方的内容；其他选项会把指针移入区域，直到退出滚动模式。";
@@ -146,9 +160,11 @@
 "Targets" = "目标";
 "Text in every selected language is found in the same scan. Each additional writing system adds a recognition pass, so scans take slightly longer." = "所有选中语言的文本会在同一次扫描中识别。每增加一种书写系统就会多一轮识别，扫描时间会略微增加。";
 "Text location · Return clicks here" = "文本位置 · Return 点按此处";
+"Text recognition" = "文本识别";
 "Text recognition languages" = "文本识别语言";
 "Text targeting unavailable. Accessibility and grid navigation still work." = "文本定位不可用。辅助功能导航和网格导航仍可使用。";
 "The target window changed. Activate again to refresh." = "目标窗口已变化。请再次激活以刷新。";
+"This App: %@" = "当前 App：%@";
 "Turn off Use Liquid Glass in Appearance to adjust opacity." = "在“外观”中关闭“使用 Liquid Glass”以调整不透明度。";
 "Type shortcut…" = "输入快捷键…";
 "Use a modifier with a letter or number. Click a shortcut to record a new one. Escape cancels recording." = "请使用修饰键加字母或数字。点按快捷键以录制新快捷键。按 Esc 取消录制。";
