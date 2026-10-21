@@ -167,6 +167,56 @@ private struct HintLayer: View {
     }
 }
 
+/// Label glyphs drawn straight through Core Text. AppKit's string drawing crashed inside Core Text's
+/// attribute copying after long sessions, and redrawing every label on each keystroke ran it hundreds of times.
+enum LabelText {
+    private static var cached: (size: CGFloat, font: CTFont, height: CGFloat)?
+    private static func font(_ size: CGFloat) -> (font: CTFont, height: CGFloat) {
+        if let cached, cached.size == size { return (cached.font, cached.height) }
+        let font = NSFont.monospacedSystemFont(ofSize: size, weight: .semibold)
+        // Measured once per size, so badges keep exactly the height AppKit gives a line.
+        let height = ("A" as NSString).size(withAttributes: [.font: font]).height
+        cached = (size, font as CTFont, height)
+        return (font as CTFont, height)
+    }
+    private static func glyphs(_ string: String, _ font: CTFont) -> [CGGlyph]? {
+        let characters = Array(string.utf16)
+        var glyphs = [CGGlyph](repeating: 0, count: characters.count)
+        return CTFontGetGlyphsForCharacters(font, characters, &glyphs, characters.count) ? glyphs : nil
+    }
+    private static func advances(_ glyphs: [CGGlyph], _ font: CTFont) -> [CGFloat] {
+        var advances = [CGSize](repeating: .zero, count: glyphs.count)
+        CTFontGetAdvancesForGlyphs(font, .horizontal, glyphs, &advances, glyphs.count)
+        return advances.map(\.width)
+    }
+    static func size(_ string: String, fontSize: CGFloat) -> CGSize {
+        let (font, height) = font(fontSize)
+        guard let glyphs = glyphs(string, font) else { return (string as NSString).size(withAttributes: [.font: font]) }
+        return CGSize(width: advances(glyphs, font).reduce(0, +), height: height)
+    }
+    /// Draws `string` with its lower-left corner at `point`; the first `typed` characters use `typedColor`.
+    static func draw(_ string: String, at point: CGPoint, fontSize: CGFloat, color: NSColor, typed: Int, typedColor: NSColor) {
+        let (font, height) = font(fontSize)
+        guard let context = NSGraphicsContext.current?.cgContext, let glyphs = glyphs(string, font) else {
+            let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: color])
+            if typed > 0 { text.addAttribute(.foregroundColor, value: typedColor, range: NSRange(location: 0, length: min(typed, text.length))) }
+            text.draw(at: point); return
+        }
+        var x = point.x
+        let baseline = point.y + height - CTFontGetAscent(font)
+        let positions = advances(glyphs, font).map { advance in defer { x += advance }; return CGPoint(x: x, y: baseline) }
+        context.saveGState(); context.textMatrix = .identity
+        let split = min(typed, glyphs.count)
+        for (range, ink) in [(0..<split, typedColor), (split..<glyphs.count, color)] where !range.isEmpty {
+            context.setFillColor(ink.cgColor)
+            Array(glyphs[range]).withUnsafeBufferPointer { glyphs in
+                Array(positions[range]).withUnsafeBufferPointer { CTFontDrawGlyphs(font, glyphs.baseAddress!, $0.baseAddress!, range.count, context) }
+            }
+        }
+        context.restoreGState()
+    }
+}
+
 /// Keep glyphs outside SwiftUI's glass container and above every material layer.
 private final class HintTextCanvas: NSView {
     var hints: [PlacedHint] = []
@@ -175,23 +225,21 @@ private final class HintTextCanvas: NSView {
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
     override func draw(_ dirtyRect: NSRect) {
         let settings = Settings.shared
-        let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
+        let highlight = settings.nsColor(.highlight), plain = settings.nsColor(.text)
         for hint in hints {
             let string = hint.target.label.uppercased()
-            let ink = hint.color.map(Settings.textColor(on:)) ?? settings.nsColor(.text)
-            let text = NSMutableAttributedString(string: string, attributes: [.font: font, .foregroundColor: ink])
-            let matched = min((prefix.uppercased() as NSString).length, text.length)
+            let ink = hint.color.map(Settings.textColor(on:)) ?? plain
             // On color-coded badges the highlight color can vanish (mint on yellow); dim the typed part instead.
-            let typed = hint.color == nil ? settings.nsColor(.highlight) : ink.withAlphaComponent(0.45)
-            if matched > 0 { text.addAttribute(.foregroundColor, value: typed, range: NSRange(location: 0, length: matched)) }
-            let size = text.size()
+            let typed = hint.color == nil ? highlight : ink.withAlphaComponent(0.45)
+            let size = LabelText.size(string, fontSize: settings.fontSize)
             // Color-coded OCR badges keep a dashed outline: they mark text, which may not be clickable.
             if hint.color != nil && hint.target.source == .text {
                 ink.withAlphaComponent(0.7).setStroke()
                 let outline = NSBezierPath(roundedRect: hint.frame.insetBy(dx: 1.5, dy: 1.5), xRadius: 4, yRadius: 4)
                 outline.lineWidth = 1; outline.setLineDash([3, 2], count: 2, phase: 0); outline.stroke()
             }
-            text.draw(at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2))
+            LabelText.draw(string, at: CGPoint(x: hint.frame.midX - size.width / 2, y: hint.frame.midY - size.height / 2), fontSize: settings.fontSize,
+                           color: ink, typed: prefix.utf16.count, typedColor: typed)
         }
     }
 }
@@ -287,10 +335,9 @@ final class HintCanvas: NSView {
             prefix = ""
         }
         let settings = Settings.shared
-        let font = NSFont.monospacedSystemFont(ofSize: settings.fontSize, weight: .semibold)
         let visible = TargetCollection.unique(targets).filter { bounds.contains(CGPoint(x: local($0.frame).midX, y: local($0.frame).midY)) }
         let items = visible.map { target in
-            let size = (target.label.uppercased() as NSString).size(withAttributes: [.font: font])
+            let size = LabelText.size(target.label.uppercased(), fontSize: settings.fontSize)
             return HintLayoutItem(id: target.id, target: local(target.frame), size: CGSize(width: size.width + 12, height: size.height + 6),
                                   fixed: target.source == .grid, titled: !target.title.isEmpty)
         }

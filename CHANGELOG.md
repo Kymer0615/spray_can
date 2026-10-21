@@ -1,5 +1,19 @@
 # Changelog
 
+## Spray Can 0.1.21
+
+- **Scroll mode starts at once.** HJKL and the arrows scroll the focused window as soon as you press ⌃J; the scan that used to hold them back (up to 1.3 s in VS Code) now runs in the background and only finds the areas Tab moves between. If you start scrolling before it finishes, the pointer stays where you are.
+- **Fixed a crash while drawing labels.** Label letters are now drawn directly with Core Text instead of AppKit's string drawing, which crashed twice inside Core Text after long sessions (0.1.16 and 0.1.20). Labels look the same.
+
+Validation: 65 core tests and a localization check passed. Label snapshots on Finder and Chrome before and after: same label count, connectors, and positions, with identical letters. Scan times measured with the snapshot harness: VS Code 1,324 ms (bounded), Chrome 278 ms, Finder 259 ms, Spotify 253 ms. Scrolling during the scan was not exercised live while the installed copy was running.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.20
 
 - **Full accessibility at launch** for Chromium-based apps such as Spotify (CEF), which ignore enhanced accessibility: Spray Can quits the app and opens it with `--force-renderer-accessibility`, and does so again whenever you open it normally. In Spotify, labels went from 3 to 166 and covered text from 0% to 99%. App analysis suggests it for poorly covered CEF and Chromium apps, tries it after you confirm, and keeps it only if it helps.

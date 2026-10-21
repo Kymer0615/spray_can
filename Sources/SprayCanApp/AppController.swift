@@ -53,6 +53,8 @@ final class AppController: ObservableObject {
     /// Where the pointer was before scroll mode moved it; put back when the session ends.
     private var pointerBeforeScroll: CGPoint?
     private var previousG = false
+    /// Scroll keys pressed before the scan finished: keep scrolling where the pointer is instead of moving it.
+    private var scrolledEarly = false
     private var centerIndex = 0
     private var subscriptions = Set<AnyCancellable>()
     private var observers: [NSObjectProtocol] = []
@@ -176,6 +178,7 @@ final class AppController: ObservableObject {
         }
         status = mode == .freestyle ? String(localized: "Move with arrows · Return to click") : String(localized: "Finding targets…")
         render()
+        if mode == .scroll { startScrollingWindow() }
         let started = ProcessInfo.processInfo.systemUptime
         if mode == .grid || mode == .freestyle {
             let targets = mode == .grid ? Geometry.grid(screens: overlay.quartzScreens, cellSize: settings.cellSize) : []
@@ -207,7 +210,7 @@ final class AppController: ObservableObject {
             scrollUnderPointer = window.contains(mouse.point)
         }
         // "Don't move" scrolls wherever the pointer already is; Tab still moves it into an area.
-        if mode == .scroll && settings.scrollPointer == .stay && !result.scrollAreas.isEmpty { scrollUnderPointer = true }
+        if mode == .scroll && (settings.scrollPointer == .stay || scrolledEarly) && !result.scrollAreas.isEmpty { scrollUnderPointer = true }
         let text = mode == .elements && appBehavior.ocr ? prescanned.flatMap { $0.isEmpty ? nil : $0 } : nil
         let targets = mode == .scroll ? result.scrollAreas
             : text.map { settings.dedupeOCR ? Geometry.mergeText(discovered.targets, $0) : Geometry.merge(discovered.targets, $0) } ?? discovered.targets
@@ -272,6 +275,7 @@ final class AppController: ObservableObject {
             if session.escape() == .cancelled { cancel() } else { updateReadyStatus(); render() }
             return
         }
+        if session.mode == .scroll && session.phase == .discovering && !result.scrollAreas.isEmpty { scrolledEarly = true; handleScroll(key); return }
         if session.phase == .discovering || selecting {
             if deferred.count < 32 { deferred.append(key) } else { status = String(localized: "Input queue full · Esc clears"); render() }
             return
@@ -461,6 +465,14 @@ final class AppController: ObservableObject {
             self.windowChanged = true
         }
         refreshWork = work; DispatchQueue.main.asyncAfter(deadline: .now() + delay, execute: work)
+    }
+    /// Scroll the focused window at once; the scan that follows only finds the areas Tab moves between.
+    private func startScrollingWindow() {
+        result = DiscoveryResult(); scrollIndex = 0; scrolledEarly = false; previousG = false
+        guard let window = frontWindow(of: targetPID) else { return }
+        result.scrollAreas = [Target(id: "scroll-0", frame: window, source: .accessibility, role: kAXScrollAreaRole)]
+        scrollUnderPointer = window.contains(mouse.point) || settings.scrollPointer == .stay
+        updateReadyStatus(); focusScrollArea()
     }
     private func focusScrollArea() {
         guard !result.scrollAreas.isEmpty else { return }
