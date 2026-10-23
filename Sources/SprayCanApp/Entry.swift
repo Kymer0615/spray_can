@@ -93,6 +93,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let extended = NSMenuItem(title: String(localized: "Extended scan time limit"), action: #selector(toggleScanTime(_:)), keyEquivalent: "")
         extended.target = self; extended.representedObject = [id, name]; extended.state = profile.scanTime == .extended ? .on : .off
         submenu.addItem(extended)
+        if profile.launchAccessibility || AppAnalyzer.kind(at: app.bundleURL).relaunchable {
+            submenu.addItem(.separator())
+            let launch = NSMenuItem(title: String(localized: "Full accessibility at launch"), action: #selector(toggleLaunchAccessibility(_:)), keyEquivalent: "")
+            launch.target = self; launch.representedObject = app; launch.state = profile.launchAccessibility ? .on : .off
+            submenu.addItem(launch)
+            if profile.launchAccessibility && !AccessibilityRelauncher.hasFlag(app.processIdentifier) {
+                let restart = NSMenuItem(title: String(localized: "Restart with Full Accessibility"), action: #selector(restartWithAccessibility(_:)), keyEquivalent: "")
+                restart.target = self; restart.representedObject = app; submenu.addItem(restart)
+            }
+        }
         submenu.addItem(.separator())
         let more = NSMenuItem(title: String(localized: "App Settings…"), action: #selector(appSettingsAction), keyEquivalent: ""); more.target = self
         submenu.addItem(more)
@@ -105,6 +115,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     @objc private func toggleScanTime(_ sender: NSMenuItem) {
         guard let values = sender.representedObject as? [String], values.count == 2 else { return }
         controller.settings.updateProfile(values[0], name: values[1]) { $0.scanTime = $0.scanTime == .extended ? .normal : .extended }
+    }
+    @objc private func toggleLaunchAccessibility(_ sender: NSMenuItem) {
+        guard let app = sender.representedObject as? NSRunningApplication, let id = app.bundleIdentifier else { return }
+        let name = app.localizedName ?? id
+        let on = !(controller.settings.appProfiles[id]?.launchAccessibility ?? false)
+        controller.settings.updateProfile(id, name: name) { $0.launchAccessibility = on }
+        guard on, !app.isTerminated, !AccessibilityRelauncher.hasFlag(app.processIdentifier) else { return }
+        // The setting applies the next time the app opens; offer to restart it now, since that quits it.
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Restart \(name) now?")
+        alert.informativeText = AppAdvice.relaunch.risk
+        alert.addButton(withTitle: String(localized: "Restart Now")); alert.addButton(withTitle: String(localized: "Later"))
+        NSApp.activate(ignoringOtherApps: true)
+        if alert.runModal() == .alertFirstButtonReturn { controller.relauncher.relaunch(app) { _ in } }
+    }
+    @objc private func restartWithAccessibility(_ sender: NSMenuItem) {
+        guard let app = sender.representedObject as? NSRunningApplication else { return }
+        controller.relauncher.relaunch(app) { _ in }
     }
     @objc private func appSettingsAction() { showSettings(); controller.requestedTab = "Apps" }
     func menuWillOpen(_ menu: NSMenu) {

@@ -22,6 +22,16 @@ final class AccessibilityRelauncher {
     }
     deinit { observers.forEach(NSWorkspace.shared.notificationCenter.removeObserver) }
 
+    /// Apps opened just before Spray Can started (at login, Spotify often wins the race) were missed by
+    /// the launch observer; relaunch those, but never one that has been in use for a while.
+    func relaunchJustOpened() {
+        for app in NSWorkspace.shared.runningApplications {
+            guard let id = app.bundleIdentifier, settings.appProfiles[id]?.launchAccessibility == true, recent[id] == nil,
+                  LaunchAccessibility.relaunchAtStart(launched: app.launchDate, now: Date()), !Self.hasFlag(app.processIdentifier) else { continue }
+            relaunch(app) { _ in }
+        }
+    }
+
     /// The process's launch arguments, read with `sysctl(KERN_PROCARGS2)`; nil if unavailable.
     static func arguments(_ pid: pid_t) -> [String]? {
         var mib = [CTL_KERN, KERN_PROCARGS2, pid]

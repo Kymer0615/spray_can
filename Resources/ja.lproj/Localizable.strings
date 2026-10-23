@@ -48,6 +48,8 @@
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "拡張アクセシビリティはまず試し、効果がなければ再びオフにします。上のApp設定はいつでも変更・削除できます。";
 "Extended (up to 2 s)" = "延長（最大2秒）";
 "Extended scan time limit" = "スキャンの制限時間を延長";
+"Few labels · Menu bar → This App → Full accessibility at launch" = "ラベルが少ない · メニューバー → このApp → 起動時に完全なアクセシビリティ";
+"Few labels · Menu bar → This App → Restart with Full Accessibility" = "ラベルが少ない · メニューバー → このApp → 完全なアクセシビリティで再起動";
 "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "このAppで操作できるコントロールはわずかで、ここでオンにできる項目は他にありません。テキストにはテキスト認識を、アイコンにはグリッドを使ってください。";
 "Find controls and move, click, drag, and scroll." = "コントロールを見つけて、移動・クリック・ドラッグ・スクロール。";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "アプリがアクセシビリティに公開していないテキストを見つけます。OCR ラベルはテキストの位置を示すもので、クリックできるとは限りません。画面収録が必要です。画像はこの Mac のメモリ内にのみ保持されます。";
@@ -89,6 +91,7 @@
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "ラベルを要素の横に置くと、要素が隠れません。オフセットはすべてのラベルを移動し、正の値で右・下に動きます。密集したラベルは読みやすいように自動でずれます。グリッドのラベルはセルの中央に表示されます。";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "ラベルは要素のテキストの隣に表示されます。不透明度は通常の背景に適用され、ガラスと「透明度を下げる」では自動で管理されます。";
 "Language" = "言語";
+"Later" = "後で";
 "Launch at login" = "ログイン時に起動";
 "Left edge" = "左端";
 "Left of the element" = "要素の左";
@@ -139,9 +142,11 @@
 "Ready when you are" = "いつでも使えます";
 "Reduce Transparency keeps label backgrounds opaque." = "「透明度を下げる」がオンの場合、ラベルの背景は不透明になります。";
 "Remove" = "削除";
+"Restart %@ now?" = "%@を今すぐ再起動しますか？";
 "Restart App Now" = "今すぐAppを再起動";
 "Restart Now" = "今すぐ再起動";
 "Restart Spray Can to use the new language." = "新しい言語を使うには Spray Can を再起動してください。";
+"Restart with Full Accessibility" = "完全なアクセシビリティで再起動";
 "Restore color coding" = "色分けの設定を元に戻す";
 "Restore default colors" = "デフォルトの色に戻す";
 "Restore default shortcuts" = "デフォルトのショートカットに戻す";

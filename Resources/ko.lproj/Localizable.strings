@@ -48,6 +48,8 @@
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "향상된 손쉬운 사용은 먼저 시험해 보고 도움이 되지 않으면 다시 끕니다. 위의 앱 설정은 언제든지 변경하거나 제거할 수 있습니다.";
 "Extended (up to 2 s)" = "연장(최대 2초)";
 "Extended scan time limit" = "스캔 제한 시간 연장";
+"Few labels · Menu bar → This App → Full accessibility at launch" = "레이블이 적음 · 메뉴 막대 → 이 앱 → 실행 시 전체 손쉬운 사용";
+"Few labels · Menu bar → This App → Restart with Full Accessibility" = "레이블이 적음 · 메뉴 막대 → 이 앱 → 전체 손쉬운 사용으로 재시작";
 "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "이 앱에서 접근할 수 있는 컨트롤이 적고, 여기에서 더 켤 수 있는 항목이 없습니다. 텍스트에는 텍스트 인식을, 아이콘에는 격자를 사용하세요.";
 "Find controls and move, click, drag, and scroll." = "컨트롤을 찾아 이동, 클릭, 드래그, 스크롤합니다.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "앱이 손쉬운 사용에 노출하지 않는 텍스트를 찾습니다. OCR 레이블은 텍스트 위치를 표시하며, 클릭할 수 없는 위치일 수도 있습니다. 화면 기록 권한이 필요합니다. 이미지는 이 Mac의 메모리에만 머뭅니다.";
@@ -89,6 +91,7 @@
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "레이블을 요소 옆에 두면 요소가 가려지지 않습니다. 오프셋은 모든 레이블을 이동하며, 양수 값은 오른쪽과 아래로 이동합니다. 밀집된 레이블은 읽기 쉽도록 자동으로 비켜납니다. 그리드 레이블은 셀 중앙에 유지됩니다.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "레이블은 요소의 텍스트 옆에 표시됩니다. 불투명도는 일반 배경에 적용되며, 글래스와 '투명도 줄이기'에서는 자동으로 관리됩니다.";
 "Language" = "언어";
+"Later" = "나중에";
 "Launch at login" = "로그인 시 실행";
 "Left edge" = "왼쪽 가장자리";
 "Left of the element" = "요소 왼쪽";
@@ -139,9 +142,11 @@
 "Ready when you are" = "언제든 준비 완료";
 "Reduce Transparency keeps label backgrounds opaque." = "투명도 줄이기가 켜져 있으면 레이블 배경이 불투명하게 유지됩니다.";
 "Remove" = "제거";
+"Restart %@ now?" = "지금 %@을(를) 재시작할까요?";
 "Restart App Now" = "지금 앱 재시작";
 "Restart Now" = "지금 재시작";
 "Restart Spray Can to use the new language." = "새 언어를 사용하려면 Spray Can을 재시작하십시오.";
+"Restart with Full Accessibility" = "전체 손쉬운 사용으로 재시작";
 "Restore color coding" = "색상 구분 설정 복원";
 "Restore default colors" = "기본 색상으로 복원";
 "Restore default shortcuts" = "기본 단축키로 복원";

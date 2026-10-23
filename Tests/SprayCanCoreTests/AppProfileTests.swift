@@ -119,3 +119,29 @@ final class AppAdaptationTests: XCTestCase {
         XCTAssertTrue(AppBehavior.resolve(bundleID: "s", profiles: spotify, vision: false, prescan: false).launchAccessibility)
     }
 }
+
+final class LaunchAccessibilityTests: XCTestCase {
+    func testEnhancedCEFProfilesMoveToTheLaunchFlag() {
+        let old = AppProfile(name: "Spotify", ocr: .off, enhanced: true)
+        let migrated = LaunchAccessibility.migrate(old, kind: .cef)
+        XCTAssertFalse(migrated.enhanced)
+        XCTAssertTrue(migrated.launchAccessibility)
+        XCTAssertEqual(migrated.ocr, .off)
+        // Enhanced accessibility works for Chromium and WebView2 apps (Teams), so it stays.
+        XCTAssertEqual(LaunchAccessibility.migrate(old, kind: .webView2), old)
+        XCTAssertEqual(LaunchAccessibility.migrate(AppProfile(name: "Spotify"), kind: .cef), AppProfile(name: "Spotify"))
+    }
+    func testSuggestsTheLaunchFlagOnlyWhenLabelsAreMissing() {
+        XCTAssertTrue(LaunchAccessibility.suggest(kind: .cef, flagged: false, labels: 3))
+        XCTAssertFalse(LaunchAccessibility.suggest(kind: .cef, flagged: true, labels: 3))
+        XCTAssertFalse(LaunchAccessibility.suggest(kind: .cef, flagged: false, labels: 166))
+        XCTAssertFalse(LaunchAccessibility.suggest(kind: .electron, flagged: false, labels: 3))
+        XCTAssertFalse(LaunchAccessibility.suggest(kind: .native, flagged: false, labels: 0))
+    }
+    func testRelaunchesAtStartOnlyAppsThatJustOpened() {
+        let now = Date()
+        XCTAssertTrue(LaunchAccessibility.relaunchAtStart(launched: now.addingTimeInterval(-20), now: now))
+        XCTAssertFalse(LaunchAccessibility.relaunchAtStart(launched: now.addingTimeInterval(-3600), now: now))
+        XCTAssertFalse(LaunchAccessibility.relaunchAtStart(launched: nil, now: now))
+    }
+}

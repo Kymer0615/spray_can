@@ -55,6 +55,8 @@ final class AppController: ObservableObject {
     private var previousG = false
     /// Scroll keys pressed before the scan finished: keep scrolling where the pointer is instead of moving it.
     private var scrolledEarly = false
+    /// Label mode found almost nothing in a Chromium-based app opened without full accessibility.
+    private var launchHint: String?
     private var centerIndex = 0
     private var subscriptions = Set<AnyCancellable>()
     private var observers: [NSObjectProtocol] = []
@@ -131,7 +133,7 @@ final class AppController: ObservableObject {
         guard accessibilityGranted else { status = String(localized: "Grant Accessibility to enable navigation."); return }
         keyboard.configure(settings.shortcuts); shortcutIssues = keyboard.conflicts
         keyboard.start(); status = keyboardReady ? String(localized: "Ready when you are") : String(localized: "Starting keyboard capture…")
-        boost.apply()
+        boost.apply(); relauncher.relaunchJustOpened()
     }
     func requestAccessibility() {
         _ = AXIsProcessTrustedWithOptions([kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary)
@@ -202,6 +204,7 @@ final class AppController: ObservableObject {
     private func finishDiscovery(_ discovered: DiscoveryResult, mode: NavigationMode, context: DiscoveryContext, generation: Int, started: TimeInterval) {
         result = discovered
         scrollUnderPointer = false
+        launchHint = mode == .elements ? launchAdvice(labels: discovered.targets.count) : nil
         if mode == .scroll && discovered.scrollAreas.isEmpty, let window = discovered.captureRects.first {
             // No accessible scroll areas: fall back to web content areas (largest first), else the window,
             // and start by scrolling under the pointer when it is already over the window.
@@ -244,6 +247,12 @@ final class AppController: ObservableObject {
         prescan.resume()
         if let point = pointerBeforeScroll { pointerBeforeScroll = nil; mouse.move(to: point); mouse.resetPosition() }
     }
+    private func launchAdvice(labels: Int) -> String? {
+        guard labels < LaunchAccessibility.fewLabels, let app = NSRunningApplication(processIdentifier: targetPID),
+              LaunchAccessibility.suggest(kind: AppAnalyzer.kind(at: app.bundleURL), flagged: AccessibilityRelauncher.hasFlag(targetPID), labels: labels) else { return nil }
+        return appBehavior.launchAccessibility ? String(localized: "Few labels · Menu bar → This App → Restart with Full Accessibility")
+            : String(localized: "Few labels · Menu bar → This App → Full accessibility at launch")
+    }
     private func frontWindow(of pid: pid_t) -> CGRect? {
         let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] ?? []
         return windows.first { ($0[kCGWindowOwnerPID as String] as? pid_t) == pid && ($0[kCGWindowLayer as String] as? Int) == 0 }
@@ -258,6 +267,7 @@ final class AppController: ObservableObject {
         }
         else { status = session.targets.isEmpty ? String(localized: "No targets found · ⇧⌘K opens the grid") : String(localized: "\(session.targets.count) targets · Type a label · Return clicks") }
         if result.timedOut && session.mode == .elements { status += String(localized: " · Partial scan") }
+        if let launchHint, session.mode == .elements { status = launchHint }
         if windowChanged { status = String(localized: "Window changed · ") + status }
     }
     private func render() {

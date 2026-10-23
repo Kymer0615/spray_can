@@ -25,8 +25,9 @@ final class AppAnalyzer: ObservableObject {
     /// Documentation renders show example results without analyzing real apps.
     func showExamples(_ examples: [String: Entry]) { entries = examples }
 
-    static func kind(of id: String) -> AppKind {
-        guard let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: id) else { return .native }
+    static func kind(of id: String) -> AppKind { kind(at: NSWorkspace.shared.urlForApplication(withBundleIdentifier: id)) }
+    static func kind(at url: URL?) -> AppKind {
+        guard let url else { return .native }
         let frameworks = (try? FileManager.default.contentsOfDirectory(atPath: url.appendingPathComponent("Contents/Frameworks").path)) ?? []
         return AppKind.detect(frameworks: frameworks)
     }

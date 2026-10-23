@@ -48,6 +48,8 @@
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above.";
 "Extended (up to 2 s)" = "Extended (up to 2 s)";
 "Extended scan time limit" = "Extended scan time limit";
+"Few labels · Menu bar → This App → Full accessibility at launch" = "Few labels · Menu bar → This App → Full accessibility at launch";
+"Few labels · Menu bar → This App → Restart with Full Accessibility" = "Few labels · Menu bar → This App → Restart with Full Accessibility";
 "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons.";
 "Find controls and move, click, drag, and scroll." = "Find controls and move, click, drag, and scroll.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac.";
@@ -89,6 +91,7 @@
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you.";
 "Language" = "Language";
+"Later" = "Later";
 "Launch at login" = "Launch at login";
 "Left edge" = "Left edge";
 "Left of the element" = "Left of the element";
@@ -139,9 +142,11 @@
 "Ready when you are" = "Ready when you are";
 "Reduce Transparency keeps label backgrounds opaque." = "Reduce Transparency keeps label backgrounds opaque.";
 "Remove" = "Remove";
+"Restart %@ now?" = "Restart %@ now?";
 "Restart App Now" = "Restart App Now";
 "Restart Now" = "Restart Now";
 "Restart Spray Can to use the new language." = "Restart Spray Can to use the new language.";
+"Restart with Full Accessibility" = "Restart with Full Accessibility";
 "Restore color coding" = "Restore color coding";
 "Restore default colors" = "Restore default colors";
 "Restore default shortcuts" = "Restore default shortcuts";

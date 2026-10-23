@@ -1,5 +1,21 @@
 # Changelog
 
+## Spray Can 0.1.22
+
+- **Spotify labels stay on.** Profiles that asked Spotify (and other CEF apps) for enhanced accessibility, which they ignore, now use **Full accessibility at launch** instead, the only switch that works for them. Spotify also accepts no runtime switch (`AXManualAccessibility` is unsupported), so it has to be opened with the flag.
+- **This App** in the menu bar now has **Full accessibility at launch** for Chromium-based apps. Turning it on offers to restart the app right away, and **Restart with Full Accessibility** appears while the app is still running without it.
+- In label mode, an app that would expose its controls if opened with full accessibility, but shows almost no labels, says so in the status line and points to the menu item.
+- Apps opened just before Spray Can started (Spotify often wins the race at login) are relaunched with the flag too, if they opened less than a minute earlier; an app already in use is never interrupted.
+
+Validation: 68 core tests and a localization check passed. Analysis with a saved profile of enhanced on and the launch flag off: before the change it suggested a relaunch, after it the profile counted as flagged. `AXManualAccessibility` on Spotify returned "attribute unsupported". The menu items and status hint were not exercised live while the installed copy was running.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.21
 
 - **Scroll mode starts at once.** HJKL and the arrows scroll the focused window as soon as you press ⌃J; the scan that used to hold them back (up to 1.3 s in VS Code) now runs in the background and only finds the areas Tab moves between. If you start scrolling before it finishes, the pointer stays where you are.

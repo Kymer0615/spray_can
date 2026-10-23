@@ -102,6 +102,30 @@ public enum AppKind: String, Codable {
     public var relaunchable: Bool { [.cef, .chromium].contains(self) }
 }
 
+/// Keeping Chromium-based apps readable without anyone having to rediscover the launch switch.
+public enum LaunchAccessibility {
+    /// Fewer accessibility labels than this in a relaunchable app means its tree is mostly missing
+    /// (Spotify opened normally: 3; with the flag: 161–166).
+    public static let fewLabels = 10
+    /// Before 0.1.20, analysis offered CEF apps (Spotify) enhanced accessibility, which they accept but
+    /// ignore; the launch flag is what that choice was for.
+    public static func migrate(_ profile: AppProfile, kind: AppKind) -> AppProfile {
+        guard kind == .cef, profile.enhanced else { return profile }
+        var profile = profile
+        profile.enhanced = false; profile.launchAccessibility = true
+        return profile
+    }
+    /// Label mode found almost nothing in an app that would expose its controls if opened with the flag.
+    public static func suggest(kind: AppKind, flagged: Bool, labels: Int) -> Bool {
+        labels < fewLabels && kind.relaunchable && !flagged
+    }
+    /// Apps already running when Spray Can starts (e.g. opened earlier at login) are relaunched only
+    /// if they just started, so updating Spray Can never interrupts an app in use.
+    public static func relaunchAtStart(launched: Date?, now: Date) -> Bool {
+        launched.map { now.timeIntervalSince($0) < 60 } ?? false
+    }
+}
+
 /// One app's read-only measurement: how many labels Spray Can finds, and how much visible text they cover.
 public struct AppAnalysis: Equatable {
     public var kind: AppKind

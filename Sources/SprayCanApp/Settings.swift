@@ -108,6 +108,9 @@ final class Settings: ObservableObject {
     }
     func restoreColors() { colors = [:] }
     private static func savedProfiles() -> [String: AppProfile] {
+        Dictionary(uniqueKeysWithValues: storedProfiles().map { id, profile in (id, LaunchAccessibility.migrate(profile, kind: AppAnalyzer.kind(of: id))) })
+    }
+    private static func storedProfiles() -> [String: AppProfile] {
         switch UserDefaults.standard.object(forKey: "appProfiles") {
         case let json as String: return AppBehavior.decode(json)
         case let plist as [String: Any]:

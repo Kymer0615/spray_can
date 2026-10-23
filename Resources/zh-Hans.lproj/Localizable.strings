@@ -48,6 +48,8 @@
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "增强辅助功能会先试用，如果没有帮助就会再次关闭。上方的每项 App 设置都可以随时更改或移除。";
 "Extended (up to 2 s)" = "延长（最多 2 秒）";
 "Extended scan time limit" = "延长扫描时限";
+"Few labels · Menu bar → This App → Full accessibility at launch" = "标签很少 · 菜单栏 → 当前 App → 以完整辅助功能启动";
+"Few labels · Menu bar → This App → Restart with Full Accessibility" = "标签很少 · 菜单栏 → 当前 App → 以完整辅助功能重新启动";
 "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "这个 App 能读取到的控件很少，这里也没有其他可以开启的选项。文字请用文本识别，图标请用网格。";
 "Find controls and move, click, drag, and scroll." = "查找控件，并移动、点按、拖移和滚动。";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "查找应用未向辅助功能公开的文本。OCR 标签仅标记文本位置，该位置未必可点按。需要屏幕录制权限。图像仅保留在这台 Mac 的内存中。";
@@ -89,6 +91,7 @@
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "标签位于元素旁边时，元素保持可见。偏移会移动所有标签；正值向右和向下移动。拥挤的标签仍会自动避让以保持清晰。网格标签始终在单元格中居中。";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "标签位于元素文字旁边。不透明度仅适用于纯色背景；玻璃效果和“降低透明度”会自动管理。";
 "Language" = "语言";
+"Later" = "稍后";
 "Launch at login" = "登录时启动";
 "Left edge" = "左边缘";
 "Left of the element" = "元素左侧";
@@ -139,9 +142,11 @@
 "Ready when you are" = "随时待命";
 "Reduce Transparency keeps label backgrounds opaque." = "开启“降低透明度”时标签背景保持不透明。";
 "Remove" = "移除";
+"Restart %@ now?" = "现在重新启动 %@ 吗？";
 "Restart App Now" = "立即重启 App";
 "Restart Now" = "立即重新启动";
 "Restart Spray Can to use the new language." = "重新启动 Spray Can 以使用新语言。";
+"Restart with Full Accessibility" = "以完整辅助功能重新启动";
 "Restore color coding" = "恢复颜色区分设置";
 "Restore default colors" = "恢复默认颜色";
 "Restore default shortcuts" = "恢复默认快捷键";

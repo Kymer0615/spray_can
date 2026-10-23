@@ -158,7 +158,7 @@ Más herramientas: `scripts/render-docs.sh` (imágenes del README), `scripts/sna
 
 ## Estado
 
-Spray Can 0.1.21 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
+Spray Can 0.1.22 funciona en macOS 14 y posteriores. El núcleo de navegación se ha sometido a pruebas de estrés con 1000 ciclos rápidos de activación, y un entorno de pruebas nativo completó 60 ciclos de clic con elementos y cuadrícula sin clics fallidos ni fugas de entrada. Las apps de terceros, varias pantallas, la pantalla completa y las versiones anteriores de macOS aún se están validando; consulta [VALIDATION.md](docs/VALIDATION.md).
 
 ## Comunidad
 

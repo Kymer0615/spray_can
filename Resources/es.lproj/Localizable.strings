@@ -48,6 +48,8 @@
 "Enhanced accessibility is tried first and turned off again if it doesn’t help. You can change or remove every app setting above." = "La accesibilidad mejorada se prueba primero y se vuelve a desactivar si no ayuda. Puedes cambiar o eliminar cualquier ajuste de app de arriba.";
 "Extended (up to 2 s)" = "Ampliado (hasta 2 s)";
 "Extended scan time limit" = "Tiempo límite de análisis ampliado";
+"Few labels · Menu bar → This App → Full accessibility at launch" = "Pocas etiquetas · Barra de menús → Esta app → Accesibilidad completa al abrir";
+"Few labels · Menu bar → This App → Restart with Full Accessibility" = "Pocas etiquetas · Barra de menús → Esta app → Reiniciar con accesibilidad completa";
 "Few of this app’s controls are reachable, and nothing more can be turned on here. Use text recognition for its text and the grid for icons." = "Pocos controles de esta app son accesibles y aquí no se puede activar nada más. Usa el reconocimiento de texto para su texto y la cuadrícula para los iconos.";
 "Find controls and move, click, drag, and scroll." = "Busca controles y mueve, haz clic, arrastra y desplázate.";
 "Find text that apps don’t expose to accessibility. OCR labels mark text locations, which may not be clickable. Requires Screen Recording. Images stay in memory on this Mac." = "Busca texto que las apps no exponen a la accesibilidad. Las etiquetas OCR marcan la ubicación del texto, que puede no ser clicable. Requiere Grabación de pantalla. Las imágenes permanecen en memoria en este Mac.";
@@ -89,6 +91,7 @@
 "Labels beside an element keep it visible. Offsets move every label; positive values move right and down. Crowded labels still shift to stay readable. Grid labels stay centered in their cells." = "Las etiquetas junto a un elemento lo dejan visible. Los desplazamientos mueven todas las etiquetas; los valores positivos las mueven a la derecha y hacia abajo. Las etiquetas apiñadas se reubican para seguir siendo legibles. Las de la cuadrícula quedan centradas en su celda.";
 "Labels sit beside their element’s text. Opacity applies to plain backgrounds; glass and Reduce Transparency manage it for you." = "Las etiquetas se colocan junto al texto de su elemento. La opacidad se aplica a los fondos normales; el cristal y Reducir transparencia la gestionan por ti.";
 "Language" = "Idioma";
+"Later" = "Más tarde";
 "Launch at login" = "Abrir al iniciar sesión";
 "Left edge" = "Borde izquierdo";
 "Left of the element" = "A la izquierda del elemento";
@@ -139,9 +142,11 @@
 "Ready when you are" = "Listo cuando quieras";
 "Reduce Transparency keeps label backgrounds opaque." = "«Reducir transparencia» mantiene opacos los fondos de las etiquetas.";
 "Remove" = "Eliminar";
+"Restart %@ now?" = "¿Reiniciar %@ ahora?";
 "Restart App Now" = "Reiniciar la app ahora";
 "Restart Now" = "Reiniciar ahora";
 "Restart Spray Can to use the new language." = "Reinicia Spray Can para usar el nuevo idioma.";
+"Restart with Full Accessibility" = "Reiniciar con accesibilidad completa";
 "Restore color coding" = "Restaurar colores de etiquetas";
 "Restore default colors" = "Restaurar colores predeterminados";
 "Restore default shortcuts" = "Restaurar atajos predeterminados";
