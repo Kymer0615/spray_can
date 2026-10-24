@@ -1,5 +1,18 @@
 # Changelog
 
+## Spray Can 0.1.23
+
+- **No more window-sized label in Spotify.** An app opened with full accessibility builds the same full web tree as enhanced accessibility, including page-sized wrappers marked as pressable; in Spotify one group covered the whole window and shaded it. Those wrappers are now pruned whenever the app runs with `--force-renderer-accessibility`, not only with enhanced accessibility on (0.1.22 had turned enhanced off for Spotify, and pruning with it). App analysis measures relaunched apps the same way.
+
+Validation: 68 core tests and a localization check passed. Spotify snapshot with the flag: the 1512×853 group and one small nested group are gone (149 → 147 targets, connectors 23 → 17); rows, buttons, playback controls, and the queue keep their labels.
+
+This release is signed with the project's own certificate and not notarized by Apple. If macOS blocks first launch, use System Settings → Privacy & Security → Open Anyway for the app you choose to trust.
+
+```sh
+brew update
+brew upgrade --cask kymer0615/tap/spray-can
+```
+
 ## Spray Can 0.1.22
 
 - **Spotify labels stay on.** Profiles that asked Spotify (and other CEF apps) for enhanced accessibility, which they ignore, now use **Full accessibility at launch** instead, the only switch that works for them. Spotify also accepts no runtime switch (`AXManualAccessibility` is unsupported), so it has to be opened with the flag.

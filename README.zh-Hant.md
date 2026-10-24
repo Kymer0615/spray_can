@@ -158,7 +158,7 @@ scripts/install-local.sh
 
 ## 狀態
 
-Spray Can 0.1.22 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
+Spray Can 0.1.23 適用於 macOS 14 及更新版本。導覽核心已通過 1,000 次快速啟動循環的壓力測試，且一個原生測試環境完成了 60 次元素／網格點按循環，沒有遺漏點按或輸入外洩。第三方 App、多台顯示器、全螢幕與較舊的 macOS 版本仍在驗證中；請參閱 [VALIDATION.md](docs/VALIDATION.md)。
 
 ## 社群
 

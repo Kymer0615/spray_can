@@ -187,7 +187,8 @@ final class AppController: ObservableObject {
             _ = session.publish(targets, generation: generation, vi: settings.vi)
             updateReadyStatus(); render(); return
         }
-        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation, scanTime: appBehavior.scanTime, prune: appBehavior.enhanced)
+        let context = DiscoveryContext(pid: targetPID, screens: overlay.quartzScreens, allWindows: settings.allWindows, generation: generation, scanTime: appBehavior.scanTime,
+                                       prune: DiscoveryContext.prunes(targetPID, enhanced: appBehavior.enhanced))
         accessibility.discover(context) { [weak self] discovered in
             guard let self, self.active, self.session.generation == generation else { return }
             self.whenPrescanKnown(generation, patience: 0.15) { self.finishDiscovery(discovered, mode: mode, context: context, generation: generation, started: started) }

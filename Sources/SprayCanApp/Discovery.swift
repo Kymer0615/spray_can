@@ -14,6 +14,9 @@ struct DiscoveryContext {
     var prune = false
     /// App analysis: scan this window only, even when it is behind others.
     var window: AXUIElement?
+    /// Full web trees, from enhanced accessibility or a launch with `--force-renderer-accessibility`, mark
+    /// page-sized wrappers as pressable (Spotify: one group covering the whole window); prune those.
+    static func prunes(_ pid: pid_t, enhanced: Bool) -> Bool { enhanced || AccessibilityRelauncher.hasFlag(pid) }
 }
 struct DiscoveryResult {
     var targets: [Target] = []

@@ -26,7 +26,8 @@ final class OverlaySnapshot {
         let screens = NSScreen.screens.map { Geometry.cocoa($0.frame, primaryHeight: primaryHeight) }
         // The app's own settings apply, as in a live session.
         let behavior = Settings.shared.behavior(for: app.bundleIdentifier)
-        let context = DiscoveryContext(pid: app.processIdentifier, screens: screens, allWindows: false, generation: 1, scanTime: behavior.scanTime, prune: behavior.enhanced)
+        let context = DiscoveryContext(pid: app.processIdentifier, screens: screens, allWindows: false, generation: 1, scanTime: behavior.scanTime,
+                                       prune: DiscoveryContext.prunes(app.processIdentifier, enhanced: behavior.enhanced))
         accessibility.discover(context) { result in
             // Right after activation the app may not report its focused window yet.
             guard let window = result.captureRects.first, !result.targets.isEmpty else {

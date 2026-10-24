@@ -95,7 +95,7 @@ final class AppAnalyzer: ObservableObject {
                 completion(); return
             }
             self.whenWindowAppears(id, waited: 0) {
-                self.measure(id, prune: false, lines: self.lastLines[id]) { [weak self] after, _ in
+                self.measure(id, prune: true, lines: self.lastLines[id]) { [weak self] after, _ in
                     guard let self else { return }
                     self.busy = false
                     guard let analysis = after.analysis, Enhancement.worthKeeping(before: before, after: analysis) else {
@@ -136,7 +136,7 @@ final class AppAnalyzer: ObservableObject {
         }
         generation += 1
         let screens = NSScreen.screens.map { Geometry.cocoa($0.frame, primaryHeight: NSScreen.screens.first?.frame.height ?? 0) }
-        let context = DiscoveryContext(pid: pid, screens: screens, allWindows: false, generation: generation, prune: prune, window: axWindow)
+        let context = DiscoveryContext(pid: pid, screens: screens, allWindows: false, generation: generation, prune: DiscoveryContext.prunes(pid, enhanced: prune), window: axWindow)
         accessibility.survey(context) { [weak self] result, milliseconds in
             guard let self else { return }
             let finish = { (lines: [CGRect]?) in

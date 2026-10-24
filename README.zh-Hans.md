@@ -158,7 +158,7 @@ scripts/install-local.sh
 
 ## 状态
 
-Spray Can 0.1.22 适用于 macOS 14 及更高版本。导航核心已通过 1,000 次快速激活循环的压力测试，原生测试夹具完成了 60 次元素/网格点按循环，没有漏点，也没有输入泄漏。第三方应用、多显示器、全屏以及较早的 macOS 版本仍在验证中；请参阅 [VALIDATION.md](docs/VALIDATION.md)。
+Spray Can 0.1.23 适用于 macOS 14 及更高版本。导航核心已通过 1,000 次快速激活循环的压力测试，原生测试夹具完成了 60 次元素/网格点按循环，没有漏点，也没有输入泄漏。第三方应用、多显示器、全屏以及较早的 macOS 版本仍在验证中；请参阅 [VALIDATION.md](docs/VALIDATION.md)。
 
 ## 社区
 
